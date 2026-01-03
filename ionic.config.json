@@ -1,0 +1,7 @@
+{
+  "name": "client-monitoring-application",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}

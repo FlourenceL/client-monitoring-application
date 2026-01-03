@@ -1,0 +1,43 @@
+/* Glass Morphism Card Theme */
+ion-card:not(.ion-color) {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  margin: 10px 0;
+}
+
+ion-card-title {
+  color: var(--ion-text-color);
+}
+
+ion-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: none;
+  border: none;
+}
+
+ion-badge.ion-color-success {
+  --background: rgba(74, 222, 128, 0.15);
+  --color: #166534;
+}
+
+ion-badge.ion-color-warning {
+  --background: rgba(250, 204, 21, 0.15);
+  --color: #854d0e;
+}
+
+ion-badge.ion-color-danger {
+  --background: rgba(248, 113, 113, 0.15);
+  --color: #991b1b;
+}
+
+ion-input {
+  margin-bottom: 1rem;
+}
