@@ -1,15 +1,16 @@
 import { Redirect, Route } from 'react-router-dom';
 import {
-  IonApp,
-  IonIcon,
-  IonLabel,
-  IonRouterOutlet,
-  IonTabBar,
-  IonTabButton,
-  IonTabs,
-  setupIonicReact
-} from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
+	IonApp,
+	IonIcon,
+	IonLabel,
+	IonRouterOutlet,
+	IonTabBar,
+	IonTabButton,
+	IonTabs,
+	setupIonicReact,
+	useIonToast,
+} from "@ionic/react";
+import { IonReactRouter } from "@ionic/react-router";
 import {
 	barChart,
 	barChartOutline,
@@ -30,6 +31,8 @@ import ReportsPage from "./pages/ReportsPage";
 import ClientsPage from "./pages/ClientsPage";
 import ConfigPage from "./pages/ConfigPage";
 import AiToolsPage from "./pages/AiToolsPage";
+import { useEffect } from "react";
+import { databaseService } from "./database/Database.service";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -64,101 +67,123 @@ import "./theme/components.css";
 
 setupIonicReact();
 
-const App: React.FC = () => (
-	<IonApp>
-		<IonReactRouter>
-			<IonTabs>
-				<IonRouterOutlet>
-					<Route
-						exact
-						path="/dashboard"
-					>
-						<HomePage />
-					</Route>
-					<Route
-						exact
-						path="/reports"
-					>
-						<ReportsPage />
-					</Route>
-					<Route
-						exact
-						path="/aitools"
-					>
-						<AiToolsPage />
-					</Route>
-					<Route path="/clients">
-						<ClientsPage />
-					</Route>
-					<Route
-						exact
-						path="/"
-					>
-						<Redirect to="/dashboard" />
-					</Route>
-					<Route path="/config">
-						<ConfigPage />
-					</Route>
-				</IonRouterOutlet>
-				<IonTabBar slot="bottom">
-					<IonTabButton
-						tab="tab1"
-						href="/dashboard"
-					>
-						<IonIcon
-							aria-hidden="true"
-							icon={homeOutline}
-						/>
-						<IonLabel>HOME</IonLabel>
-					</IonTabButton>
+const App: React.FC = () => {
+	const [presentToast] = useIonToast();
+	useEffect(() => {
+		try {
+			databaseService.init();
+			presentToast({
+				message: "Database initialized successfully",
+				duration: 2000,
+				color: "success",
+				position: "bottom",
+			});
+		} catch (error) {
+			presentToast({
+				message: "Error initializing database service: " + error,
+				duration: 3000,
+				color: "danger",
+				position: "bottom",
+			});
+		}
+	}, []);
 
-					<IonTabButton
-						tab="tab2"
-						href="/reports"
-					>
-						<IonIcon
-							aria-hidden="true"
-							icon={barChartOutline}
-						/>
-						<IonLabel>REPORTS</IonLabel>
-					</IonTabButton>
+	return (
+		<IonApp>
+			<IonReactRouter>
+				<IonTabs>
+					<IonRouterOutlet>
+						<Route
+							exact
+							path="/dashboard"
+						>
+							<HomePage />
+						</Route>
+						<Route
+							exact
+							path="/reports"
+						>
+							<ReportsPage />
+						</Route>
+						<Route
+							exact
+							path="/aitools"
+						>
+							<AiToolsPage />
+						</Route>
+						<Route path="/clients">
+							<ClientsPage />
+						</Route>
+						<Route
+							exact
+							path="/"
+						>
+							<Redirect to="/dashboard" />
+						</Route>
+						<Route path="/config">
+							<ConfigPage />
+						</Route>
+					</IonRouterOutlet>
+					<IonTabBar slot="bottom">
+						<IonTabButton
+							tab="tab1"
+							href="/dashboard"
+						>
+							<IonIcon
+								aria-hidden="true"
+								icon={homeOutline}
+							/>
+							<IonLabel>HOME</IonLabel>
+						</IonTabButton>
 
-					<IonTabButton
-						tab="tab5"
-						href="/aitools"
-					>
-						<IonIcon
-							aria-hidden="true"
-							icon={hardwareChipOutline}
-						/>
-						<IonLabel>AI TOOL</IonLabel>
-					</IonTabButton>
+						<IonTabButton
+							tab="tab2"
+							href="/reports"
+						>
+							<IonIcon
+								aria-hidden="true"
+								icon={barChartOutline}
+							/>
+							<IonLabel>REPORTS</IonLabel>
+						</IonTabButton>
 
-					<IonTabButton
-						tab="tab3"
-						href="/clients"
-					>
-						<IonIcon
-							aria-hidden="true"
-							icon={peopleOutline}
-						/>
-						<IonLabel>CLIENTS</IonLabel>
-					</IonTabButton>
+						<IonTabButton
+							tab="tab5"
+							href="/aitools"
+						>
+							<IonIcon
+								aria-hidden="true"
+								icon={hardwareChipOutline}
+							/>
+							<IonLabel>AI TOOL</IonLabel>
+						</IonTabButton>
 
-					<IonTabButton
-						tab="tab4"
-						href="/config"
-					>
-						<IonIcon
-							aria-hidden="true"
-							icon={settingsOutline}
-						/>
-						<IonLabel>CONFIG</IonLabel>
-					</IonTabButton>
-				</IonTabBar>
-			</IonTabs>
-		</IonReactRouter>
-	</IonApp>
-);
+						<IonTabButton
+							tab="tab3"
+							href="/clients"
+						>
+							<IonIcon
+								aria-hidden="true"
+								icon={peopleOutline}
+							/>
+							<IonLabel>CLIENTS</IonLabel>
+						</IonTabButton>
+
+						<IonTabButton
+							tab="tab4"
+							href="/config"
+						>
+							<IonIcon
+								aria-hidden="true"
+								icon={settingsOutline}
+							/>
+							<IonLabel>CONFIG</IonLabel>
+						</IonTabButton>
+					</IonTabBar>
+				</IonTabs>
+			</IonReactRouter>
+		</IonApp>
+	);
+};
 
 export default App;
