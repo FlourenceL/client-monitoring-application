@@ -64,6 +64,8 @@ import "@ionic/react/css/palettes/dark.system.css";
 /* Theme variables */
 import "./theme/variables.css";
 import "./theme/components.css";
+import LoginPage from "./pages/LoginPage";
+import MainTabs from "./components/MainTabs";
 
 setupIonicReact();
 
@@ -72,12 +74,6 @@ const App: React.FC = () => {
 	useEffect(() => {
 		try {
 			databaseService.init();
-			presentToast({
-				message: "Database initialized successfully",
-				duration: 2000,
-				color: "success",
-				position: "bottom",
-			});
 		} catch (error) {
 			presentToast({
 				message: "Error initializing database service: " + error,
@@ -91,96 +87,40 @@ const App: React.FC = () => {
 	return (
 		<IonApp>
 			<IonReactRouter>
-				<IonTabs>
-					<IonRouterOutlet>
-						<Route
-							exact
-							path="/dashboard"
-						>
-							<HomePage />
-						</Route>
-						<Route
-							exact
-							path="/reports"
-						>
-							<ReportsPage />
-						</Route>
-						<Route
-							exact
-							path="/aitools"
-						>
-							<AiToolsPage />
-						</Route>
-						<Route path="/clients">
-							<ClientsPage />
-						</Route>
-						<Route
-							exact
-							path="/"
-						>
-							<Redirect to="/dashboard" />
-						</Route>
-						<Route path="/config">
-							<ConfigPage />
-						</Route>
-					</IonRouterOutlet>
-					<IonTabBar slot="bottom">
-						<IonTabButton
-							tab="tab1"
-							href="/dashboard"
-						>
-							<IonIcon
-								aria-hidden="true"
-								icon={homeOutline}
-							/>
-							<IonLabel>HOME</IonLabel>
-						</IonTabButton>
-
-						<IonTabButton
-							tab="tab2"
-							href="/reports"
-						>
-							<IonIcon
-								aria-hidden="true"
-								icon={barChartOutline}
-							/>
-							<IonLabel>REPORTS</IonLabel>
-						</IonTabButton>
-
-						<IonTabButton
-							tab="tab5"
-							href="/aitools"
-						>
-							<IonIcon
-								aria-hidden="true"
-								icon={hardwareChipOutline}
-							/>
-							<IonLabel>AI TOOL</IonLabel>
-						</IonTabButton>
-
-						<IonTabButton
-							tab="tab3"
-							href="/clients"
-						>
-							<IonIcon
-								aria-hidden="true"
-								icon={peopleOutline}
-							/>
-							<IonLabel>CLIENTS</IonLabel>
-						</IonTabButton>
-
-						<IonTabButton
-							tab="tab4"
-							href="/config"
-						>
-							<IonIcon
-								aria-hidden="true"
-								icon={settingsOutline}
-							/>
-							<IonLabel>CONFIG</IonLabel>
-						</IonTabButton>
-					</IonTabBar>
-				</IonTabs>
+				<IonRouterOutlet>
+					<Route
+						exact
+						path="/login"
+					>
+						<LoginPage onLogin={() => {}} />
+					</Route>
+					<Route
+						path="/dashboard"
+						component={MainTabs}
+					/>
+					<Route
+						path="/reports"
+						component={MainTabs}
+					/>
+					<Route
+						path="/clients"
+						component={MainTabs}
+					/>
+					<Route
+						path="/aitools"
+						component={MainTabs}
+					/>
+					<Route
+						path="/config"
+						component={MainTabs}
+					/>
+					<Route
+						exact
+						path="/"
+					>
+						<Redirect to="/login" />
+					</Route>
+				</IonRouterOutlet>
 			</IonReactRouter>
 		</IonApp>
 	);
