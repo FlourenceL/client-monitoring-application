@@ -3,7 +3,7 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
   IonBadge, IonButton, IonModal, IonButtons, IonFooter
  } from '@ionic/react';
 import { useState } from 'react';
-import { useClientStore } from '../store/appStore';
+import { useAppStore } from "../store/appStore";
 
 const clients = [
   {

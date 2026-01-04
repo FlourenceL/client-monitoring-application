@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from "zustand/middleware";
 
 export interface Client {
   id: string;
@@ -6,21 +7,23 @@ export interface Client {
   status: 'active' | 'inactive';
 }
 
-interface ClientState {
-  clients: Client[];
-  addClient: (name: string) => void;
-  removeClient: (id: string) => void;
+interface AppState {
+	isConnected: boolean;
+	setIsConnected: (connected: boolean) => void;
+	isAdmin: boolean;
+	setIsAdmin: (admin: boolean) => void;
 }
 
-export const useClientStore = create<ClientState>((set) => ({
-  clients: [],
-  addClient: (name) => set((state) => ({
-    clients: [
-      ...state.clients,
-      { id: crypto.randomUUID(), name, status: 'active' }
-    ]
-  })),
-  removeClient: (id) => set((state) => ({
-    clients: state.clients.filter((client) => client.id !== id)
-  })),
-}));
+export const useAppStore = create<AppState>()(
+	persist(
+		(set) => ({
+			isConnected: false,
+			setIsConnected: (connected: boolean) => set({ isConnected: connected }),
+			isAdmin: false,
+			setIsAdmin: (admin: boolean) => set({ isAdmin: admin }),
+		}),
+		{
+			name: "app-storage",
+		}
+	)
+);
