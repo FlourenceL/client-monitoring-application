@@ -1,0 +1,57 @@
+Table MstUser {
+  Id int [primary key]
+  User string
+  Username varchar
+  Password varchar
+}
+
+Table MstClient {
+  Id int [primary key]
+  Client string
+  ContactInfo string
+  DateInstalled datetime
+  PlanId int
+  IsActive boolean
+}
+
+Table MstLocation {
+  Id int [primary key]
+  Location string
+}
+
+Table MstStatus {
+  Id int [primary key]
+  Status string
+}
+
+Table MstPaymentMethod {
+  Id int [primary key]
+  PaymentMethod string
+}
+
+Table MstPlan {
+  Id int [primary key]
+  PlanName string
+  Amount int
+  IsActive boolean
+}
+
+Table TrnCollection {
+  Id int [primary key]
+  UserId int
+  ClientId int
+  LocationId int
+  StatusId int
+  PaymentMethodId int
+  BillingMonth char(7)
+  AmountDue int
+  AmountPaid int
+  PaymentDate datetime //default is now
+}
+
+Ref: TrnCollection.ClientId > MstClient.Id
+Ref: TrnCollection.UserId > MstUser.Id
+Ref: TrnCollection.PaymentMethodId > MstPaymentMethod.Id
+Ref: TrnCollection.LocationId > MstLocation.Id
+Ref: TrnCollection.StatusId > MstStatus.Id
+Ref: MstClient.PlanId > MstPlan.Id
