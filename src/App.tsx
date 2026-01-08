@@ -11,28 +11,9 @@ import {
 	useIonToast,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import {
-	barChart,
-	barChartOutline,
-	ellipse,
-	hardwareChipOutline,
-	home,
-	homeOutline,
-	people,
-	peopleOutline,
-	settings,
-	settingsOutline,
-	square,
-	thunderstorm,
-	triangle,
-} from "ionicons/icons";
-import HomePage from "./pages/HomePage";
-import ReportsPage from "./pages/ReportsPage";
-import ClientsPage from "./pages/ClientsPage";
-import ConfigPage from "./pages/ConfigPage";
-import AiToolsPage from "./pages/AiToolsPage";
 import { useEffect } from "react";
 import { databaseService } from "./database/Database.service";
+import { seedDatabase } from "./database/Seeder";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -72,16 +53,21 @@ setupIonicReact();
 const App: React.FC = () => {
 	const [presentToast] = useIonToast();
 	useEffect(() => {
-		try {
-			databaseService.init();
-		} catch (error) {
-			presentToast({
-				message: "Error initializing database service: " + error,
-				duration: 3000,
-				color: "danger",
-				position: "bottom",
-			});
-		}
+		const initDb = async () => {
+			try {
+				await databaseService.init();
+				await seedDatabase(); // Run seeder after init
+			} catch (error) {
+				presentToast({
+					message: "Error initializing database: " + error,
+					duration: 3000,
+					color: "danger",
+					position: "bottom",
+				});
+			}
+		};
+
+		initDb();
 	}, []);
 
 	return (
