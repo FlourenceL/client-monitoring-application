@@ -57,8 +57,11 @@ class DatabaseService {
           Client TEXT NOT NULL,
           ContactInfo TEXT,
           DateInstalled DATETIME,
-          PlanId TEXT NOT NULL,
-          IsActive BOOLEAN DEFAULT 0
+          PlanId INTEGER NOT NULL,
+		  UserId INTEGER NOT NULL,
+          IsActive BOOLEAN DEFAULT 0,
+		  FOREIGN KEY (PlanId) REFERENCES ${MstPlan}(Id),
+		  FOREIGN KEY (UserId) REFERENCES ${MstUser}(Id)
         );
         
         CREATE TABLE IF NOT EXISTS ${MstLocation} (

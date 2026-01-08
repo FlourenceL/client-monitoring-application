@@ -88,26 +88,29 @@ export const seedDatabase = async () => {
 					client: "John Doe",
 					contactInfo: "09123456789",
 					dateInstalled: new Date().toISOString(),
-					planId: "1",
+					planId: 1,
+					userId: 1,
 					isActive: 1,
 				},
 				{
 					client: "Jane Smith",
 					contactInfo: "09987654321",
 					dateInstalled: new Date().toISOString(),
-					planId: "2",
+					planId: 2,
+					userId: 1,
 					isActive: 1,
 				},
 			];
 
 			for (const client of clientData) {
 				await databaseService.run(
-					`INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, IsActive) VALUES (?, ?, ?, ?, ?)`,
+					`INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, UserId, IsActive) VALUES (?, ?, ?, ?, ?, ?)`,
 					[
 						client.client,
 						client.contactInfo,
 						client.dateInstalled,
 						client.planId,
+						client.userId,
 						client.isActive,
 					]
 				);
