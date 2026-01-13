@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.happylink.services;
 
 import com.getcapacitor.BridgeActivity;
 

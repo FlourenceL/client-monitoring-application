@@ -14,6 +14,7 @@ import { IonReactRouter } from "@ionic/react-router";
 import { useEffect } from "react";
 import { databaseService } from "./database/Database.service";
 import { seedDatabase } from "./database/Seeder";
+import { useAppStore } from "./store/appStore";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -51,12 +52,14 @@ import MainTabs from "./components/MainTabs";
 setupIonicReact();
 
 const App: React.FC = () => {
-	const [presentToast] = useIonToast();
+    const isAuthenticated = useAppStore((state) => state.isAuthenticated);
+    const setIsAuthenticated = useAppStore((state) => state.setIsAuthenticated);
+    const [presentToast] = useIonToast();
 	useEffect(() => {
 		const initDb = async () => {
 			try {
 				await databaseService.init();
-				await seedDatabase(); // Run seeder after init
+				await seedDatabase();
 			} catch (error) {
 				presentToast({
 					message: "Error initializing database: " + error,
@@ -70,6 +73,7 @@ const App: React.FC = () => {
 		initDb();
 	}, []);
 
+
 	return (
 		<IonApp>
 			<IonReactRouter>
@@ -78,27 +82,27 @@ const App: React.FC = () => {
 						exact
 						path="/login"
 					>
-						<LoginPage onLogin={() => {}} />
+						{isAuthenticated ? <Redirect to="/dashboard" /> : <LoginPage onLogin={() => setIsAuthenticated(true)} />}
 					</Route>
 					<Route
 						path="/dashboard"
-						component={MainTabs}
+						render={() => isAuthenticated ? <MainTabs /> : <Redirect to="/login" />}
 					/>
 					<Route
 						path="/reports"
-						component={MainTabs}
+						render={() => isAuthenticated ? <MainTabs /> : <Redirect to="/login" />}
 					/>
 					<Route
 						path="/clients"
-						component={MainTabs}
+						render={() => isAuthenticated ? <MainTabs /> : <Redirect to="/login" />}
 					/>
 					<Route
 						path="/aitools"
-						component={MainTabs}
+						render={() => isAuthenticated ? <MainTabs /> : <Redirect to="/login" />}
 					/>
 					<Route
 						path="/config"
-						component={MainTabs}
+						render={() => isAuthenticated ? <MainTabs /> : <Redirect to="/login" />}
 					/>
 					<Route
 						exact

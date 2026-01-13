@@ -1,6 +1,9 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonItem, IonLabel, IonInput} from '@ionic/react';
-import React from 'react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton, IonItem, IonLabel, IonInput, useIonToast } from '@ionic/react';
+import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { databaseService } from '../database/Database.service';
+import { MstUser } from '../database/DatabaseConstants';
+import { useAppStore } from '../store/appStore';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -8,11 +11,47 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const history = useHistory();
+  const {setUser} = useAppStore()
+  const [present] = useIonToast();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Logic to be handled by user
-    onLogin();
-    history.push('/dashboard'); // This will now correctly load MainTabs -> HomePage
+  const handleLogin = async () => {
+    if (!username || !password) {
+        present({
+            message: 'Please enter both username and password',
+            duration: 2000,
+            color: 'warning'
+        });
+        return;
+    }
+
+    try {
+        const users = await databaseService.query(
+            `SELECT * FROM ${MstUser} WHERE Username = ? AND Password = ?`,
+            [username, password]
+        );
+
+        if (users && users.length > 0) {
+            const user = users[0];
+            setUser(user.User);
+            onLogin();
+            history.push('/dashboard'); 
+        } else {
+            present({
+                message: 'Invalid username or password',
+                duration: 2000,
+                color: 'danger'
+            });
+        }
+    } catch (error) {
+        console.error("Login error:", error);
+        present({
+            message: 'An error occurred during login',
+            duration: 2000,
+            color: 'danger'
+        });
+    }
   };
 
   return (
@@ -23,16 +62,24 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         <h1>Welcome Back</h1>
         <p className="ion-text-muted">Please enter your credentials to access the dashboard.</p>
         </div>
-
-        <IonItem lines="full" className="ion-margin-bottom">
-        <IonLabel position="floating">Username</IonLabel>
-        <IonInput type="text" placeholder="Enter your username"></IonInput>
-        </IonItem>
-
-        <IonItem lines="full" className="ion-margin-bottom">
-        <IonLabel position="floating">Password</IonLabel>
-        <IonInput type="password" placeholder="Enter your password"></IonInput>
-        </IonItem>
+   
+        <IonInput 
+            type="text" 
+            fill='outline'
+            labelPlacement="floating"
+            label='Enter username'
+            value={username}
+            onIonInput={(e) => setUsername(e.detail.value!)}
+        ></IonInput>
+     
+        <IonInput 
+            type="password" 
+            fill='outline'
+            label='Enter password'
+            labelPlacement="floating"    
+            value={password}
+            onIonInput={(e) => setPassword(e.detail.value!)}
+        ></IonInput>
 
         <IonButton expand="block" size="large" onClick={handleLogin} style={{ marginTop: '2rem' }}>
         Sign In
