@@ -3,7 +3,8 @@ export interface CreateClientDTO {
     ContactInfo: string;
     DateInstalled: Date;
     PlanId: number;
-    IsActive: boolean;
+    UserId: number;
+    IsActive: boolean;   
 }
 
 export interface UpdateClientDTO {
