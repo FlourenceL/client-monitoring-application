@@ -65,7 +65,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
    
         <IonInput 
             type="text" 
-            fill='outline'
+            fill='solid'
             labelPlacement="floating"
             label='Enter username'
             value={username}
@@ -74,7 +74,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
      
         <IonInput 
             type="password" 
-            fill='outline'
+            fill='solid'
             label='Enter password'
             labelPlacement="floating"    
             value={password}

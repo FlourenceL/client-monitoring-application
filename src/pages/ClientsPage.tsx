@@ -291,9 +291,9 @@ const ClientsPage: React.FC = () => {
               
               {/* Client Details Section */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <IonInput label="Client Name" labelPlacement="floating" fill="outline" placeholder="e.g. Acme Corp" value={formData.clientName} onIonInput={e => handleInputChange('clientName', e.detail.value!)}></IonInput>
-          <IonInput label="Email Address" type="email" labelPlacement="floating" fill="outline" placeholder="contact@acme.com" value={formData.email} onIonInput={e => handleInputChange('email', e.detail.value!)}></IonInput>
-          <IonInput label="Phone Number" type="tel" labelPlacement="floating" fill="outline" placeholder="+1 (555) 000-0000" value={formData.phone} onIonInput={e => handleInputChange('phone', e.detail.value!)}></IonInput>
+          <IonInput label="Client Name" labelPlacement="floating" fill="solid" placeholder="e.g. Acme Corp" value={formData.clientName} onIonInput={e => handleInputChange('clientName', e.detail.value!)}></IonInput>
+          <IonInput label="Email Address" type="email" labelPlacement="floating" fill="solid" placeholder="contact@acme.com" value={formData.email} onIonInput={e => handleInputChange('email', e.detail.value!)}></IonInput>
+          <IonInput label="Phone Number" type="tel" labelPlacement="floating" fill="solid" placeholder="+1 (555) 000-0000" value={formData.phone} onIonInput={e => handleInputChange('phone', e.detail.value!)}></IonInput>
               </div>
 
               {/* Billing Details Section */}
@@ -301,7 +301,7 @@ const ClientsPage: React.FC = () => {
                 <IonSelect 
                   label="Internet Plan" 
                   labelPlacement="floating" 
-                  fill="outline" 
+                  fill="solid" 
                   value={formData.planId} 
                   onIonChange={e => {
                     const selectedPlanId = e.detail.value;
@@ -321,8 +321,8 @@ const ClientsPage: React.FC = () => {
                 </IonSelect>
 
           <div style={{ display: 'flex', gap: '15px' }}>
-            <IonInput style={{ flex: 1 }} label="Amount ($)" type="number" labelPlacement="floating" fill="outline" placeholder="0.00" value={formData.amount} onIonInput={e => handleInputChange('amount', e.detail.value!)}></IonInput>
-            <IonInput style={{ flex: 1 }} label="Due Date" type="date" labelPlacement="floating" fill="outline" value={formData.dueDate} onIonChange={e => handleInputChange('dueDate', e.detail.value!)}></IonInput>
+            <IonInput style={{ flex: 1 }} label="Amount ($)" type="number" labelPlacement="floating" fill="solid" placeholder="0.00" value={formData.amount} onIonInput={e => handleInputChange('amount', e.detail.value!)}></IonInput>
+            <IonInput style={{ flex: 1 }} label="Due Date" type="date" labelPlacement="floating" fill="solid" value={formData.dueDate} onIonChange={e => handleInputChange('dueDate', e.detail.value!)}></IonInput>
           </div>
           
           <div>
