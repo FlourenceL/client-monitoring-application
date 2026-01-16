@@ -9,10 +9,16 @@ import {
 import { Redirect, Route } from 'react-router-dom';
 import {
 	barChartOutline,
+	barChartSharp,
 	hardwareChipOutline,
+	hardwareChipSharp,
+	home,
 	homeOutline,
+	homeSharp,
+	peopleCircleSharp,
 	peopleOutline,
 	settingsOutline,
+	settingsSharp,
 } from "ionicons/icons";
 import HomePage from "../pages/HomePage";
 import ReportsPage from "../pages/ReportsPage";
@@ -62,7 +68,7 @@ const MainTabs: React.FC = () => {
 				>
 					<IonIcon
 						aria-hidden="true"
-						icon={homeOutline}
+						icon={homeSharp}
 					/>
 					<IonLabel>HOME</IonLabel>
 				</IonTabButton>
@@ -73,21 +79,21 @@ const MainTabs: React.FC = () => {
 				>
 					<IonIcon
 						aria-hidden="true"
-						icon={barChartOutline}
+						icon={barChartSharp}
 					/>
 					<IonLabel>REPORTS</IonLabel>
 				</IonTabButton>
 
-				<IonTabButton
+				{/* <IonTabButton
 					tab="tab5"
 					href="/aitools"
 				>
 					<IonIcon
 						aria-hidden="true"
-						icon={hardwareChipOutline}
+						icon={hardwareChipSharp}
 					/>
 					<IonLabel>AI TOOL</IonLabel>
-				</IonTabButton>
+				</IonTabButton> */}
 
 				<IonTabButton
 					tab="tab3"
@@ -95,7 +101,7 @@ const MainTabs: React.FC = () => {
 				>
 					<IonIcon
 						aria-hidden="true"
-						icon={peopleOutline}
+						icon={peopleCircleSharp}
 					/>
 					<IonLabel>CLIENTS</IonLabel>
 				</IonTabButton>
@@ -106,7 +112,7 @@ const MainTabs: React.FC = () => {
 				>
 					<IonIcon
 						aria-hidden="true"
-						icon={settingsOutline}
+						icon={settingsSharp}
 					/>
 					<IonLabel>CONFIG</IonLabel>
 				</IonTabButton>

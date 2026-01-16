@@ -1,30 +1,32 @@
 import { databaseService } from "../database/Database.service";
+import { MstLocation } from "../database/DatabaseConstants";
+import { LocationsListModel } from "../models/viewModels/LocationsListModel";
 
 class LocationsService {
-    async getLocations() {
-        const getLocations = await databaseService.query(`SELECT * FROM locations`);
+    async getLocations(): Promise<LocationsListModel[]> {
+        const getLocations = await databaseService.query(`SELECT * FROM ${MstLocation}`);
         return getLocations;
     }
 
-    async addLocation(name: string, address: string) {
+    async addLocation(location: string) {
         const insertLocation = await databaseService.run(
-            `INSERT INTO locations (name, address) VALUES (?, ?)`,
-            [name, address]
+            `INSERT INTO ${MstLocation} (Location) VALUES (?)`,
+            [location]
         );
         return insertLocation;
     }
 
-    async updateLocation(id: number, name: string, address: string) {
+    async updateLocation(id: number, location: string) {
         const updateLocation = await databaseService.run(
-            `UPDATE locations SET name = ?, address = ? WHERE id = ?`,
-            [name, address, id]
+            `UPDATE ${MstLocation} SET Location = ? WHERE Id = ?`,
+            [location, id]
         );
         return updateLocation;
     }
 
     async deleteLocation(id: number) {
         const deleteLocation = await databaseService.run(
-            `DELETE FROM locations WHERE id = ?`,
+            `DELETE FROM ${MstLocation} WHERE Id = ?`,
             [id]
         );
         return deleteLocation;

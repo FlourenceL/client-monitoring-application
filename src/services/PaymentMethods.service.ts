@@ -1,30 +1,32 @@
 import { databaseService } from "../database/Database.service";
+import { MstPaymentMethod } from "../database/DatabaseConstants";
+import { PaymentMethodsListModel } from "../models/viewModels/PaymentMethodsListModel";
 
 class PaymentMethodsService {
-    async getPaymentMethods() {
-        const getPaymentMethods = await databaseService.query(`SELECT * FROM payment_methods`);
+    async getPaymentMethods(): Promise<PaymentMethodsListModel[]> {
+        const getPaymentMethods = await databaseService.query(`SELECT * FROM ${MstPaymentMethod}`);
         return getPaymentMethods;
     }
 
-    async addPaymentMethod(name: string, details: string) {
+    async addPaymentMethod(paymentMethod: string) {
         const insertPaymentMethod = await databaseService.run(
-            `INSERT INTO payment_methods (name, details) VALUES (?, ?)`,
-            [name, details]
+            `INSERT INTO ${MstPaymentMethod} (PaymentMethod) VALUES (?)`,
+            [paymentMethod]
         );
         return insertPaymentMethod;
     }
 
-    async updatePaymentMethod(id: number, name: string, details: string) {
+    async updatePaymentMethod(id: number, paymentMethod: string) {
         const updatePaymentMethod = await databaseService.run(
-            `UPDATE payment_methods SET name = ?, details = ? WHERE id = ?`,
-            [name, details, id]
+            `UPDATE ${MstPaymentMethod} SET PaymentMethod = ? WHERE Id = ?`,
+            [paymentMethod, id]
         );
         return updatePaymentMethod;
     }
 
     async deletePaymentMethod(id: number) {
         const deletePaymentMethod = await databaseService.run(
-            `DELETE FROM payment_methods WHERE id = ?`,
+            `DELETE FROM ${MstPaymentMethod} WHERE Id = ?`,
             [id]
         );
         return deletePaymentMethod;

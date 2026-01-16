@@ -1,30 +1,31 @@
 import { databaseService } from "../database/Database.service";
+import { MstPlan } from "../database/DatabaseConstants";
 
 class PlanService {
     async getPlans() {
-        const getPlans = await databaseService.query(`SELECT * FROM plans`);
+        const getPlans = await databaseService.query(`SELECT * FROM ${MstPlan}`);
         return getPlans;
     }
 
-    async addPlan(name: string, price: number, duration: string) {
+    async addPlan(planName: string, amount: number, isActive: boolean) {
         const insertPlan = await databaseService.run(
-            `INSERT INTO plans (name, price, duration) VALUES (?, ?, ?)`,
-            [name, price, duration]
+            `INSERT INTO ${MstPlan} (PlanName, Amount, IsActive) VALUES (?, ?, ?)`,
+            [planName, amount, isActive]
         );
         return insertPlan;
     }
 
-    async updatePlan(id: number, name: string, price: number, duration: string) {
+    async updatePlan(id: number, planName: string, amount: number, isActive: boolean) {
         const updatePlan = await databaseService.run(
-            `UPDATE plans SET name = ?, price = ?, duration = ? WHERE id = ?`,
-            [name, price, duration, id]
+            `UPDATE ${MstPlan} SET PlanName = ?, Amount = ?, IsActive = ? WHERE Id = ?`,
+            [planName, amount, isActive, id]
         );
         return updatePlan;
     }
 
     async deletePlan(id: number) {
         const deletePlan = await databaseService.run(
-            `DELETE FROM plans WHERE id = ?`,
+            `DELETE FROM ${MstPlan} WHERE Id = ?`,
             [id]
         );
         return deletePlan;
