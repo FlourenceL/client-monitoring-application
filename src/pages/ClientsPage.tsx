@@ -4,12 +4,15 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonCardH
   IonModal, IonButtons, IonInput, IonFooter, useIonToast, IonSelect, IonSelectOption,
   IonFab, IonFabButton, IonText, IonAvatar
  } from '@ionic/react';
-import { add, wallet, searchOutline, filter, person } from 'ionicons/icons';
+import { add, wallet, searchOutline, filter, person, calendar } from 'ionicons/icons';
 import clientService from '../services/Clients.service';
 import planService from '../services/Plans.service';
+import collectionService from '../services/Collections.service';
 
 const ClientsPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('all');
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>('active');
+  const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
@@ -35,17 +38,69 @@ const ClientsPage: React.FC = () => {
   const loadClients = async () => {
     try {
       const res = await clientService.getClients();
+      const plansData = await planService.getPlans();
+      
+      // Convert selectedMonth (YYYY-MM) to BillingMonth (MM/YYYY)
+      const [year, month] = selectedMonth.split('-');
+      const billingMonth = `${month}/${year}`;
+      
+      const collectionsRes = await collectionService.getCollectionsByMonth(billingMonth);
+      const collections = collectionsRes as any[];
+      
       // Map DB result to UI model
-      const mapped = (res as any[]).map((c: any) => ({
-        id: c.Id || c.id,
-        name: c.Client,
-        email: c.ContactInfo.split(' | ')[0], // Extract email
-        phone: c.ContactInfo.split(' | ')[1] || '',
-        dueDate: c.DateInstalled ? new Date(c.DateInstalled).toLocaleDateString() : '',
-        amount: 0, // Placeholder
-        status: c.IsActive ? 'Paid' : 'Pending',
-        planId: c.PlanId
-      }));
+      const mapped = (res as any[]).map((c: any) => {
+        const clientPlan = (plansData as any[]).find(p => p.Id === c.PlanId);
+        
+        // Determine Billing Status
+        const clientCollection = collections.find(col => col.ClientId === (c.Id || c.id));
+        let billingStatus = 'Pending';
+        
+        if (clientCollection) {
+             if (clientCollection.AmountPaid >= clientCollection.AmountDue) {
+                 billingStatus = 'Paid';
+             } else {
+                 // Check for Overdue
+                 const now = new Date();
+                 const collectionMonthDate = new Date(`${year}-${month}-01`);
+                 const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                 
+                 // If collection month is strictly before current month, and not paid -> Overdue
+                 if (collectionMonthDate < currentMonthDate) {
+                     billingStatus = 'Overdue';
+                 }
+             }
+        } else {
+             // No collection record found for this month
+             // If selected month is past, it's technically overdue or no-bill. 
+             // But if it's future, it's just N/A or Pending.
+             // If it's current month, it might be Pending generation (but we generate on load).
+             // Let's assume Status 'Pending' if active, but maybe indicate 'No Bill'?
+             // User asked "if not paid, status will be either pending or overdue".
+             // I'll stick to Pending/Overdue logic based on date if record missing (fallback), 
+             // but `generateMonthlyTransactions` ensures record exists for active clients for CURRENT month.
+             // For past months, if no record, maybe they weren't active?
+             
+             const now = new Date();
+             const collectionMonthDate = new Date(`${year}-${month}-01`);
+             const currentMonthDate = new Date(now.getFullYear(), now.getMonth(), 1);
+
+             if (collectionMonthDate < currentMonthDate) {
+                billingStatus = 'Overdue'; // Or 'No Record'
+             }
+        }
+
+        return {
+          id: c.Id || c.id,
+          name: c.Client,
+          email: c.ContactInfo.split(' | ')[0],
+          phone: c.ContactInfo.split(' | ')[1] || '',
+          dueDate: c.DateInstalled ? new Date(c.DateInstalled).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '',
+          amount: clientPlan ? clientPlan.Amount : 0,
+          status: billingStatus,
+          subscriptionStatus: c.IsActive ? 'Active' : 'Inactive',
+          planId: c.PlanId
+        };
+      });
       setClientsList(mapped);
     } catch (e) {
       console.error(e);
@@ -64,7 +119,7 @@ const ClientsPage: React.FC = () => {
   useEffect(() => {
     loadClients();
     loadPlans();
-  }, []);
+  }, [selectedMonth]);
 
   const handleSaveClient = async () => {
     try {
@@ -99,6 +154,10 @@ const ClientsPage: React.FC = () => {
       presentToast({ message: 'An error occurred', duration: 2000, color: 'danger' });  
     }
   }
+
+  // Calculate total revenue and paid clients count
+  const paidClients = clientsList.filter(client => client.status === 'Paid');
+  const totalRevenue = paidClients.reduce((sum, client) => sum + (client.amount || 0), 0);
 
   return (
     <IonPage>
@@ -139,10 +198,10 @@ const ClientsPage: React.FC = () => {
                   <IonText color="light">
                     <p style={{ margin: 0, opacity: 0.9, fontSize: '0.9rem', fontWeight: 500 }}>Total Monthly Revenue</p>
                   </IonText>
-                  <h1 style={{ margin: '8px 0 16px 0', fontSize: '2.5rem', fontWeight: 'bold' }}>$40,000</h1>
+                  <h1 style={{ margin: '8px 0 16px 0', fontSize: '2.5rem', fontWeight: 'bold' }}>${totalRevenue.toLocaleString()}</h1>
                   <div style={{ display: 'flex', gap: '8px' }}>
                      <IonBadge color="light" style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '8px', color: 'var(--ion-color-primary)' }}>
-                        {clientsList.length} Active Clients
+                        {paidClients.length} Paid Clients
                      </IonBadge>
                   </div>
                 </div>
@@ -160,27 +219,99 @@ const ClientsPage: React.FC = () => {
 
           {/* Controls Section */}
           <section style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <IonSearchbar 
-              showCancelButton="never" 
-              placeholder="Search clients..." 
-              searchIcon={searchOutline}
-              style={{ padding: 0, '--box-shadow': 'none', '--background': 'var(--ion-color-light)', '--border-radius': '12px' }}
-            ></IonSearchbar>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <IonSearchbar 
+                showCancelButton="never" 
+                placeholder="Search clients..." 
+                searchIcon={searchOutline}
+                style={{ padding: 0, '--box-shadow': 'none', '--background': 'var(--ion-color-light)', '--border-radius': '12px', flex: 1 }}
+                ></IonSearchbar>
+                
+                <div style={{ 
+                    background: 'var(--ion-color-light)', 
+                    borderRadius: '12px', 
+                    padding: '0 10px', 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    height: '42px'
+                }}>
+                    <IonInput 
+                        type="month" 
+                        value={selectedMonth} 
+                        onIonChange={e => setSelectedMonth(e.detail.value!)}
+                        style={{ maxWidth: '140px' }}
+                    />
+                </div>
+            </div>
+
+             <IonSegment 
+              value={subscriptionFilter} 
+              onIonChange={e => setSubscriptionFilter(e.detail.value as string)}
+              style={{ background: 'var(--ion-color-light)', padding: '4px', borderRadius: '12px' }}
+              mode="ios"
+            >
+              <IonSegmentButton value="active" style={{ 
+                '--background-checked': 'white',
+                '--color-checked': 'var(--ion-color-primary)',
+                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
+                borderRadius: '8px'
+              }}>
+                <IonLabel>Active Sub</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="inactive" style={{ 
+                '--background-checked': 'white',
+                '--color-checked': 'var(--ion-color-primary)',
+                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
+                borderRadius: '8px'
+              }}>
+                <IonLabel>Inactive Sub</IonLabel>
+              </IonSegmentButton>
+               {/* <IonSegmentButton value="all">
+                <IonLabel>All Subs</IonLabel>
+              </IonSegmentButton> */}
+            </IonSegment>
 
             <IonSegment 
               value={selectedTab} 
               onIonChange={e => setSelectedTab(e.detail.value as string)}
-              style={{ background: 'transparent', padding: '4px' }}
+              style={{ background: 'var(--ion-color-light)', padding: '4px', borderRadius: '12px' }}
               mode="ios"
             >
-              <IonSegmentButton value="all" style={{ borderRadius: '8px', '--indicator-display': 'none', minHeight: '36px' }}>
+              <IonSegmentButton value="all" style={{ 
+                borderRadius: '8px', 
+                minHeight: '36px',
+                '--background-checked': 'white',
+                '--color-checked': 'var(--ion-color-primary)',
+                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
                 <IonLabel style={{ fontWeight: selectedTab === 'all' ? '600' : '400' }}>All</IonLabel>
               </IonSegmentButton>
-              <IonSegmentButton value="paid" style={{ borderRadius: '8px', minHeight: '36px' }}>
+              <IonSegmentButton value="paid" style={{ 
+                borderRadius: '8px', 
+                minHeight: '36px',
+                '--background-checked': 'white',
+                '--color-checked': 'var(--ion-color-primary)',
+                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
                 <IonLabel style={{ fontWeight: selectedTab === 'paid' ? '600' : '400' }}>Paid</IonLabel>
               </IonSegmentButton>
-              <IonSegmentButton value="pending" style={{ borderRadius: '8px', minHeight: '36px' }}>
+              <IonSegmentButton value="pending" style={{ 
+                borderRadius: '8px', 
+                minHeight: '36px',
+                '--background-checked': 'white',
+                '--color-checked': 'var(--ion-color-primary)',
+                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
                 <IonLabel style={{ fontWeight: selectedTab === 'pending' ? '600' : '400' }}>Pending</IonLabel>
+              </IonSegmentButton>
+               <IonSegmentButton value="overdue" style={{ 
+                borderRadius: '8px', 
+                minHeight: '36px',
+                '--background-checked': 'white',
+                '--color-checked': 'var(--ion-color-primary)',
+                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
+                <IonLabel style={{ fontWeight: selectedTab === 'overdue' ? '600' : '400' }}>Overdue</IonLabel>
               </IonSegmentButton>
             </IonSegment>
           </section>
@@ -201,7 +332,11 @@ const ClientsPage: React.FC = () => {
               </div>
 
               {clientsList
-                .filter(client => selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab))
+                .filter(client => {
+                    const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
+                    const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
+                    return matchesTab && matchesSub;
+                })
                 .map((client) => (
                 <div
                   key={client.id}
@@ -261,7 +396,11 @@ const ClientsPage: React.FC = () => {
               ))}
             </div>
             
-            {clientsList.filter(client => selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab)).length === 0 && (
+            {clientsList.filter(client => {
+                    const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
+                    const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
+                    return matchesTab && matchesSub;
+                }).length === 0 && (
                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--ion-color-medium)' }}>
                  <IonIcon icon={person} style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.2 }} />
                  <p>No clients found.</p>

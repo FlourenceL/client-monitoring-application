@@ -1,11 +1,11 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonSegment, IonSegmentButton, IonLabel, IonCardContent,
-  IonButton, IonSelect, IonSelectOption, IonIcon
+  IonButton, IonSelect, IonSelectOption, IonIcon, IonChip, IonBadge
  } from '@ionic/react';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis,
   YAxis, Tooltip, Legend, Line, Bar, BarChart, Area, AreaChart, PieChart, Pie, Cell
  } from 'recharts';
 import { useState } from 'react';
-import { filterCircleOutline } from 'ionicons/icons';
+import { filterCircleOutline, trendingUp, trendingDown, documentTextOutline, downloadOutline, statsChartOutline, pieChartOutline, calendarOutline } from 'ionicons/icons';
 
 const data = [
   { name: 'Jan', revenue: 4000, expenses: 2400, profit: 1600 },
@@ -46,22 +46,23 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 const ReportsPage: React.FC = () => {
   const [chartType, setChartType] = useState<'area' | 'line'>('area');
+  const [timeFilter, setTimeFilter] = useState('all');
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Performance</IonTitle>
+          <IonTitle>Reports</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Reports</IonTitle>
+            <IonTitle size="large">Reports & Analytics</IonTitle>
           </IonToolbar>
         </IonHeader>
 
-        <div className="ion-padding">
+        <div className="ion-padding" style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '80px' }}>
             <section style={{ marginBottom: '1rem' }}>
             <IonCard>
               <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -97,19 +98,29 @@ const ReportsPage: React.FC = () => {
             </IonCard>
             </section>
 
-          <section style={{ marginBottom: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginLeft: '0.5rem' }}>Financial Overview</h2>
-              <IonSegment value={chartType} onIonChange={e => setChartType(e.detail.value as any)}>
+          <section style={{ marginBottom: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: 'var(--ion-text-color)' }}>Financial Overview</h2>
+                <p style={{ margin: 0, fontSize: '14px', color: 'var(--ion-color-medium)' }}>Revenue, expenses and profit trends over time</p>
+              </div>
+              <IonSegment value={chartType} onIonChange={e => setChartType(e.detail.value as any)} style={{ maxWidth: '200px' }}>
                 <IonSegmentButton value="area">
-                  <IonLabel>Area</IonLabel>
+                  <IonLabel style={{ fontWeight: 600 }}>Area</IonLabel>
                 </IonSegmentButton>
                 <IonSegmentButton value="line">
-                  <IonLabel>Line</IonLabel>
+                  <IonLabel style={{ fontWeight: 600 }}>Line</IonLabel>
                 </IonSegmentButton>
               </IonSegment>
             </div>
-            <IonCard style={{ height: '400px', padding: '1.5rem' }}>
+            <div style={{ 
+              background: 'var(--ion-card-background)',
+              borderRadius: '20px',
+              padding: '28px',
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+              height: '450px'
+            }}>
               <ResponsiveContainer width="100%" height="100%">
               {chartType === 'area' ? (
               <AreaChart data={data} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
@@ -144,12 +155,22 @@ const ReportsPage: React.FC = () => {
               </LineChart>
               )}
               </ResponsiveContainer>
-            </IonCard>
+            </div>
           </section>
 
           <section>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', marginLeft: '0.5rem' }}>Payment Distribution</h2>
-            <IonCard style={{ height: '320px', padding: '1.5rem' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: 'var(--ion-text-color)' }}>Payment Distribution</h2>
+              <p style={{ margin: 0, fontSize: '14px', color: 'var(--ion-color-medium)' }}>Overview of payment status breakdown</p>
+            </div>
+            <div style={{ 
+              background: 'var(--ion-card-background)',
+              borderRadius: '20px',
+              padding: '28px',
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+              height: '380px'
+            }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -169,7 +190,7 @@ const ReportsPage: React.FC = () => {
                   <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
-            </IonCard>
+            </div>
           </section>
         </div>
       </IonContent>

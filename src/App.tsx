@@ -14,6 +14,7 @@ import { IonReactRouter } from "@ionic/react-router";
 import { useEffect } from "react";
 import { databaseService } from "./database/Database.service";
 import { seedDatabase } from "./database/Seeder";
+import collectionService from "./services/Collections.service";
 import { useAppStore } from "./store/appStore";
 
 /* Core CSS required for Ionic components to work properly */
@@ -60,6 +61,7 @@ const App: React.FC = () => {
 			try {
 				await databaseService.init();
 				await seedDatabase();
+                await collectionService.generateMonthlyTransactions();
 			} catch (error) {
 				presentToast({
 					message: "Error initializing database: " + error,
