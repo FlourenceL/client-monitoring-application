@@ -217,196 +217,131 @@ const ClientsPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Controls Section */}
-          <section style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <IonSearchbar 
-                showCancelButton="never" 
-                placeholder="Search clients..." 
-                searchIcon={searchOutline}
-                style={{ padding: 0, '--box-shadow': 'none', '--background': 'var(--ion-color-light)', '--border-radius': '12px', flex: 1 }}
-                ></IonSearchbar>
-                
-                <div style={{ 
-                    background: 'var(--ion-color-light)', 
-                    borderRadius: '12px', 
-                    padding: '0 10px', 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    height: '42px'
-                }}>
-                    <IonInput 
-                        type="month" 
-                        value={selectedMonth} 
-                        onIonChange={e => setSelectedMonth(e.detail.value!)}
-                        style={{ maxWidth: '140px' }}
-                    />
-                </div>
-            </div>
 
-             <IonSegment 
-              value={subscriptionFilter} 
-              onIonChange={e => setSubscriptionFilter(e.detail.value as string)}
-              style={{ background: 'var(--ion-color-light)', padding: '4px', borderRadius: '12px' }}
-              mode="ios"
-            >
-              <IonSegmentButton value="active" style={{ 
-                '--background-checked': 'white',
-                '--color-checked': 'var(--ion-color-primary)',
-                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
-                borderRadius: '8px'
-              }}>
-                <IonLabel>Active Sub</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="inactive" style={{ 
-                '--background-checked': 'white',
-                '--color-checked': 'var(--ion-color-primary)',
-                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)',
-                borderRadius: '8px'
-              }}>
-                <IonLabel>Inactive Sub</IonLabel>
-              </IonSegmentButton>
-               {/* <IonSegmentButton value="all">
-                <IonLabel>All Subs</IonLabel>
-              </IonSegmentButton> */}
-            </IonSegment>
-
-            <IonSegment 
-              value={selectedTab} 
-              onIonChange={e => setSelectedTab(e.detail.value as string)}
-              style={{ background: 'var(--ion-color-light)', padding: '4px', borderRadius: '12px' }}
-              mode="ios"
-            >
-              <IonSegmentButton value="all" style={{ 
-                borderRadius: '8px', 
-                minHeight: '36px',
-                '--background-checked': 'white',
-                '--color-checked': 'var(--ion-color-primary)',
-                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                <IonLabel style={{ fontWeight: selectedTab === 'all' ? '600' : '400' }}>All</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="paid" style={{ 
-                borderRadius: '8px', 
-                minHeight: '36px',
-                '--background-checked': 'white',
-                '--color-checked': 'var(--ion-color-primary)',
-                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                <IonLabel style={{ fontWeight: selectedTab === 'paid' ? '600' : '400' }}>Paid</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="pending" style={{ 
-                borderRadius: '8px', 
-                minHeight: '36px',
-                '--background-checked': 'white',
-                '--color-checked': 'var(--ion-color-primary)',
-                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                <IonLabel style={{ fontWeight: selectedTab === 'pending' ? '600' : '400' }}>Pending</IonLabel>
-              </IonSegmentButton>
-               <IonSegmentButton value="overdue" style={{ 
-                borderRadius: '8px', 
-                minHeight: '36px',
-                '--background-checked': 'white',
-                '--color-checked': 'var(--ion-color-primary)',
-                '--indicator-box-shadow': '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                <IonLabel style={{ fontWeight: selectedTab === 'overdue' ? '600' : '400' }}>Overdue</IonLabel>
-              </IonSegmentButton>
-            </IonSegment>
-          </section>
-
-          {/* Client List */}
+          {/* Client List Table */}
           <section>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              
-              {/* Table Header - Only visible on wider screens or kept minimal */}
-              <div style={{ 
-                display: 'grid', gridTemplateColumns: 'minmax(180px, 2fr) 100px 100px 80px', gap: '10px', 
-                padding: '0 16px', marginBottom: '4px', fontSize: '12px', fontWeight: '600', color: 'var(--ion-color-medium)', textTransform: 'uppercase'
+            <div style={{ 
+              background: 'var(--ion-card-background)',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              maxHeight: 'calc(100vh - 300px)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Table Header */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 90px',
+                gap: '16px',
+                padding: '18px 20px',
+                backgroundColor: 'var(--ion-color-step-50, rgba(0,0,0,0.02))',
+                borderBottom: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+                fontWeight: '600',
+                fontSize: '12px',
+                color: 'var(--ion-color-medium)',
+                textTransform: 'uppercase',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10
               }}>
-                <div>Client</div>
-                <div>Due Date</div>
-                <div style={{ textAlign: 'right' }}>Amount</div>
-                <div style={{ textAlign: 'center' }}>Status</div>
+                <div style={{ fontWeight: '700' }}>Client</div>
+                <div style={{ fontWeight: '700' }}>Due Date</div>
+                <div style={{ textAlign: 'right', fontWeight: '700' }}>Amount</div>
+                <div style={{ textAlign: 'center', fontWeight: '700' }}>Status</div>
               </div>
 
-              {clientsList
-                .filter(client => {
+              {/* Table Body with Scroll */}
+              <div style={{ 
+                overflowY: 'auto',
+                overflowX: 'auto',
+                flex: 1
+              }}>
+                {clientsList
+                  .filter(client => {
                     const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
                     const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
                     return matchesTab && matchesSub;
-                })
-                .map((client) => (
-                <div
-                  key={client.id}
-                  onClick={() => {
-                    setSelectedClient(client);
-                    setIsDetailsOpen(true);
-                  }}
-                  style={{
-                    background: 'var(--ion-card-background)',
-                    borderRadius: '16px',
-                    padding: '12px 16px',
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(180px, 2fr) 100px 100px 80px',
-                    gap: '10px',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                    border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-                    transition: 'transform 0.2s',
-                  }}
-                  className="client-row-hover"
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ 
-                        width: '42px', height: '42px', borderRadius: '12px',
-                        background: `hsl(${client.id * 50}, 85%, 95%)`, color: `hsl(${client.id * 50}, 70%, 40%)`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                        fontWeight: '700', fontSize: '18px'
-                      }}>
-                        {client.name.charAt(0)}
-                    </div>
-                    <div style={{ overflow: 'hidden' }}>
-                      <div style={{ fontWeight: '600', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{client.name}</div>
-                      <div style={{ fontSize: '13px', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{client.email || 'No email'}</div>
-                    </div>
-                  </div>
-
-                  <div style={{ fontSize: '14px', color: 'var(--ion-color-step-600, #555)' }}>
-                    {client.dueDate}
-                  </div>
-
-                  <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>
-                    ${client.amount.toLocaleString()}
-                  </div>
-
-                  <div style={{ textAlign: 'center' }}>
-                    <IonBadge color={
-                        client.status.toLowerCase() === 'paid' ? 'success' :
-                        client.status.toLowerCase() === 'pending' ? 'warning' : 'danger'
-                      }
-                      style={{ borderRadius: '6px', padding: '6px 8px', fontWeight: '600' }}
+                  })
+                  .length > 0 ? (
+                  clientsList
+                    .filter(client => {
+                      const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
+                      const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
+                      return matchesTab && matchesSub;
+                    })
+                    .map((client, index) => (
+                    <div
+                      key={client.id}
+                      onClick={() => {
+                        setSelectedClient(client);
+                        setIsDetailsOpen(true);
+                      }}
+                      style={{
+                        padding: '18px 20px',
+                        display: 'grid',
+                        gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 90px',
+                        gap: '16px',
+                        alignItems: 'center',
+                        borderBottom: index < clientsList.filter(c => {
+                          const matchesTab = selectedTab === 'all' || (c.status && c.status.toLowerCase() === selectedTab);
+                          const matchesSub = subscriptionFilter === 'all' || (c.subscriptionStatus && c.subscriptionStatus.toLowerCase() === subscriptionFilter);
+                          return matchesTab && matchesSub;
+                        }).length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
+                        transition: 'background 0.2s ease',
+                        cursor: 'pointer',
+                        minWidth: '100%'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--ion-color-step-50, rgba(0,0,0,0.02))'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      {client.status}
-                    </IonBadge>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {clientsList.filter(client => {
-                    const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
-                    const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
-                    return matchesTab && matchesSub;
-                }).length === 0 && (
-               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--ion-color-medium)' }}>
-                 <IonIcon icon={person} style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.2 }} />
-                 <p>No clients found.</p>
-               </div>
-            )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                        <div style={{ 
+                          width: '48px', height: '48px', borderRadius: '14px',
+                          background: `hsl(${client.id * 50}, 85%, 95%)`, 
+                          color: `hsl(${client.id * 50}, 70%, 40%)`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                          fontWeight: '700', fontSize: '19px',
+                          border: `2px solid hsl(${client.id * 50}, 85%, 90%)`,
+                          flexShrink: 0
+                        }}>
+                          {client.name.charAt(0)}
+                        </div>
+                        <div style={{ overflow: 'hidden', minWidth: 0 }}>
+                          <div style={{ fontWeight: '600', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ion-text-color)' }}>{client.name}</div>
+                          <div style={{ fontSize: '13px', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{client.email || 'No email'}</div>
+                        </div>
+                      </div>
 
+                      <div style={{ fontSize: '14px', color: 'var(--ion-color-step-600, #666)', fontWeight: 500 }}>
+                        {client.dueDate}
+                      </div>
+
+                      <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '16px', color: 'var(--ion-text-color)' }}>
+                        ${client.amount.toLocaleString()}
+                      </div>
+
+                      <div style={{ textAlign: 'center' }}>
+                        <IonBadge color={
+                          client.status.toLowerCase() === 'paid' ? 'success' :
+                          client.status.toLowerCase() === 'pending' ? 'warning' : 'danger'
+                        }
+                        style={{ borderRadius: '8px', padding: '6px 12px', fontWeight: '600', fontSize: '12px' }}
+                        >
+                          {client.status}
+                        </IonBadge>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--ion-color-medium)' }}>
+                    <IonIcon icon={person} style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.2 }} />
+                    <p>No clients found.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </section>
         </div>
 
@@ -416,7 +351,8 @@ const ClientsPage: React.FC = () => {
             <IonIcon icon={add} />
           </IonFabButton>
         </IonFab>
-
+        
+        {/* Add Client Modal */}
         <IonModal isOpen={isOpen} onDidDismiss={() => setIsOpen(false)}>
           <IonHeader>
             <IonToolbar>
