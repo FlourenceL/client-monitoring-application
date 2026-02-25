@@ -9,6 +9,13 @@ export default defineConfig({
   server: {
     host: true,        // exposes to your local network
     port: 5173,        // optional
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+    },
+  },
+  optimizeDeps: {
+    exclude: ['jeep-sqlite'],
   },
   plugins: [
     react(),

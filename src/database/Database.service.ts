@@ -22,10 +22,25 @@ class DatabaseService {
 		const platform = Capacitor.getPlatform();
 
 		if (platform === "web") {
-			console.warn(
-				"SQLite is not supported on web in this configuration. Please run on an Android device/emulator."
-			);
-			return;
+			// Wait for jeep-sqlite custom element to be ready
+			try {
+				await customElements.whenDefined('jeep-sqlite');
+				const jeepSqliteEl = document.querySelector('jeep-sqlite');
+				if (!jeepSqliteEl) {
+					// Create and append the jeep-sqlite element if it doesn't exist
+					const jeepSqlite = document.createElement('jeep-sqlite');
+					jeepSqlite.setAttribute('autoSave', 'true');
+					document.body.appendChild(jeepSqlite);
+					await customElements.whenDefined('jeep-sqlite');
+				}
+				
+				// Initialize the web store for SQLite
+				await this.sqlite.initWebStore();
+				console.log('SQLite web store initialized');
+			} catch (err) {
+				console.error('Error initializing SQLite web store:', err);
+				throw err;
+			}
 		}
 
 		try {

@@ -58,6 +58,11 @@ const HomePage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <IonPage>
+      <IonHeader translucent={true}>
+              <IonToolbar>
+                <IonTitle>Dashboard</IonTitle>
+              </IonToolbar>
+            </IonHeader>
       <IonContent fullscreen>
         <div className='ion-padding' style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '80px' }}>
           
