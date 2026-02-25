@@ -17,6 +17,8 @@ import { seedDatabase } from "./database/Seeder";
 import collectionService from "./services/Collections.service";
 import { useAppStore } from "./store/appStore";
 
+import './theme/LoginPage.css'
+
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
 
