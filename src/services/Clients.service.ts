@@ -20,7 +20,7 @@ class ClientService {
 
             return {success: true, message: 'Client added successfully'};
         } catch (error) {
-            return {success: false, message: 'Failed to add client'};
+            return {success: false, message: `Failed to add client: ${error}`};
         }
         
     }

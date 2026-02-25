@@ -38,6 +38,7 @@ const ClientsPage: React.FC = () => {
   const loadClients = async () => {
     try {
       const res = await clientService.getClients();
+      console.log(res)
       const plansData = await planService.getPlans();
       
       // Convert selectedMonth (YYYY-MM) to BillingMonth (MM/YYYY)
@@ -126,10 +127,10 @@ const ClientsPage: React.FC = () => {
       const response = await clientService.addClient({
         Client: formData.clientName,
         ContactInfo: `${formData.email} | ${formData.phone}`,
-        DateInstalled: new Date(formData.dueDate),
+        DateInstalled: new Date(formData.dueDate).toISOString(),
         PlanId: formData.planId || 1, // Default plan if not selected
         UserId: 1, // Default user
-        IsActive: formData.status === 'paid'
+        IsActive: true
       });
 
       if (response.success) {
@@ -147,11 +148,9 @@ const ClientsPage: React.FC = () => {
           status: 'pending',
           planId: null
         });
-      } else {
-         presentToast({ message: 'Failed to add client', duration: 2000, color: 'danger' });
       }
     } catch (error) {
-      presentToast({ message: 'An error occurred', duration: 2000, color: 'danger' });  
+      presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger' });  
     }
   }
 
