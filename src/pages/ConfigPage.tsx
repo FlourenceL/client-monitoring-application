@@ -34,7 +34,11 @@ import {
     cardOutline,
     pricetagOutline,
     trashOutline,
-    createOutline
+    createOutline,
+    checkboxSharp,
+    warningOutline,
+    checkmarkCircleOutline,
+    closeCircleOutline
 } from "ionicons/icons";
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
@@ -123,7 +127,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Location name cannot be empty",
                 duration: 2000,
-                color: "warning"
+                color: "warning",
+                position: 'top',
+                icon: warningOutline
             });
             return;
         }
@@ -134,7 +140,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 present({
                     message: "Location updated successfully",
                     duration: 2000,
-                    color: "success"
+                    color: "success",
+                    position: 'top',
+                    icon: checkmarkCircleOutline
                 });
                 setEditingLocationId(null);
             } else {
@@ -142,7 +150,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 present({
                     message: "Location added successfully",
                     duration: 2000,
-                    color: "success"
+                    color: "success",
+                    position: 'top',
+                    icon: checkmarkCircleOutline
                 });
             }
             setLocationName("");
@@ -152,7 +162,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: editingLocationId ? "Failed to update location" : "Failed to add location",
                 duration: 2000,
-                color: "danger"
+                color: "danger",
+                position: 'top',
+                icon: closeCircleOutline
             });
         }
     };
@@ -168,7 +180,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Location deleted successfully",
                 duration: 2000,
-                color: "success"
+                color: "success",
+                position: 'top',
+                icon: checkmarkCircleOutline
             });
             await loadLocations();
         } catch (error) {
@@ -176,7 +190,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Failed to delete location",
                 duration: 2000,
-                color: "danger"
+                color: "danger",
+                position: 'top',
+                icon: closeCircleOutline
             });
         }
     };
@@ -186,7 +202,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Payment method name cannot be empty",
                 duration: 2000,
-                color: "warning"
+                color: "warning",
+                position: 'top',
+                icon: warningOutline
             });
             return;
         }
@@ -197,7 +215,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 present({
                     message: "Payment method updated successfully",
                     duration: 2000,
-                    color: "success"
+                    color: "success",
+                    position: 'top',
+                    icon: checkmarkCircleOutline
                 });
                 setEditingPaymentMethodId(null);
             } else {
@@ -205,7 +225,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 present({
                     message: "Payment method added successfully",
                     duration: 2000,
-                    color: "success"
+                    color: "success",
+                    position: 'top',
+                    icon: checkmarkCircleOutline
                 });
             }
             setPaymentMethodName("");
@@ -215,7 +237,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: editingPaymentMethodId ? "Failed to update payment method" : "Failed to add payment method",
                 duration: 2000,
-                color: "danger"
+                color: "danger",
+                position: 'top',
+                icon: closeCircleOutline
             });
         }
     };
@@ -231,7 +255,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Payment method deleted successfully",
                 duration: 2000,
-                color: "success"
+                color: "success",
+                position: 'top',
+                icon: checkmarkCircleOutline
             });
             await loadPaymentMethods();
         } catch (error) {
@@ -239,7 +265,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Failed to delete payment method",
                 duration: 2000,
-                color: "danger"
+                color: "danger",
+                position: 'top',
+                icon: closeCircleOutline
             });
         }
     };
@@ -249,7 +277,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Plan name cannot be empty",
                 duration: 2000,
-                color: "warning"
+                color: "warning",
+                position: 'top',
+                icon: warningOutline
             });
             return;
         }
@@ -257,7 +287,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Please enter a valid amount",
                 duration: 2000,
-                color: "warning"
+                color: "warning",
+                position: 'top',
+                icon: warningOutline
             });
             return;
         }
@@ -268,7 +300,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 present({
                     message: "Plan updated successfully",
                     duration: 2000,
-                    color: "success"
+                    color: "success",
+                    position: 'top',
+                    icon: checkmarkCircleOutline
                 });
                 setEditingPlanId(null);
             } else {
@@ -276,7 +310,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 present({
                     message: "Plan added successfully",
                     duration: 2000,
-                    color: "success"
+                    color: "success",
+                    position: 'top',
+                    icon: checkmarkCircleOutline
                 });
             }
             setPlanName("");
@@ -288,7 +324,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: editingPlanId ? "Failed to update plan" : "Failed to add plan",
                 duration: 2000,
-                color: "danger"
+                color: "danger",
+                position: 'top',
+                icon: closeCircleOutline
             });
         }
     };
@@ -306,7 +344,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Plan deleted successfully",
                 duration: 2000,
-                color: "success"
+                color: "success",
+                position: 'top',
+                icon: checkmarkCircleOutline
             });
             await loadPlans();
         } catch (error) {
@@ -314,7 +354,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             present({
                 message: "Failed to delete plan",
                 duration: 2000,
-                color: "danger"
+                color: "danger",
+                position: 'top',
+                icon: closeCircleOutline
             });
         }
     };
@@ -332,7 +374,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
 					message: "Database connection successful!",
 					duration: 3000,
 					color: "success",
-					position: "bottom",
+					position: "top",
                     icon: shieldCheckmarkOutline
 				});
 			} else {
@@ -346,7 +388,8 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
 					(error instanceof Error ? error.message : String(error)),
 				duration: 3000,
 				color: "danger",
-				position: "bottom",
+				position: "top",
+                icon: closeCircleOutline
 			});
 		}
 	};

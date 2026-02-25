@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { databaseService } from '../database/Database.service';
 import { MstUser } from '../database/DatabaseConstants';
 import { useAppStore } from '../store/appStore';
-import { personOutline, lockClosedOutline } from 'ionicons/icons';
+import { personOutline, lockClosedOutline, warningOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -23,7 +23,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         present({
             message: 'Please enter both username and password',
             duration: 2000,
-            color: 'warning'
+            color: 'warning',
+            position: 'top',
+            icon: warningOutline
         });
         return;
     }
@@ -42,7 +44,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             present({
                 message: 'Login successful! Welcome back.',
                 duration: 1500,
-                color: 'success'
+                color: 'success',
+                position: 'top',
+                icon: checkmarkCircleOutline
             });
             onLogin();
             history.push('/dashboard'); 
@@ -50,7 +54,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             present({
                 message: 'Invalid username or password',
                 duration: 2000,
-                color: 'danger'
+                color: 'danger',
+                position: 'top',
+                icon: closeCircleOutline
             });
         }
     } catch (error) {
@@ -58,7 +64,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         present({
             message: 'An error occurred during login',
             duration: 2000,
-            color: 'danger'
+            color: 'danger',
+            position: 'top',
+            icon: closeCircleOutline
         });
     } finally {
         setIsLoading(false);
