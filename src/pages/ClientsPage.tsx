@@ -238,14 +238,14 @@ const ClientsPage: React.FC = () => {
               overflow: 'hidden',
               border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              maxHeight: 'calc(100vh - 300px)',
               display: 'flex',
               flexDirection: 'column'
             }}>
+
               {/* Table Header */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 90px',
+                gridTemplateColumns: '3fr 1fr',
                 gap: '16px',
                 padding: '18px 20px',
                 backgroundColor: 'var(--ion-color-step-50, rgba(0,0,0,0.02))',
@@ -260,14 +260,10 @@ const ClientsPage: React.FC = () => {
               }}>
                 <div style={{ fontWeight: '700' }}>Client</div>
                 <div style={{ fontWeight: '700' }}>Due Date</div>
-                <div style={{ textAlign: 'right', fontWeight: '700' }}>Amount</div>
-                <div style={{ textAlign: 'center', fontWeight: '700' }}>Status</div>
               </div>
 
-              {/* Table Body with Scroll */}
+              {/* Table Body */}
               <div style={{ 
-                overflowY: 'auto',
-                overflowX: 'auto',
                 flex: 1
               }}>
                 {clientsList
@@ -293,7 +289,7 @@ const ClientsPage: React.FC = () => {
                       style={{
                         padding: '18px 20px',
                         display: 'grid',
-                        gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 90px',
+                        gridTemplateColumns: '3fr 1fr',
                         gap: '16px',
                         alignItems: 'center',
                         borderBottom: index < clientsList.filter(c => {
@@ -302,8 +298,7 @@ const ClientsPage: React.FC = () => {
                           return matchesTab && matchesSub;
                         }).length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
                         transition: 'background 0.2s ease',
-                        cursor: 'pointer',
-                        minWidth: '100%'
+                        cursor: 'pointer'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--ion-color-step-50, rgba(0,0,0,0.02))'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -330,7 +325,7 @@ const ClientsPage: React.FC = () => {
                         {client.dueDate}
                       </div>
 
-                      <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '16px', color: 'var(--ion-text-color)' }}>
+                      {/* <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '16px', color: 'var(--ion-text-color)' }}>
                         ${client.amount.toLocaleString()}
                       </div>
 
@@ -343,7 +338,7 @@ const ClientsPage: React.FC = () => {
                         >
                           {client.status}
                         </IonBadge>
-                      </div>
+                      </div> */}
                     </div>
                   ))
                 ) : (
