@@ -4,7 +4,7 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonCardH
   IonModal, IonButtons, IonInput, IonFooter, useIonToast, IonSelect, IonSelectOption,
   IonFab, IonFabButton, IonText, IonAvatar
  } from '@ionic/react';
-import { add, wallet, searchOutline, filter, person, calendar } from 'ionicons/icons';
+import { add, wallet, searchOutline, filter, person, calendar, card } from 'ionicons/icons';
 import clientService from '../services/Clients.service';
 import planService from '../services/Plans.service';
 import collectionService from '../services/Collections.service';
@@ -360,83 +360,172 @@ const ClientsPage: React.FC = () => {
         </IonFab>
         
         {/* Add Client Modal */}
-        <IonModal isOpen={isOpen} onDidDismiss={() => setIsOpen(false)}>
+        <IonModal isOpen={isOpen} onDidDismiss={() => setIsOpen(false)} style={{ '--border-radius': '16px' }}>
           <IonHeader>
             <IonToolbar>
               <IonTitle>Add New Client</IonTitle>
               <IonButtons slot="end">
+                <IonButton onClick={() => setIsOpen(false)}>
+                  <IonIcon icon={add} style={{ transform: 'rotate(45deg)' }} />
+                </IonButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>
           <IonContent className="ion-padding">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingTop: '10px' }}>
               
               <div style={{ 
-                padding: '12px', 
-                background: 'var(--ion-color-light)', 
-                borderRadius: '8px',
-                fontSize: '13px',
-                color: 'var(--ion-color-medium)'
+                padding: '16px', 
+                background: 'rgba(var(--ion-color-primary-rgb), 0.05)', 
+                borderRadius: '12px',
+                fontSize: '14px',
+                color: 'var(--ion-color-medium)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: '1px solid rgba(var(--ion-color-primary-rgb), 0.1)'
               }}>
-                <span style={{ color: 'var(--ion-color-danger)' }}>*</span> Required fields
+                <IonIcon icon={person} color="primary" />
+                <span>Fields marked with <span style={{ color: 'var(--ion-color-danger)', fontWeight: 'bold' }}>*</span> are required</span>
               </div>
 
               {/* Client Details Section */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <IonInput 
-            label="Client Name *" 
-            labelPlacement="floating" 
-            fill="solid" 
-            placeholder="e.g. Acme Corp" 
-            value={formData.clientName} 
-            onIonInput={e => handleInputChange('clientName', e.detail.value!)}
-            required
-          ></IonInput>
-          <IonInput label="Email Address" type="email" labelPlacement="floating" fill="solid" placeholder="contact@acme.com" value={formData.email} onIonInput={e => handleInputChange('email', e.detail.value!)}></IonInput>
-          <IonInput label="Phone Number" type="tel" labelPlacement="floating" fill="solid" placeholder="+1 (555) 000-0000" value={formData.phone} onIonInput={e => handleInputChange('phone', e.detail.value!)}></IonInput>
-              </div>
+              <section>
+                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', color: 'var(--ion-color-medium)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <IonIcon icon={person} />
+                  Client Information
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <IonInput 
+                    label="Client Name *" 
+                    labelPlacement="floating" 
+                    fill="outline" 
+                    mode="md"
+                    placeholder="e.g. Acme Corp" 
+                    value={formData.clientName} 
+                    onIonInput={e => handleInputChange('clientName', e.detail.value!)}
+                    required
+                    style={{ '--border-radius': '12px' }}
+                  ></IonInput>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <IonInput 
+                      label="Email Address" 
+                      type="email" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      placeholder="contact@acme.com" 
+                      value={formData.email} 
+                      onIonInput={e => handleInputChange('email', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                    <IonInput 
+                      label="Phone Number" 
+                      type="tel" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      placeholder="+1 (555)..." 
+                      value={formData.phone} 
+                      onIonInput={e => handleInputChange('phone', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                  </div>
+                </div>
+              </section>
+
+              <div style={{ height: '1px', background: 'var(--ion-color-step-100, #f0f0f0)' }}></div>
 
               {/* Billing Details Section */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <IonSelect 
-                  label="Internet Plan *" 
-                  labelPlacement="floating" 
-                  fill="solid" 
-                  value={formData.planId} 
-                  placeholder="Select a plan"
-                  onIonChange={e => {
-                    const selectedPlanId = e.detail.value;
-                    const selectedPlan = plans.find(p => p.Id === selectedPlanId);
-                    handleInputChange('planId', selectedPlanId);
-                    // Auto-fill amount if a plan is selected
-                    if (selectedPlan) {
-                      handleInputChange('amount', selectedPlan.Amount);
-                    }
-                  }}
-                >
-                  {plans.map(plan => (
-                    <IonSelectOption key={plan.Id} value={plan.Id}>
-                      {plan.PlanName} (${plan.Amount})
-                    </IonSelectOption>
-                  ))}
-                </IonSelect>
+              <section>
+                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', color: 'var(--ion-color-medium)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <IonIcon icon={card} />
+                  Subscription Plan
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <IonSelect 
+                    label="Internet Plan *" 
+                    labelPlacement="floating" 
+                    fill="outline" 
+                    mode="md"
+                    value={formData.planId} 
+                    placeholder="Select a plan"
+                    style={{ '--border-radius': '12px' }}
+                    interface="action-sheet"
+                    onIonChange={e => {
+                      const selectedPlanId = e.detail.value;
+                      const selectedPlan = plans.find(p => p.Id === selectedPlanId);
+                      handleInputChange('planId', selectedPlanId);
+                      if (selectedPlan) {
+                        handleInputChange('amount', selectedPlan.Amount);
+                      }
+                    }}
+                  >
+                    {plans.map(plan => (
+                      <IonSelectOption key={plan.Id} value={plan.Id}>
+                        {plan.PlanName} (${plan.Amount})
+                      </IonSelectOption>
+                    ))}
+                  </IonSelect>
 
-          <div style={{ display: 'flex', gap: '15px' }}>
-            <IonInput style={{ flex: 1 }} label="Amount ($)" type="number" labelPlacement="floating" fill="solid" placeholder="0.00" value={formData.amount} onIonInput={e => handleInputChange('amount', e.detail.value!)}></IonInput>
-            <IonInput style={{ flex: 1 }} label="Due Date" type="date" labelPlacement="floating" fill="solid" value={formData.dueDate} onIonChange={e => handleInputChange('dueDate', e.detail.value!)}></IonInput>
-          </div>
-          
-              </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <IonInput 
+                      label="Amount ($)" 
+                      type="number" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      placeholder="0.00" 
+                      value={formData.amount} 
+                      onIonInput={e => handleInputChange('amount', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                    <IonInput 
+                      label="Due Date" 
+                      type="date" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      value={formData.dueDate} 
+                      onIonChange={e => handleInputChange('dueDate', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                  </div>
+                </div>
+              </section>
 
             </div>
           </IonContent>
-          <IonFooter>
-            <div className="ion-padding" style={{ display: 'flex', gap: '10px', borderTop: '1px solid var(--ion-color-step-150, #f0f0f0)' }}>
-              <IonButton expand="block" color="danger" style={{ flex: 1 }} onClick={() => setIsOpen(false)}>
-          Cancel
+          <IonFooter className="ion-no-border">
+            <div className="ion-padding" style={{ display: 'flex', gap: '12px', paddingTop: '0' }}>
+              <IonButton 
+                expand="block" 
+                fill="outline" 
+                color="medium" 
+                style={{ flex: 1, '--border-radius': '12px', height: '50px' }} 
+                onClick={() => {
+                  setIsOpen(false);
+                  setFormData({
+                    clientName: '',
+                    email: '',
+                    phone: '',
+                    amount: '',
+                    dueDate: '',
+                    status: 'pending', 
+                    planId: null
+                  });
+                }}
+              >
+                Cancel
               </IonButton>
-              <IonButton expand="block" color="primary" style={{ flex: 1 }} onClick={handleSaveClient}>
-          Save Client
+              <IonButton 
+                expand="block" 
+                color="primary" 
+                style={{ flex: 1, '--border-radius': '12px', height: '50px', '--box-shadow': '0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3)' }} 
+                onClick={handleSaveClient}
+              >
+                Save Client
               </IonButton>
             </div>
           </IonFooter>
