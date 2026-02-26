@@ -123,12 +123,23 @@ const ClientsPage: React.FC = () => {
   }, [selectedMonth]);
 
   const handleSaveClient = async () => {
+    // Validate required fields
+    if (!formData.clientName || formData.clientName.trim() === '') {
+      presentToast({ message: 'Client name is required', duration: 2000, color: 'warning' });
+      return;
+    }
+
+    if (!formData.planId) {
+      presentToast({ message: 'Please select an internet plan', duration: 2000, color: 'warning' });
+      return;
+    }
+
     try {
       const response = await clientService.addClient({
         Client: formData.clientName,
         ContactInfo: `${formData.email} | ${formData.phone}`,
-        DateInstalled: new Date(formData.dueDate).toISOString(),
-        PlanId: formData.planId || 1, // Default plan if not selected
+        DateInstalled: formData.dueDate ? new Date(formData.dueDate).toISOString() : new Date().toISOString(),
+        PlanId: formData.planId,
         UserId: 1, // Default user
         IsActive: true
       });
@@ -148,6 +159,8 @@ const ClientsPage: React.FC = () => {
           status: 'pending',
           planId: null
         });
+      } else {
+        presentToast({ message: response.message || 'Failed to add client', duration: 2000, color: 'danger' });
       }
     } catch (error) {
       presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger' });  
@@ -363,9 +376,27 @@ const ClientsPage: React.FC = () => {
           <IonContent className="ion-padding">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '10px' }}>
               
+              <div style={{ 
+                padding: '12px', 
+                background: 'var(--ion-color-light)', 
+                borderRadius: '8px',
+                fontSize: '13px',
+                color: 'var(--ion-color-medium)'
+              }}>
+                <span style={{ color: 'var(--ion-color-danger)' }}>*</span> Required fields
+              </div>
+
               {/* Client Details Section */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <IonInput label="Client Name" labelPlacement="floating" fill="solid" placeholder="e.g. Acme Corp" value={formData.clientName} onIonInput={e => handleInputChange('clientName', e.detail.value!)}></IonInput>
+          <IonInput 
+            label="Client Name *" 
+            labelPlacement="floating" 
+            fill="solid" 
+            placeholder="e.g. Acme Corp" 
+            value={formData.clientName} 
+            onIonInput={e => handleInputChange('clientName', e.detail.value!)}
+            required
+          ></IonInput>
           <IonInput label="Email Address" type="email" labelPlacement="floating" fill="solid" placeholder="contact@acme.com" value={formData.email} onIonInput={e => handleInputChange('email', e.detail.value!)}></IonInput>
           <IonInput label="Phone Number" type="tel" labelPlacement="floating" fill="solid" placeholder="+1 (555) 000-0000" value={formData.phone} onIonInput={e => handleInputChange('phone', e.detail.value!)}></IonInput>
               </div>
@@ -373,10 +404,11 @@ const ClientsPage: React.FC = () => {
               {/* Billing Details Section */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <IonSelect 
-                  label="Internet Plan" 
+                  label="Internet Plan *" 
                   labelPlacement="floating" 
                   fill="solid" 
                   value={formData.planId} 
+                  placeholder="Select a plan"
                   onIonChange={e => {
                     const selectedPlanId = e.detail.value;
                     const selectedPlan = plans.find(p => p.Id === selectedPlanId);
@@ -389,7 +421,7 @@ const ClientsPage: React.FC = () => {
                 >
                   {plans.map(plan => (
                     <IonSelectOption key={plan.Id} value={plan.Id}>
-                      {plan.PlanName} ({plan.Amount})
+                      {plan.PlanName} (${plan.Amount})
                     </IonSelectOption>
                   ))}
                 </IonSelect>
@@ -399,20 +431,6 @@ const ClientsPage: React.FC = () => {
             <IonInput style={{ flex: 1 }} label="Due Date" type="date" labelPlacement="floating" fill="solid" value={formData.dueDate} onIonChange={e => handleInputChange('dueDate', e.detail.value!)}></IonInput>
           </div>
           
-          <div>
-            <IonLabel style={{ display: 'block', marginBottom: '10px', color: 'var(--ion-color-medium)', fontSize: '14px' }}>Initial Status</IonLabel>
-            <IonSegment value={formData.status} onIonChange={e => handleInputChange('status', e.detail.value!)}>
-              <IonSegmentButton value="paid">
-                <IonLabel>Paid</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="pending">
-                <IonLabel>Pending</IonLabel>
-              </IonSegmentButton>
-              <IonSegmentButton value="overdue">
-                <IonLabel>Overdue</IonLabel>
-              </IonSegmentButton>
-            </IonSegment>
-          </div>
               </div>
 
             </div>
