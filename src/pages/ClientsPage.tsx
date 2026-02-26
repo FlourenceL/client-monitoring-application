@@ -360,15 +360,11 @@ const ClientsPage: React.FC = () => {
         </IonFab>
         
         {/* Add Client Modal */}
-        <IonModal isOpen={isOpen} onDidDismiss={() => setIsOpen(false)} style={{ '--border-radius': '16px' }}>
+        <IonModal isOpen={isOpen} onDidDismiss={() => setIsOpen(false)}>
           <IonHeader>
             <IonToolbar>
               <IonTitle>Add New Client</IonTitle>
-              <IonButtons slot="end">
-                <IonButton onClick={() => setIsOpen(false)}>
-                  <IonIcon icon={add} style={{ transform: 'rotate(45deg)' }} />
-                </IonButton>
-              </IonButtons>
+             
             </IonToolbar>
           </IonHeader>
           <IonContent className="ion-padding">
@@ -450,8 +446,8 @@ const ClientsPage: React.FC = () => {
                     fill="outline" 
                     mode="md"
                     value={formData.planId} 
-                    placeholder="Select a plan"
-                    style={{ '--border-radius': '12px' }}
+                    
+                    style={{ '--border-radius': '12px', '--color': 'white', '--placeholder-color': 'white', '--placeholder-opacity': '0.8' }}
                     interface="action-sheet"
                     onIonChange={e => {
                       const selectedPlanId = e.detail.value;
