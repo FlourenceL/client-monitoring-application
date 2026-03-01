@@ -7,6 +7,6 @@ export interface CreateCollectionDTO {
     BillingMonth: string;
     AmountDue: number;
     AmountPaid: number;
-    PaymentDate: Date;
-    CreateDate: Date;
+    PaymentDate: string;
+    CreateDate: string;
 }
