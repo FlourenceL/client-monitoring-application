@@ -259,7 +259,7 @@ const ClientsPage: React.FC = () => {
                 zIndex: 10
               }}>
                 <div style={{ fontWeight: '700' }}>Client</div>
-                <div style={{ fontWeight: '700' }}>Due Date</div>
+                <div style={{ fontWeight: '700' }}>Date Installed</div>
               </div>
 
               {/* Table Body */}
@@ -478,7 +478,7 @@ const ClientsPage: React.FC = () => {
                       style={{ '--border-radius': '12px' }}
                     ></IonInput>
                     <IonInput 
-                      label="Due Date" 
+                      label="Date Installed" 
                       type="date" 
                       labelPlacement="floating" 
                       fill="outline" 
@@ -572,7 +572,7 @@ const ClientsPage: React.FC = () => {
                         <div style={{ fontWeight: '500' }}>{selectedClient.phone || 'N/A'}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Due Date</div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>Date Installed</div>
                         <div style={{ fontWeight: '500' }}>{selectedClient.dueDate}</div>
                       </div>
                        <div>
