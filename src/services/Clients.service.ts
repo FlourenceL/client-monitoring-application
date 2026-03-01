@@ -1,6 +1,6 @@
 import { databaseService } from "../database/Database.service";
 import { CreateClientDTO } from "../models/createModels/ClientsModel";
-import { MstClient } from "../database/DatabaseConstants";
+import { MstClient, TrnCollection } from "../database/DatabaseConstants";
 
 class ClientService {
     async getClients() {
@@ -8,13 +8,25 @@ class ClientService {
         return getClients;
     }
 
+    async getPaidClients() {
+        const getPaidClients = await databaseService.query(
+            `SELECT c.*
+            FROM ${TrnCollection} t
+            INNER JOIN ${MstClient} c ON t.ClientId = c.Id
+            WHERE t.BillingMonth = strftime('%Y-%m', 'now')
+            AND t.StatusId = 1
+            AND c.IsActive = 1;`
+        );
+        return getPaidClients;
+    }
+
     async addClient(createClientDto: CreateClientDTO): Promise<{success: boolean; message: string}> {
         try {
 
             const insertClient = await databaseService.run(
-            `INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, IsActive, UserId) VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, IsActive, UserId, LocationId) VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [createClientDto.Client, createClientDto.ContactInfo, createClientDto.DateInstalled, 
-                createClientDto.PlanId,createClientDto.IsActive, createClientDto.UserId]
+                createClientDto.PlanId,createClientDto.IsActive, createClientDto.UserId, createClientDto.LocationId]
             );
 
 
