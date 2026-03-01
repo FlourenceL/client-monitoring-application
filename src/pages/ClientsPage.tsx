@@ -8,6 +8,7 @@ import { add, wallet, searchOutline, filter, person, calendar, card } from 'ioni
 import clientService from '../services/Clients.service';
 import planService from '../services/Plans.service';
 import collectionService from '../services/Collections.service';
+import locationsService from '../services/Locations.service';
 
 const ClientsPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('all');
@@ -16,6 +17,8 @@ const ClientsPage: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<any>(null); // For details modal
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
   
@@ -26,7 +29,8 @@ const ClientsPage: React.FC = () => {
     amount: '',
     dueDate: '',
     status: 'pending', 
-    planId: null as number | null
+    planId: null as number | null,
+    locationId: null as number | null
   });
 
   const [presentToast] = useIonToast();
@@ -38,8 +42,8 @@ const ClientsPage: React.FC = () => {
   const loadClients = async () => {
     try {
       const res = await clientService.getClients();
-      console.log(res)
       const plansData = await planService.getPlans();
+      const locationsData = await locationsService.getLocations();
       
       // Convert selectedMonth (YYYY-MM) to BillingMonth (MM/YYYY)
       const [year, month] = selectedMonth.split('-');
@@ -51,6 +55,7 @@ const ClientsPage: React.FC = () => {
       // Map DB result to UI model
       const mapped = (res as any[]).map((c: any) => {
         const clientPlan = (plansData as any[]).find(p => p.Id === c.PlanId);
+        const clientLocation = (locationsData as any[]).find(l => l.Id === c.LocationId);
         
         // Determine Billing Status
         const clientCollection = collections.find(col => col.ClientId === (c.Id || c.id));
@@ -99,7 +104,8 @@ const ClientsPage: React.FC = () => {
           amount: clientPlan ? clientPlan.Amount : 0,
           status: billingStatus,
           subscriptionStatus: c.IsActive ? 'Active' : 'Inactive',
-          planId: c.PlanId
+          planId: c.PlanId,
+          location: clientLocation ? clientLocation.Location : ''
         };
       });
       setClientsList(mapped);
@@ -117,9 +123,29 @@ const ClientsPage: React.FC = () => {
     }
   };
 
+  const loadLocations = async () => {
+    try {
+      const res = await locationsService.getLocations();
+      setLocations(res as any[]);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getPaidClients = async () => {
+    try {
+      const res = await clientService.getPaidClients();
+      console.log(`paid clients ${res}`)
+    } catch (error) {
+      console.error('Error fetching paid clients:', error);
+    }
+  }
+
   useEffect(() => {
     loadClients();
     loadPlans();
+    loadLocations();
+    getPaidClients();
   }, [selectedMonth]);
 
   const handleSaveClient = async () => {
@@ -134,6 +160,11 @@ const ClientsPage: React.FC = () => {
       return;
     }
 
+    if (!formData.locationId) {
+      presentToast({ message: 'Please select a location', duration: 2000, color: 'warning' });
+      return;
+    }
+
     try {
       const response = await clientService.addClient({
         Client: formData.clientName,
@@ -141,7 +172,8 @@ const ClientsPage: React.FC = () => {
         DateInstalled: formData.dueDate ? new Date(formData.dueDate).toISOString() : new Date().toISOString(),
         PlanId: formData.planId,
         UserId: 1, // Default user
-        IsActive: true
+        IsActive: true,
+        LocationId: formData.locationId
       });
 
       if (response.success) {
@@ -157,7 +189,8 @@ const ClientsPage: React.FC = () => {
           amount: '',
           dueDate: '',
           status: 'pending',
-          planId: null
+          planId: null,
+          locationId: null
         });
       } else {
         presentToast({ message: response.message || 'Failed to add client', duration: 2000, color: 'danger' });
@@ -230,6 +263,40 @@ const ClientsPage: React.FC = () => {
           </section>
 
 
+          {/* Location Filter */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+            <div style={{
+              background: 'var(--ion-card-background)',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 8px'
+            }}>
+              <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)' }} />
+              <IonSelect
+                interface="popover"
+                value={selectedLocation}
+                onIonChange={e => setSelectedLocation(e.detail.value)}
+                style={{
+                  '--padding-start': '12px',
+                  '--padding-end': '16px',
+                  '--padding-top': '12px',
+                  '--padding-bottom': '12px',
+                  minWidth: '150px'
+                }}
+              >
+                <IonSelectOption value="all">All Locations</IonSelectOption>
+                {locations.map(loc => (
+                  <IonSelectOption key={loc.Id} value={loc.Location}>
+                    {loc.Location}
+                  </IonSelectOption>
+                ))}
+              </IonSelect>
+            </div>
+          </div>
+
           {/* Client List Table */}
           <section>
             <div style={{ 
@@ -270,14 +337,16 @@ const ClientsPage: React.FC = () => {
                   .filter(client => {
                     const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
                     const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
-                    return matchesTab && matchesSub;
+                    const matchesLocation = selectedLocation === 'all' || (client.location === selectedLocation);
+                    return matchesTab && matchesSub && matchesLocation;
                   })
                   .length > 0 ? (
                   clientsList
                     .filter(client => {
                       const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
                       const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
-                      return matchesTab && matchesSub;
+                      const matchesLocation = selectedLocation === 'all' || (client.location === selectedLocation);
+                      return matchesTab && matchesSub && matchesLocation;
                     })
                     .map((client, index) => (
                     <div
@@ -295,7 +364,8 @@ const ClientsPage: React.FC = () => {
                         borderBottom: index < clientsList.filter(c => {
                           const matchesTab = selectedTab === 'all' || (c.status && c.status.toLowerCase() === selectedTab);
                           const matchesSub = subscriptionFilter === 'all' || (c.subscriptionStatus && c.subscriptionStatus.toLowerCase() === subscriptionFilter);
-                          return matchesTab && matchesSub;
+                          const matchesLocation = selectedLocation === 'all' || (c.location === selectedLocation);
+                          return matchesTab && matchesSub && matchesLocation;
                         }).length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
                         transition: 'background 0.2s ease',
                         cursor: 'pointer'
@@ -427,6 +497,23 @@ const ClientsPage: React.FC = () => {
                       onIonInput={e => handleInputChange('phone', e.detail.value!)}
                       style={{ '--border-radius': '12px' }}
                     ></IonInput>
+                  
+                  <IonSelect 
+                    label="Location *" 
+                    labelPlacement="floating" 
+                    fill="outline" 
+                    mode="md"
+                    value={formData.locationId} 
+                    style={{ '--border-radius': '12px' }}
+                    interface="action-sheet"
+                    onIonChange={e => handleInputChange('locationId', e.detail.value)}
+                  >
+                    {locations.map(loc => (
+                      <IonSelectOption key={loc.Id} value={loc.Id}>
+                        {loc.Location}
+                      </IonSelectOption>
+                    ))}
+                  </IonSelect>
                   </div>
                 </div>
               </section>
@@ -509,7 +596,8 @@ const ClientsPage: React.FC = () => {
                     amount: '',
                     dueDate: '',
                     status: 'pending', 
-                    planId: null
+                    planId: null,
+                    locationId: null
                   });
                 }}
               >
