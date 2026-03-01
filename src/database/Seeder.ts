@@ -91,6 +91,8 @@ export const seedDatabase = async () => {
 					planId: 1,
 					userId: 1,
 					isActive: 1,
+					locationId: 1,
+					
 				},
 				{
 					client: "Jane Smith",
@@ -99,12 +101,13 @@ export const seedDatabase = async () => {
 					planId: 2,
 					userId: 1,
 					isActive: 1,
+					locationId: 1,
 				},
 			];
 
 			for (const client of clientData) {
 				await databaseService.run(
-					`INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, UserId, IsActive) VALUES (?, ?, ?, ?, ?, ?)`,
+					`INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, UserId, IsActive, LocationId) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 					[
 						client.client,
 						client.contactInfo,
@@ -112,6 +115,7 @@ export const seedDatabase = async () => {
 						client.planId,
 						client.userId,
 						client.isActive,
+						client.locationId
 					]
 				);
 			}

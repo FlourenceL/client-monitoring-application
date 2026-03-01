@@ -4,7 +4,8 @@ export interface CreateClientDTO {
     DateInstalled: string;
     PlanId: number;
     UserId: number;
-    IsActive: boolean;   
+    IsActive: boolean;
+    LocationId: number;
 }
 
 export interface UpdateClientDTO {

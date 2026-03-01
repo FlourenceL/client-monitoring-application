@@ -75,8 +75,10 @@ class DatabaseService {
           PlanId INTEGER NOT NULL,
 		  UserId INTEGER NOT NULL,
           IsActive BOOLEAN DEFAULT 0,
+		  LocationId INTEGER NOT NULL,
 		  FOREIGN KEY (PlanId) REFERENCES ${MstPlan}(Id),
-		  FOREIGN KEY (UserId) REFERENCES ${MstUser}(Id)
+		  FOREIGN KEY (UserId) REFERENCES ${MstUser}(Id),
+		  FOREIGN KEY (LocationId) REFERENCES ${MstLocation}(Id)
         );
         
         CREATE TABLE IF NOT EXISTS ${MstLocation} (
