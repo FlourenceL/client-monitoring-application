@@ -1,201 +1,277 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonSegment, IonSegmentButton, IonLabel, IonCardContent,
-  IonButton, IonSelect, IonSelectOption, IonIcon, IonChip, IonBadge
- } from '@ionic/react';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis,
-  YAxis, Tooltip, Legend, Line, Bar, BarChart, Area, AreaChart, PieChart, Pie, Cell
- } from 'recharts';
-import { useState } from 'react';
-import { filterCircleOutline, trendingUp, trendingDown, documentTextOutline, downloadOutline, statsChartOutline, pieChartOutline, calendarOutline } from 'ionicons/icons';
+import React, { useState, useEffect } from 'react';
+import { 
+  IonContent, IonHeader, IonPage, IonTitle, IonToolbar, 
+  IonCard, IonCardContent, IonItem, IonLabel, IonInput, 
+  IonSelect, IonSelectOption, IonButton, 
+  IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons
+} from '@ionic/react';
+import collectionService from '../services/Collections.service';
+import clientService from '../services/Clients.service';
+import locationsService from '../services/Locations.service';
+import paymentMethodsService from '../services/PaymentMethods.service';
+import planService from '../services/Plans.service';
+import { CreateCollectionDTO } from '../models/createModels/CollectionsModel';
 
-const data = [
-  { name: 'Jan', revenue: 4000, expenses: 2400, profit: 1600 },
-  { name: 'Feb', revenue: 3000, expenses: 1398, profit: 1602 },
-  { name: 'Mar', revenue: 2000, expenses: 1200, profit: 800 },
-  { name: 'Apr', revenue: 2780, expenses: 1908, profit: 872 },
-  { name: 'May', revenue: 1890, expenses: 1200, profit: 690 },
-  { name: 'Jun', revenue: 2390, expenses: 1500, profit: 890 },
-  { name: 'Jul', revenue: 3490, expenses: 2100, profit: 1390 },
-];
+const TransactionsPage: React.FC = () => {
+  const [clients, setClients] = useState<any[]>([]);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
-const paymentData = [
-  { name: 'Paid', value: 4000, color: '#4caf50' },
-  { name: 'Pending', value: 2400, color: '#ff9800' },
-  { name: 'Overdue', value: 1200, color: '#f44336' },
-];
+  // Form State
+  const [selectedClientId, setSelectedClientId] = useState<number | undefined>(undefined);
+  const [selectedLocationId, setSelectedLocationId] = useState<number | undefined>(undefined);
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<number | undefined>(undefined);
+  const [statusId, setStatusId] = useState<number>(2); // Default to Paid (2) based on seed
+  const [amountPaid, setAmountPaid] = useState<number>(0);
+  const [amountDue, setAmountDue] = useState<number>(0);
+  const [billingMonth, setBillingMonth] = useState<string>(() => {
+    const now = new Date();
+    return `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+  });
+  // Use ISO string for ion-datetime? No, just keep simple input for now or date picker.
+  // Actually, let's use a simple IonInput type="date"
+  const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div style={{ 
-        background: 'rgba(255, 255, 255, 0.95)', 
-        padding: '12px', 
-        borderRadius: '12px',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-        border: '1px solid #e0e0e0'
-      }}>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} style={{ margin: '4px 0', color: entry.color, fontWeight: 600 }}>
-            {entry.name}: ${entry.value.toLocaleString()}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
-const ReportsPage: React.FC = () => {
-  const [chartType, setChartType] = useState<'area' | 'line'>('area');
-  const [timeFilter, setTimeFilter] = useState('all');
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const clientsData = await clientService.getClients();
+      setClients(clientsData || []);
+      
+      const locationsData = await locationsService.getLocations();
+      setLocations(locationsData || []);
+
+      const methodsData = await paymentMethodsService.getPaymentMethods();
+      setPaymentMethods(methodsData || []);
+
+      const plansData = await planService.getPlans();
+      setPlans(plansData || []);
+      
+      // select default location if available
+      if (locationsData && locationsData.length > 0) {
+        setSelectedLocationId(locationsData[0].Id);
+      }
+       // select default payment method if available
+       if (methodsData && methodsData.length > 0) {
+        setSelectedPaymentMethodId(methodsData[0].Id);
+      }
+
+    } catch (error) {
+      console.error("Error loading data", error);
+      showToastMessage("Error loading initial data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClientChange = (clientId: number) => {
+    setSelectedClientId(clientId);
+    const client = clients.find(c => c.Id === clientId);
+    if (client) {
+      const plan = plans.find(p => p.Id === client.PlanId);
+      if (plan) {
+        setAmountDue(plan.Amount);
+        setAmountPaid(plan.Amount); // Default pay full amount
+      }
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedClientId || !selectedLocationId || !selectedPaymentMethodId) {
+      showToastMessage("Please fill in all required fields.");
+      return;
+    }
+
+    const newCollection: CreateCollectionDTO = {
+        UserId: 1, // Default user
+        ClientId: selectedClientId,
+        LocationId: selectedLocationId,
+        StatusId: statusId, // 2 = Paid
+        PaymentMethodId: selectedPaymentMethodId,
+        BillingMonth: billingMonth,
+        AmountDue: amountDue,
+        AmountPaid: amountPaid,
+        PaymentDate: paymentDate,
+        CreateDate: new Date().toISOString()
+    };
+
+    setLoading(true);
+    try {
+        await collectionService.addCollection(newCollection);
+        showToastMessage("Transaction added successfully!");
+        
+        // Reset form partially
+        setAmountPaid(0);
+        setSelectedClientId(undefined);
+        setAmountDue(0);
+        // Keep location and payment method
+    } catch (error) {
+        console.error("Error adding transaction", error);
+        showToastMessage("Failed to add transaction.");
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const showToastMessage = (msg: string) => {
+    setToastMessage(msg);
+    setShowToast(true);
+  };
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Reports</IonTitle>
+            <IonButtons slot="start">
+                <IonBackButton defaultHref="/" />
+            </IonButtons>
+          <IonTitle>Transactions</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Reports & Analytics</IonTitle>
+            <IonTitle size="large">Add Transaction</IonTitle>
           </IonToolbar>
         </IonHeader>
 
-        <div className="ion-padding" style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '80px' }}>
-            <section style={{ marginBottom: '1rem' }}>
-            <IonCard>
-              <IonCardContent style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <IonLabel><IonIcon icon={filterCircleOutline} style={{ fontSize: '2rem' }} /></IonLabel>
-                <IonSelect 
-                  interface="popover" 
-                  value="all"
-                  style={{ 
-                  border: '1px solid #e0e0e0', 
-                  borderRadius: '8px',
-                  minWidth: '140px',
-                  '--padding-start': '10px'
-                  }}
-                >
-                  <IonSelectOption value="all">All Time</IonSelectOption>
-                  <IonSelectOption value="thisMonth">This Month</IonSelectOption>
-                  <IonSelectOption value="lastMonth">Last Month</IonSelectOption>
-                  <IonSelectOption value="last3Months">Last 3 Months</IonSelectOption>
-                  <IonSelectOption value="thisYear">This Year</IonSelectOption>
-                </IonSelect>
-              </div>
-              
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem', flex: 1 }}>
-                <IonButton color="success" size="small">
-                Export Excel
-                </IonButton>
-                <IonButton color="danger" size="small">
-                Export PDF
-                </IonButton>
-                </div>
-              </IonCardContent>
-            </IonCard>
-            </section>
+        <IonGrid>
+          <IonRow className="ion-justify-content-center">
+            <IonCol size="12" sizeMd="8" sizeLg="6">
+              <IonCard>
+                <IonCardContent>
+                    
+                  <IonItem>
+                    <IonSelect 
+                        label="Client"
+                        labelPlacement="stacked"
+                        value={selectedClientId} 
+                        placeholder="Select Client" 
+                        onIonChange={e => handleClientChange(e.detail.value)}
+                    >
+                      {clients.map(client => (
+                        <IonSelectOption key={client.Id} value={client.Id}>
+                          {client.Client}
+                        </IonSelectOption>
+                      ))}
+                    </IonSelect>
+                  </IonItem>
 
-          <section style={{ marginBottom: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
-              <div>
-                <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: 'var(--ion-text-color)' }}>Financial Overview</h2>
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--ion-color-medium)' }}>Revenue, expenses and profit trends over time</p>
-              </div>
-              <IonSegment value={chartType} onIonChange={e => setChartType(e.detail.value as any)} style={{ maxWidth: '200px' }}>
-                <IonSegmentButton value="area">
-                  <IonLabel style={{ fontWeight: 600 }}>Area</IonLabel>
-                </IonSegmentButton>
-                <IonSegmentButton value="line">
-                  <IonLabel style={{ fontWeight: 600 }}>Line</IonLabel>
-                </IonSegmentButton>
-              </IonSegment>
-            </div>
-            <div style={{ 
-              background: 'var(--ion-card-background)',
-              borderRadius: '20px',
-              padding: '28px',
-              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-              height: '450px'
-            }}>
-              <ResponsiveContainer width="100%" height="100%">
-              {chartType === 'area' ? (
-              <AreaChart data={data} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
-                <defs>
-                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#667eea" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#667eea" stopOpacity={0.1}/>
-                </linearGradient>
-                <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ff9800" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#ff9800" stopOpacity={0.1}/>
-                </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Area type="monotone" dataKey="revenue" stroke="#667eea" strokeWidth={3} fill="url(#colorRevenue)" name="Revenue" />
-                <Area type="monotone" dataKey="expenses" stroke="#ff9800" strokeWidth={2} fill="url(#colorExpenses)" name="Expenses" />
-              </AreaChart>
-              ) : (
-              <LineChart data={data} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#667eea" strokeWidth={3} dot={{ r: 5 }} name="Revenue" />
-                <Line type="monotone" dataKey="expenses" stroke="#ff9800" strokeWidth={3} dot={{ r: 5 }} name="Expenses" />
-                <Line type="monotone" dataKey="profit" stroke="#4caf50" strokeWidth={3} dot={{ r: 5 }} name="Profit" />
-              </LineChart>
-              )}
-              </ResponsiveContainer>
-            </div>
-          </section>
+                  <IonItem>
+                    <IonSelect 
+                        label="Location"
+                        labelPlacement="stacked"
+                        value={selectedLocationId} 
+                        placeholder="Select Location"
+                        onIonChange={e => setSelectedLocationId(e.detail.value)}
+                    >
+                      {locations.map(loc => (
+                        <IonSelectOption key={loc.Id} value={loc.Id}>
+                          {loc.Location}
+                        </IonSelectOption>
+                      ))}
+                    </IonSelect>
+                  </IonItem>
 
-          <section>
-            <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: 'var(--ion-text-color)' }}>Payment Distribution</h2>
-              <p style={{ margin: 0, fontSize: '14px', color: 'var(--ion-color-medium)' }}>Overview of payment status breakdown</p>
-            </div>
-            <div style={{ 
-              background: 'var(--ion-card-background)',
-              borderRadius: '20px',
-              padding: '28px',
-              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-              height: '380px'
-            }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={paymentData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent! * 100).toFixed(0)}%`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {paymentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
-        </div>
+                  <IonItem>
+                    <IonInput 
+                        label="Billing Month (MM/YYYY)"
+                        labelPlacement="stacked"
+                        value={billingMonth} 
+                        onIonChange={e => setBillingMonth(e.detail.value!)}
+                        placeholder="e.g. 03/2026"
+                    />
+                  </IonItem>
+
+                  <IonItem>
+                    <IonSelect 
+                        label="Status"
+                        labelPlacement="stacked"
+                        value={statusId} 
+                        onIonChange={e => setStatusId(e.detail.value)}
+                    >
+                        <IonSelectOption value={1}>Pending</IonSelectOption>
+                        <IonSelectOption value={2}>Paid</IonSelectOption>
+                        <IonSelectOption value={3}>Overdue</IonSelectOption>
+                        <IonSelectOption value={4}>Cancelled</IonSelectOption>
+                    </IonSelect>
+                  </IonItem>
+
+                   <IonItem>
+                    <IonSelect 
+                        label="Payment Method"
+                        labelPlacement="stacked"
+                        value={selectedPaymentMethodId} 
+                        placeholder="Select Payment Method"
+                        onIonChange={e => setSelectedPaymentMethodId(e.detail.value)}
+                    >
+                      {paymentMethods.map(method => (
+                        <IonSelectOption key={method.Id} value={method.Id}>
+                          {method.PaymentMethod}
+                        </IonSelectOption>
+                      ))}
+                    </IonSelect>
+                  </IonItem>
+
+                  <IonItem>
+                    <IonInput 
+                        label="Amount Due"
+                        labelPlacement="stacked"
+                        type="number" 
+                        value={amountDue} 
+                        onIonChange={e => setAmountDue(parseFloat(e.detail.value!) || 0)}
+                    />
+                  </IonItem>
+
+                  <IonItem>
+                    <IonInput 
+                        label="Amount Paid"
+                        labelPlacement="stacked"
+                        type="number" 
+                        value={amountPaid} 
+                        onIonChange={e => setAmountPaid(parseFloat(e.detail.value!) || 0)}
+                    />
+                  </IonItem>
+
+                  <IonItem>
+                     <IonInput
+                        label="Payment Date"
+                        labelPlacement="stacked"
+                        type="date"
+                        value={paymentDate}
+                        onIonChange={e => setPaymentDate(e.detail.value!)}
+                     />
+                  </IonItem>
+
+                  <IonButton expand="block" className="ion-margin-top" onClick={handleSubmit}>
+                    Add Transaction
+                  </IonButton>
+
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
+
+        <IonLoading isOpen={loading} message={'Processing...'} duration={0} />
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message={toastMessage}
+          duration={2000}
+        />
       </IonContent>
     </IonPage>
   );
 };
 
-export default ReportsPage;
+export default TransactionsPage;
