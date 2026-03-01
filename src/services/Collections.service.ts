@@ -46,7 +46,7 @@ class CollectionService {
                         AmountDue: amountDue,
                         AmountPaid: 0,
                         PaymentDate: null as any, // Not paid yet
-                        CreateDate: new Date()
+                        CreateDate: new Date().toISOString()
                     });
                     console.log(`Generated transaction for client ${client.Client} for ${billingMonth}`);
                 }
