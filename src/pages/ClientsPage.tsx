@@ -258,28 +258,33 @@ const ClientsPage: React.FC = () => {
 
             {/* Inactive Clients Card */}
             <div style={{ 
-              background: 'var(--ion-card-background)', 
+              background: 'linear-gradient(135deg, #FF9966, #FF5E62)', 
               borderRadius: '24px', 
               padding: '24px 20px', 
-              boxShadow: '0 8px 20px -5px rgba(0, 0, 0, 0.05)',
+              color: 'white',
+              boxShadow: '0 8px 25px -5px rgba(255, 94, 98, 0.5)',
               position: 'relative',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: '130px',
-              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))'
+              minHeight: '130px'
             }}>
-              <div>
+               <div style={{
+                position: 'absolute', top: -20, right: -20, width: 90, height: 90,
+                background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
+              }}></div>
+
+              <div style={{ position: 'relative', zIndex: 2 }}>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <div style={{ padding: '6px', background: 'var(--ion-color-step-50, rgba(0,0,0,0.05))', borderRadius: '10px', display: 'flex', color: 'var(--ion-color-medium)' }}>
+                    <div style={{ padding: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex', color: 'white' }}>
                        <IonIcon icon={person} style={{ fontSize: '14px' }} />
                     </div>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ion-color-medium)' }}>Inactive</span>
+                    <span style={{ fontSize: '13px', fontWeight: 600, opacity: 0.9 }}>Inactive</span>
                  </div>
-                 <h1 style={{ margin: '8px 0 0 0', fontSize: '36px', fontWeight: 800, letterSpacing: '-1px', color: 'var(--ion-text-color)' }}>{inactiveClientsCount}</h1>
+                 <h1 style={{ margin: '8px 0 0 0', fontSize: '36px', fontWeight: 800, letterSpacing: '-1px', color: 'white' }}>{inactiveClientsCount}</h1>
               </div>
-               <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', fontWeight: 500 }}>
+               <div style={{ fontSize: '12px', opacity: 0.7, fontWeight: 500 }}>
                  Past or pending
               </div>
             </div>
