@@ -263,8 +263,38 @@ const ClientsPage: React.FC = () => {
           </section>
 
 
-          {/* Location Filter */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+          {/* Location and Status Filter */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px', gap: '10px' }}>
+             {/* Status Filter */}
+             <div style={{
+              background: 'var(--ion-card-background)',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '0 8px'
+            }}>
+              <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)' }} />
+              <IonSelect
+                interface="popover"
+                value={subscriptionFilter}
+                onIonChange={e => setSubscriptionFilter(e.detail.value)}
+                style={{
+                  '--padding-start': '12px',
+                  '--padding-end': '16px',
+                  '--padding-top': '12px',
+                  '--padding-bottom': '12px',
+                  minWidth: '130px'
+                }}
+              >
+                <IonSelectOption value="all">All Status</IonSelectOption>
+                <IonSelectOption value="active">Active</IonSelectOption>
+                <IonSelectOption value="inactive">Inactive</IonSelectOption>
+              </IonSelect>
+            </div>
+
+            {/* Location Filter */}
             <div style={{
               background: 'var(--ion-card-background)',
               borderRadius: '12px',
