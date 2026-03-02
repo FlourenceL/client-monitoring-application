@@ -201,8 +201,8 @@ const ClientsPage: React.FC = () => {
   }
 
   // Calculate total revenue and paid clients count
-  const paidClients = clientsList.filter(client => client.status === 'Paid');
-  const totalRevenue = paidClients.reduce((sum, client) => sum + (client.amount || 0), 0);
+  const activeClientsCount = clientsList.filter(c => c.subscriptionStatus === 'Active').length;
+  const inactiveClientsCount = clientsList.filter(c => c.subscriptionStatus === 'Inactive').length;
 
   return (
     <IonPage>
@@ -220,43 +220,59 @@ const ClientsPage: React.FC = () => {
 
         <div className='ion-padding' style={{ paddingBottom: '80px' }}>
           
-          {/* Summary Card */}
-          <section>
+          {/* Summary Cards */}
+          <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+            {/* Active Clients Card */}
             <div style={{ 
               background: 'linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary))', 
               borderRadius: '24px', 
-              padding: '24px', 
+              padding: '20px', 
               color: 'white',
-              boxShadow: '0 10px 30px -5px rgba(0, 180, 216, 0.4)',
-              marginBottom: '24px',
+              boxShadow: '0 10px 20px -5px rgba(0, 180, 216, 0.4)',
               position: 'relative',
               overflow: 'hidden'
             }}>
-              {/* Decorative circle */}
-              <div style={{
-                position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px',
-                background: 'rgba(255,255,255,0.1)', borderRadius: '50%'
-              }}></div>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 2 }}>
-                <div>
-                  <IonText color="light">
-                    <p style={{ margin: 0, opacity: 0.9, fontSize: '0.9rem', fontWeight: 500 }}>Total Monthly Revenue</p>
-                  </IonText>
-                  <h1 style={{ margin: '8px 0 16px 0', fontSize: '2.5rem', fontWeight: 'bold' }}>${totalRevenue.toLocaleString()}</h1>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                     <IonBadge color="light" style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '8px', color: 'var(--ion-color-primary)' }}>
-                        {paidClients.length} Paid Clients
-                     </IonBadge>
+              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 2 }}>
+                <IonText color="light">
+                  <p style={{ margin: 0, opacity: 0.9, fontSize: '0.8rem', fontWeight: 500 }}>Active Clients</p>
+                </IonText>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                  <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>{activeClientsCount}</h1>
+                  <div style={{ 
+                    background: 'rgba(255,255,255,0.2)', 
+                    padding: '8px', 
+                    borderRadius: '12px',
+                    backdropFilter: 'blur(5px)'
+                  }}>
+                    <IonIcon icon={person} style={{ fontSize: '20px' }} />
                   </div>
                 </div>
-                <div style={{ 
-                  background: 'rgba(255,255,255,0.2)', 
-                  padding: '12px', 
-                  borderRadius: '16px',
-                  backdropFilter: 'blur(5px)'
-                }}>
-                  <IonIcon icon={wallet} style={{ fontSize: '28px' }} />
+              </div>
+            </div>
+
+            {/* Inactive Clients Card */}
+            <div style={{ 
+              background: 'var(--ion-card-background)', 
+              borderRadius: '24px', 
+              padding: '20px', 
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 2 }}>
+                <IonText color="medium">
+                  <p style={{ margin: 0, opacity: 0.8, fontSize: '0.8rem', fontWeight: 600 }}>Inactive Clients</p>
+                </IonText>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                  <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: 'var(--ion-text-color)' }}>{inactiveClientsCount}</h1>
+                  <div style={{ 
+                    background: 'var(--ion-color-step-100, rgba(0,0,0,0.05))', 
+                    padding: '8px', 
+                    borderRadius: '12px'
+                  }}>
+                    <IonIcon icon={person} style={{ fontSize: '20px', color: 'var(--ion-color-medium)' }} />
+                  </div>
                 </div>
               </div>
             </div>
