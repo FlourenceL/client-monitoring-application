@@ -14,6 +14,7 @@ const ClientsPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>('all');
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>('active');
   const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [searchText, setSearchText] = useState<string>('');
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
@@ -279,67 +280,78 @@ const ClientsPage: React.FC = () => {
           </section>
 
 
-          {/* Location and Status Filter */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px', gap: '10px' }}>
-             {/* Status Filter */}
-             <div style={{
-              background: 'var(--ion-card-background)',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0 8px'
-            }}>
-              <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)' }} />
-              <IonSelect
-                interface="popover"
-                value={subscriptionFilter}
-                onIonChange={e => setSubscriptionFilter(e.detail.value)}
-                style={{
-                  '--padding-start': '12px',
-                  '--padding-end': '16px',
-                  '--padding-top': '12px',
-                  '--padding-bottom': '12px',
-                  minWidth: '130px'
-                }}
-              >
-                <IonSelectOption value="all">All Status</IonSelectOption>
-                <IonSelectOption value="active">Active</IonSelectOption>
-                <IonSelectOption value="inactive">Inactive</IonSelectOption>
-              </IonSelect>
-            </div>
+          {/* Search and Filters */}
+          <div style={{ marginBottom: '24px' }}>
+            <IonSearchbar 
+              value={searchText} 
+              onIonInput={e => setSearchText(e.detail.value!)} 
+              placeholder="Search clients..." 
+              className="custom-searchbar"
+              style={{ '--box-shadow': 'none', '--background': 'var(--ion-card-background)', '--border-radius': '12px', padding: 0, marginBottom: '16px', border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' }}
+            ></IonSearchbar>
+            
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {/* Status Filter */}
+              <div style={{
+                background: 'var(--ion-card-background)',
+                borderRadius: '12px',
+                border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 4px',
+                flex: 1
+              }}>
+                <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)', fontSize: '18px' }} />
+                <IonSelect
+                  interface="popover"
+                  value={subscriptionFilter}
+                  onIonChange={e => setSubscriptionFilter(e.detail.value)}
+                  style={{
+                    '--padding-start': '12px',
+                    '--padding-end': '16px',
+                    width: '100%',
+                    fontSize: '14px',
+                    fontWeight: 500
+                  }}
+                >
+                  <IonSelectOption value="all">All Status</IonSelectOption>
+                  <IonSelectOption value="active">Active</IonSelectOption>
+                  <IonSelectOption value="inactive">Inactive</IonSelectOption>
+                </IonSelect>
+              </div>
 
-            {/* Location Filter */}
-            <div style={{
-              background: 'var(--ion-card-background)',
-              borderRadius: '12px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0 8px'
-            }}>
-              <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)' }} />
-              <IonSelect
-                interface="popover"
-                value={selectedLocation}
-                onIonChange={e => setSelectedLocation(e.detail.value)}
-                style={{
-                  '--padding-start': '12px',
-                  '--padding-end': '16px',
-                  '--padding-top': '12px',
-                  '--padding-bottom': '12px',
-                  minWidth: '150px'
-                }}
-              >
-                <IonSelectOption value="all">All Locations</IonSelectOption>
-                {locations.map(loc => (
-                  <IonSelectOption key={loc.Id} value={loc.Location}>
-                    {loc.Location}
-                  </IonSelectOption>
-                ))}
-              </IonSelect>
+              {/* Location Filter */}
+              <div style={{
+                background: 'var(--ion-card-background)',
+                borderRadius: '12px',
+                border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 4px',
+                flex: 1
+              }}>
+                <IonIcon icon={locationsService ? filter : undefined} hidden style={{ marginLeft: '12px', color: 'var(--ion-color-medium)', fontSize: '18px' }} /> {/* Hidden icon for spacing balance if needed, or use specific location icon */}
+                 <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)', fontSize: '18px' }} />
+                <IonSelect
+                  interface="popover"
+                  value={selectedLocation}
+                  onIonChange={e => setSelectedLocation(e.detail.value)}
+                  style={{
+                    '--padding-start': '12px',
+                    '--padding-end': '16px',
+                    width: '100%',
+                    fontSize: '14px',
+                    fontWeight: 500
+                  }}
+                >
+                  <IonSelectOption value="all">All Locations</IonSelectOption>
+                  {locations.map(loc => (
+                    <IonSelectOption key={loc.Id} value={loc.Location}>
+                      {loc.Location}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
+              </div>
             </div>
           </div>
 
@@ -347,44 +359,39 @@ const ClientsPage: React.FC = () => {
           <section>
             <div style={{ 
               background: 'var(--ion-card-background)',
-              borderRadius: '16px',
+              borderRadius: '20px',
               overflow: 'hidden',
-              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              display: 'flex',
-              flexDirection: 'column'
+              boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+              border: '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))',
             }}>
 
               {/* Table Header */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '3fr 1fr',
-                gap: '16px',
-                padding: '18px 20px',
-                backgroundColor: 'var(--ion-color-step-50, rgba(0,0,0,0.02))',
+                gridTemplateColumns: '2fr 1fr',
+                gap: '12px',
+                padding: '16px 20px',
+                backgroundColor: 'rgba(var(--ion-color-primary-rgb), 0.03)',
                 borderBottom: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-                fontWeight: '600',
-                fontSize: '12px',
+                fontWeight: '700',
+                fontSize: '11px',
+                letterSpacing: '0.05em',
                 color: 'var(--ion-color-medium)',
                 textTransform: 'uppercase',
-                position: 'sticky',
-                top: 0,
-                zIndex: 10
               }}>
-                <div style={{ fontWeight: '700' }}>Client</div>
-                <div style={{ fontWeight: '700' }}>Date Installed</div>
+                <div>Client Details</div>
+                <div style={{ textAlign: 'right' }}>Date Installed</div>
               </div>
 
               {/* Table Body */}
-              <div style={{ 
-                flex: 1
-              }}>
+              <div style={{ flex: 1 }}>
                 {clientsList
                   .filter(client => {
                     const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
                     const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
                     const matchesLocation = selectedLocation === 'all' || (client.location === selectedLocation);
-                    return matchesTab && matchesSub && matchesLocation;
+                    const matchesSearch = searchText === '' || client.name.toLowerCase().includes(searchText.toLowerCase()) || client.email.toLowerCase().includes(searchText.toLowerCase());
+                    return matchesTab && matchesSub && matchesLocation && matchesSearch;
                   })
                   .length > 0 ? (
                   clientsList
@@ -392,69 +399,59 @@ const ClientsPage: React.FC = () => {
                       const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
                       const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
                       const matchesLocation = selectedLocation === 'all' || (client.location === selectedLocation);
-                      return matchesTab && matchesSub && matchesLocation;
+                       const matchesSearch = searchText === '' || client.name.toLowerCase().includes(searchText.toLowerCase()) || client.email.toLowerCase().includes(searchText.toLowerCase());
+                      return matchesTab && matchesSub && matchesLocation && matchesSearch;
                     })
-                    .map((client, index) => (
+                    .map((client, index, arr) => (
                     <div
                       key={client.id}
                       onClick={() => {
                         setSelectedClient(client);
                         setIsDetailsOpen(true);
                       }}
+                      className="ion-activatable ripple-parent"
                       style={{
-                        padding: '18px 20px',
+                        padding: '16px 20px',
                         display: 'grid',
-                        gridTemplateColumns: '3fr 1fr',
-                        gap: '16px',
+                        gridTemplateColumns: '2fr 1fr',
+                        gap: '12px',
                         alignItems: 'center',
-                        borderBottom: index < clientsList.filter(c => {
-                          const matchesTab = selectedTab === 'all' || (c.status && c.status.toLowerCase() === selectedTab);
-                          const matchesSub = subscriptionFilter === 'all' || (c.subscriptionStatus && c.subscriptionStatus.toLowerCase() === subscriptionFilter);
-                          const matchesLocation = selectedLocation === 'all' || (c.location === selectedLocation);
-                          return matchesTab && matchesSub && matchesLocation;
-                        }).length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
+                        borderBottom: index < arr.length - 1 ? '1px solid var(--ion-color-step-50, rgba(0,0,0,0.04))' : 'none',
                         transition: 'background 0.2s ease',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        position: 'relative',
+                        overflow: 'hidden'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--ion-color-step-50, rgba(0,0,0,0.02))'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                      {/* Avatar and Name */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
                         <div style={{ 
-                          width: '48px', height: '48px', borderRadius: '14px',
-                          background: `hsl(${client.id * 50}, 85%, 95%)`, 
-                          color: `hsl(${client.id * 50}, 70%, 40%)`,
+                          width: '42px', height: '42px', borderRadius: '12px',
+                          background: `linear-gradient(135deg, hsl(${client.id * 50}, 70%, 90%), hsl(${client.id * 50}, 70%, 85%))`, 
+                          color: `hsl(${client.id * 50}, 60%, 40%)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                          fontWeight: '700', fontSize: '19px',
-                          border: `2px solid hsl(${client.id * 50}, 85%, 90%)`,
+                          fontWeight: '700', fontSize: '16px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                           flexShrink: 0
                         }}>
                           {client.name.charAt(0)}
                         </div>
                         <div style={{ overflow: 'hidden', minWidth: 0 }}>
-                          <div style={{ fontWeight: '600', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ion-text-color)' }}>{client.name}</div>
-                          <div style={{ fontSize: '13px', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{client.email || 'No email'}</div>
+                          <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--ion-text-color)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {client.name}
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                             <IonIcon icon={card} style={{ fontSize: '10px' }} />
+                             {plans.find(p => p.Id === client.planId)?.PlanName || 'No Plan'}
+                          </div>
                         </div>
                       </div>
 
-                      <div style={{ fontSize: '14px', color: 'var(--ion-color-step-600, #666)', fontWeight: 500 }}>
+                      {/* Date Installed */}
+                      <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: 500, color: 'var(--ion-text-color)' }}>
                         {client.dueDate}
                       </div>
 
-                      {/* <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '16px', color: 'var(--ion-text-color)' }}>
-                        ${client.amount.toLocaleString()}
-                      </div>
-
-                      <div style={{ textAlign: 'center' }}>
-                        <IonBadge color={
-                          client.status.toLowerCase() === 'paid' ? 'success' :
-                          client.status.toLowerCase() === 'pending' ? 'warning' : 'danger'
-                        }
-                        style={{ borderRadius: '8px', padding: '6px 12px', fontWeight: '600', fontSize: '12px' }}
-                        >
-                          {client.status}
-                        </IonBadge>
-                      </div> */}
                     </div>
                   ))
                 ) : (
