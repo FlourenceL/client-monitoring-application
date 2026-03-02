@@ -207,47 +207,52 @@ const ClientsPage: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
+      <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle>Client Manager</IonTitle>
+          <IonTitle style={{ fontWeight: 800, fontSize: '24px', paddingLeft: '8px' }}>Client Manager</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen className="ion-padding-bottom">
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Clients</IonTitle>
+            <IonTitle size="large" style={{ fontWeight: 800 }}>Clients</IonTitle>
           </IonToolbar>
         </IonHeader>
 
-        <div className='ion-padding' style={{ paddingBottom: '80px' }}>
+        <div className='ion-padding' style={{ paddingBottom: '90px' }}>
           
           {/* Summary Cards */}
-          <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+          <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '28px' }}>
             {/* Active Clients Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary))', 
+              background: 'linear-gradient(135deg, #4361ee, #3a0ca3)', 
               borderRadius: '24px', 
-              padding: '20px', 
+              padding: '24px 20px', 
               color: 'white',
-              boxShadow: '0 10px 20px -5px rgba(0, 180, 216, 0.4)',
+              boxShadow: '0 8px 25px -5px rgba(67, 97, 238, 0.5)',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '130px'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 2 }}>
-                <IonText color="light">
-                  <p style={{ margin: 0, opacity: 0.9, fontSize: '0.8rem', fontWeight: 500 }}>Active Clients</p>
-                </IonText>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                  <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>{activeClientsCount}</h1>
-                  <div style={{ 
-                    background: 'rgba(255,255,255,0.2)', 
-                    padding: '8px', 
-                    borderRadius: '12px',
-                    backdropFilter: 'blur(5px)'
-                  }}>
-                    <IonIcon icon={person} style={{ fontSize: '20px' }} />
-                  </div>
-                </div>
+               <div style={{
+                position: 'absolute', top: -20, right: -20, width: 90, height: 90,
+                background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
+              }}></div>
+              
+              <div style={{ position: 'relative', zIndex: 2 }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <div style={{ padding: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '10px', display: 'flex' }}>
+                       <IonIcon icon={person} style={{ fontSize: '14px' }} />
+                    </div>
+                    <span style={{ fontSize: '13px', fontWeight: 600, opacity: 0.9 }}>Active</span>
+                 </div>
+                 <h1 style={{ margin: '8px 0 0 0', fontSize: '36px', fontWeight: 800, letterSpacing: '-1px' }}>{activeClientsCount}</h1>
+              </div>
+              <div style={{ fontSize: '12px', opacity: 0.7, fontWeight: 500 }}>
+                 Currently subscribed
               </div>
             </div>
 
@@ -255,26 +260,27 @@ const ClientsPage: React.FC = () => {
             <div style={{ 
               background: 'var(--ion-card-background)', 
               borderRadius: '24px', 
-              padding: '20px', 
-              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+              padding: '24px 20px', 
+              boxShadow: '0 8px 20px -5px rgba(0, 0, 0, 0.05)',
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: '130px',
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 2 }}>
-                <IonText color="medium">
-                  <p style={{ margin: 0, opacity: 0.8, fontSize: '0.8rem', fontWeight: 600 }}>Inactive Clients</p>
-                </IonText>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                  <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold', color: 'var(--ion-text-color)' }}>{inactiveClientsCount}</h1>
-                  <div style={{ 
-                    background: 'var(--ion-color-step-100, rgba(0,0,0,0.05))', 
-                    padding: '8px', 
-                    borderRadius: '12px'
-                  }}>
-                    <IonIcon icon={person} style={{ fontSize: '20px', color: 'var(--ion-color-medium)' }} />
-                  </div>
-                </div>
+              <div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <div style={{ padding: '6px', background: 'var(--ion-color-step-50, rgba(0,0,0,0.05))', borderRadius: '10px', display: 'flex', color: 'var(--ion-color-medium)' }}>
+                       <IonIcon icon={person} style={{ fontSize: '14px' }} />
+                    </div>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ion-color-medium)' }}>Inactive</span>
+                 </div>
+                 <h1 style={{ margin: '8px 0 0 0', fontSize: '36px', fontWeight: 800, letterSpacing: '-1px', color: 'var(--ion-text-color)' }}>{inactiveClientsCount}</h1>
+              </div>
+               <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', fontWeight: 500 }}>
+                 Past or pending
               </div>
             </div>
           </section>
@@ -285,33 +291,52 @@ const ClientsPage: React.FC = () => {
             <IonSearchbar 
               value={searchText} 
               onIonInput={e => setSearchText(e.detail.value!)} 
-              placeholder="Search clients..." 
+              placeholder="Search by name or email" 
               className="custom-searchbar"
-              style={{ '--box-shadow': 'none', '--background': 'var(--ion-card-background)', '--border-radius': '12px', padding: 0, marginBottom: '16px', border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' }}
+              mode="ios"
+              style={{ 
+                '--background': 'var(--ion-card-background)', 
+                '--border-radius': '16px', 
+                '--placeholder-color': 'var(--ion-color-medium)',
+                '--icon-color': '#4361ee',
+                padding: 0, 
+                marginBottom: '16px', 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                height: '48px'
+              }}
             ></IonSearchbar>
             
-            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
               {/* Status Filter */}
               <div style={{
                 background: 'var(--ion-card-background)',
-                borderRadius: '12px',
-                border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+                borderRadius: '14px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                border: '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 4px',
-                flex: 1
+                padding: '2px 6px',
+                flex: 1,
+                minWidth: '140px'
               }}>
-                <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)', fontSize: '18px' }} />
+                <div style={{ 
+                  width: '28px', height: '28px', borderRadius: '8px', 
+                  background: '#eff3ff', color: '#4361ee',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginLeft: '6px'
+                }}>
+                   <IonIcon icon={filter} style={{ fontSize: '14px' }} />
+                </div>
                 <IonSelect
                   interface="popover"
                   value={subscriptionFilter}
                   onIonChange={e => setSubscriptionFilter(e.detail.value)}
                   style={{
-                    '--padding-start': '12px',
-                    '--padding-end': '16px',
+                    '--padding-start': '10px',
+                    '--padding-end': '10px',
                     width: '100%',
-                    fontSize: '14px',
-                    fontWeight: 500
+                    fontSize: '13px',
+                    fontWeight: 600
                   }}
                 >
                   <IonSelectOption value="all">All Status</IonSelectOption>
@@ -323,25 +348,33 @@ const ClientsPage: React.FC = () => {
               {/* Location Filter */}
               <div style={{
                 background: 'var(--ion-card-background)',
-                borderRadius: '12px',
-                border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+                borderRadius: '14px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                border: '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))',
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0 4px',
-                flex: 1
+                padding: '2px 6px',
+                flex: 1,
+                minWidth: '140px'
               }}>
-                <IonIcon icon={locationsService ? filter : undefined} hidden style={{ marginLeft: '12px', color: 'var(--ion-color-medium)', fontSize: '18px' }} /> {/* Hidden icon for spacing balance if needed, or use specific location icon */}
-                 <IonIcon icon={filter} style={{ marginLeft: '12px', color: 'var(--ion-color-medium)', fontSize: '18px' }} />
+                <div style={{ 
+                  width: '28px', height: '28px', borderRadius: '8px', 
+                  background: '#fdf2f8', color: '#db2777',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginLeft: '6px'
+                }}>
+                   <IonIcon icon={filter} style={{ fontSize: '14px' }} />
+                </div>
                 <IonSelect
                   interface="popover"
                   value={selectedLocation}
                   onIonChange={e => setSelectedLocation(e.detail.value)}
                   style={{
-                    '--padding-start': '12px',
-                    '--padding-end': '16px',
+                    '--padding-start': '10px',
+                    '--padding-end': '10px',
                     width: '100%',
-                    fontSize: '14px',
-                    fontWeight: 500
+                    fontSize: '13px',
+                    fontWeight: 600
                   }}
                 >
                   <IonSelectOption value="all">All Locations</IonSelectOption>
@@ -359,28 +392,23 @@ const ClientsPage: React.FC = () => {
           <section>
             <div style={{ 
               background: 'var(--ion-card-background)',
-              borderRadius: '20px',
+              borderRadius: '24px',
               overflow: 'hidden',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+              boxShadow: '0 10px 30px -10px rgba(0,0,0,0.04)',
               border: '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))',
             }}>
 
               {/* Table Header */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '2fr 1fr',
-                gap: '12px',
-                padding: '16px 20px',
-                backgroundColor: 'rgba(var(--ion-color-primary-rgb), 0.03)',
+                gridTemplateColumns: 'minmax(200px, 2fr) 1fr',
+                gap: '16px',
+                padding: '16px 24px',
                 borderBottom: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-                fontWeight: '700',
-                fontSize: '11px',
-                letterSpacing: '0.05em',
-                color: 'var(--ion-color-medium)',
-                textTransform: 'uppercase',
+                background: 'var(--ion-color-step-50, rgba(0,0,0,0.02))'
               }}>
-                <div>Client Details</div>
-                <div style={{ textAlign: 'right' }}>Date Installed</div>
+                <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Client Details</div>
+                <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Installed</div>
               </div>
 
               {/* Table Body */}
@@ -411,13 +439,13 @@ const ClientsPage: React.FC = () => {
                       }}
                       className="ion-activatable ripple-parent"
                       style={{
-                        padding: '16px 20px',
+                        padding: '16px 24px',
                         display: 'grid',
-                        gridTemplateColumns: '2fr 1fr',
-                        gap: '12px',
+                        gridTemplateColumns: 'minmax(200px, 2fr) 1fr',
+                        gap: '16px',
                         alignItems: 'center',
-                        borderBottom: index < arr.length - 1 ? '1px solid var(--ion-color-step-50, rgba(0,0,0,0.04))' : 'none',
-                        transition: 'background 0.2s ease',
+                        borderBottom: index < arr.length - 1 ? '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))' : 'none',
+                        transition: 'all 0.2s ease',
                         cursor: 'pointer',
                         position: 'relative',
                         overflow: 'hidden'
@@ -426,30 +454,42 @@ const ClientsPage: React.FC = () => {
                       {/* Avatar and Name */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0 }}>
                         <div style={{ 
-                          width: '42px', height: '42px', borderRadius: '12px',
-                          background: `linear-gradient(135deg, hsl(${client.id * 50}, 70%, 90%), hsl(${client.id * 50}, 70%, 85%))`, 
-                          color: `hsl(${client.id * 50}, 60%, 40%)`,
+                          width: '48px', height: '48px', borderRadius: '16px',
+                          background: `hsl(${client.name.length * 20}, 85%, 96%)`, 
+                          color: `hsl(${client.name.length * 20}, 70%, 45%)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                          fontWeight: '700', fontSize: '16px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                          flexShrink: 0
+                          fontWeight: '800', fontSize: '18px',
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.03)',
+                          flexShrink: 0,
+                          border: '1px solid rgba(0,0,0,0.02)'
                         }}>
                           {client.name.charAt(0)}
                         </div>
                         <div style={{ overflow: 'hidden', minWidth: 0 }}>
-                          <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--ion-text-color)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {client.name}
                           </div>
-                          <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                             <IonIcon icon={card} style={{ fontSize: '10px' }} />
-                             {plans.find(p => p.Id === client.planId)?.PlanName || 'No Plan'}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                             <div style={{ 
+                               padding: '2px 8px', borderRadius: '6px', 
+                               background: 'var(--ion-color-step-50, rgba(0,0,0,0.05))', color: 'var(--ion-color-step-600, #666)',
+                               fontSize: '11px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px'
+                             }}>
+                                <IonIcon icon={card} style={{ fontSize: '10px' }} />
+                                {plans.find(p => p.Id === client.planId)?.PlanName || 'No Plan'}
+                             </div>
                           </div>
                         </div>
                       </div>
 
                       {/* Date Installed */}
-                      <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: 500, color: 'var(--ion-text-color)' }}>
-                        {client.dueDate}
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ion-text-color)' }}>
+                          {client.dueDate}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--ion-color-medium)', marginTop: '2px', fontWeight: 500 }}>
+                           {new Date(client.dueDate).toLocaleDateString('en-US', { weekday: 'short' })}
+                        </div>
                       </div>
 
                     </div>
