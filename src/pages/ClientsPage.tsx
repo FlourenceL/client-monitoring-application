@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonCardHeader
   , IonCardTitle, IonCardContent, IonButton, IonIcon, IonSearchbar, IonGrid, IonRow, IonCol, IonBadge, IonSegment, IonSegmentButton, IonLabel,
   IonModal, IonButtons, IonInput, IonFooter, useIonToast, IonSelect, IonSelectOption,
-  IonFab, IonFabButton, IonText, IonAvatar
+  IonFab, IonFabButton, IonText, IonAvatar, IonList, IonItem, IonNote
  } from '@ionic/react';
-import { add, wallet, searchOutline, filter, person, calendar, card } from 'ionicons/icons';
+import { add, wallet, searchOutline, filter, person, calendar, card, mail, call, location, createOutline, documentText, wifi } from 'ionicons/icons';
 import clientService from '../services/Clients.service';
 import planService from '../services/Plans.service';
 import collectionService from '../services/Collections.service';
@@ -704,83 +704,122 @@ const ClientsPage: React.FC = () => {
         </IonModal>
 
         {/* Client Details Modal */}
-        <IonModal isOpen={isDetailsOpen} onDidDismiss={() => setIsDetailsOpen(false)} initialBreakpoint={0.65} breakpoints={[0, 0.65, 0.9]}>
+        <IonModal isOpen={isDetailsOpen} onDidDismiss={() => setIsDetailsOpen(false)} initialBreakpoint={0.9} breakpoints={[0, 0.75, 1]}>
           <IonContent className="ion-padding" style={{ '--background': 'var(--ion-background-color)' }}>
              <div style={{ width: '40px', height: '4px', background: 'var(--ion-color-step-200, #e0e0e0)', borderRadius: '2px', margin: '10px auto 20px auto' }}></div>
             {selectedClient && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '30px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '30px' }}>
                 
                 {/* Header Section */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                   <div style={{ 
-                      width: '80px', height: '80px', borderRadius: '24px',
+                      width: '90px', height: '90px', borderRadius: '30px',
                       background: `hsl(${selectedClient.name.length * 20}, 85%, 96%)`, 
                       color: `hsl(${selectedClient.name.length * 20}, 70%, 45%)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      fontWeight: '800', fontSize: '32px',
+                      fontWeight: '800', fontSize: '36px',
                       marginBottom: '16px',
-                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05)'
+                      boxShadow: '0 10px 25px -5px rgba(0,0,0,0.08)',
+                      border: '4px solid white'
                     }}>
                       {selectedClient.name.charAt(0)}
                   </div>
                   
-                  <h2 style={{ margin: '0 0 8px 0', fontWeight: '800', fontSize: '24px', letterSpacing: '-0.5px' }}>{selectedClient.name}</h2>
+                  <h2 style={{ margin: '0 0 6px 0', fontWeight: '800', fontSize: '26px', letterSpacing: '-0.5px' }}>{selectedClient.name}</h2>
+                   <div style={{ fontSize: '14px', color: 'var(--ion-color-medium)', fontWeight: '500', marginBottom: '12px' }}>
+                        {selectedClient.location || 'No Location'}
+                   </div>
                   
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <IonBadge color={
                         selectedClient.subscriptionStatus === 'Active' ? 'success' : 'medium'
-                    } style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '600' }}>
+                    } style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
                         {selectedClient.subscriptionStatus}
                     </IonBadge>
-                    
-                     {/* <IonBadge color={
-                        selectedClient.status.toLowerCase() === 'paid' ? 'primary' :
-                        selectedClient.status.toLowerCase() === 'pending' ? 'warning' : 'danger'
-                    } style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '600' }}>
-                        Billing: {selectedClient.status}
-                    </IonBadge> */}
                   </div>
                 </div>
 
-                {/* Info Grid */}
-                <div style={{ 
-                    display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px',
-                    background: 'var(--ion-color-step-50, #f9fafb)', padding: '20px', borderRadius: '24px',
-                    border: '1px solid var(--ion-color-step-100, #f0f0f5)'
-                }}>
-                    
-                    <div>
-                        <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--ion-color-medium)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Email</div>
-                        <div style={{ fontSize: '14px', fontWeight: '600', wordBreak: 'break-all', color: 'var(--ion-text-color)' }}>{selectedClient.email || 'N/A'}</div>
+                {/* Quick Actions */}
+                {/* <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', padding: '10px 0' }}>
+                    <div className="ion-activatable ripple-parent" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                         <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--ion-color-primary-tint)', color: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             <IonIcon icon={call} />
+                         </div>
+                         <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--ion-text-color)' }}>Call</span>
                     </div>
-
-                    <div>
-                        <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--ion-color-medium)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Phone</div>
-                        <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--ion-text-color)' }}>{selectedClient.phone || 'N/A'}</div>
+                     <div className="ion-activatable ripple-parent" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                         <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--ion-color-secondary-tint)', color: 'var(--ion-color-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             <IonIcon icon={mail} />
+                         </div>
+                         <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--ion-text-color)' }}>Email</span>
                     </div>
+                     <div className="ion-activatable ripple-parent" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                         <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--ion-color-warning-tint)', color: 'var(--ion-color-warning)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             <IonIcon icon={documentText} />
+                         </div>
+                         <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--ion-text-color)' }}>History</span>
+                    </div>
+                </div> */}
 
-                    <div>
-                        <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--ion-color-medium)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Plan</div>
-                        <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--ion-color-primary)' }}>
-                             {plans.find(p => p.Id === selectedClient.planId)?.PlanName || 'Unknown Plan'}
+                {/* Info List */}
+                <IonList inset={true} style={{ margin: 0, borderRadius: '20px', background: 'var(--ion-card-background)', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
+                    <IonItem lines="full" detail={false} style={{ '--padding-start': '16px' }}>
+                        <div slot="start" style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#e0e7ff', color: '#4338ca', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <IonIcon icon={wifi} />
                         </div>
-                    </div>
+                        <IonLabel>
+                            <h3 style={{ fontWeight: '700', fontSize: '14px', color: '#4338ca' }}>Internet Plan</h3>
+                            <p style={{ fontWeight: '600', color: 'var(--ion-text-color)', fontSize: '15px' }}>
+                                {plans.find(p => p.Id === selectedClient.planId)?.PlanName || 'Unknown'}
+                            </p>
+                        </IonLabel>
+                         <IonNote slot="end" style={{ fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>
+                            ${selectedClient.amount}
+                        </IonNote>
+                    </IonItem>
 
-                    <div>
-                        <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--ion-color-medium)', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Installed</div>
-                        <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--ion-text-color)' }}>{selectedClient.dueDate}</div>
-                    </div>
-                </div>
+                    <IonItem lines="full" detail={false} style={{ '--padding-start': '16px' }}>
+                        <div slot="start" style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#fee2e2', color: '#b91c1c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <IonIcon icon={calendar} />
+                        </div>
+                         <IonLabel>
+                            <h3 style={{ fontWeight: '700', fontSize: '14px', color: '#b91c1c' }}>Installation Date</h3>
+                            <p style={{ fontWeight: '600', color: 'var(--ion-text-color)', fontSize: '15px' }}>
+                                {selectedClient.dueDate}
+                            </p>
+                        </IonLabel>
+                    </IonItem>
+                    
+                     <IonItem lines="full" detail={false} style={{ '--padding-start': '16px' }}>
+                        <div slot="start" style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#d1fae5', color: '#047857', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <IonIcon icon={location} />
+                        </div>
+                         <IonLabel>
+                            <h3 style={{ fontWeight: '700', fontSize: '14px', color: '#047857' }}>Location</h3>
+                            <p style={{ fontWeight: '600', color: 'var(--ion-text-color)', fontSize: '15px' }}>
+                                {selectedClient.location || 'Unknown Location'}
+                            </p>
+                        </IonLabel>
+                    </IonItem>
+                    
+                    <IonItem lines="none" detail={false} style={{ '--padding-start': '16px' }}>
+                         <div slot="start" style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f3f4f6', color: '#4b5563', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <IonIcon icon={person} />
+                        </div>
+                         <IonLabel>
+                            <h3 style={{ fontWeight: '700', fontSize: '14px', color: '#4b5563' }}>Contact Details</h3>
+                            <p style={{ fontWeight: '500', fontSize: '13px', marginTop: '4px' }}>
+                                 {selectedClient.email || 'No Email'}<br/>
+                                 {selectedClient.phone || 'No Phone'}
+                            </p>
+                        </IonLabel>
+                    </IonItem>
+                </IonList>
                 
-                {/* Actions */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <IonButton expand="block" fill="outline" color="medium" style={{ '--border-radius': '14px', height: '52px', fontWeight: '600', '--border-width': '2px' }}>
-                        History
-                    </IonButton>
-                    <IonButton expand="block" color="primary" style={{ '--border-radius': '14px', height: '52px', fontWeight: '600', '--box-shadow': '0 8px 20px -4px rgba(67, 97, 238, 0.3)' }}>
-                        Edit Details
-                    </IonButton>
-                </div>
+                <IonButton expand="block" color="primary" style={{ '--border-radius': '16px', height: '54px', fontWeight: '700', fontSize: '16px', '--box-shadow': '0 8px 20px -4px rgba(67, 97, 238, 0.4)' }}>
+                    <IonIcon icon={createOutline} slot="start" />
+                    Edit Client Details
+                </IonButton>
 
               </div>
             )}
