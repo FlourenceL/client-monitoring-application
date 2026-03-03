@@ -26,14 +26,39 @@ const TransactionsPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
 
   // Generation State
-  const [generationMonth, setGenerationMonth] = useState<string>(() => {
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
-    // Default to next month
-    let m = now.getMonth() + 2; 
-    let y = now.getFullYear();
-    if(m > 12) { m = 1; y++; }
-    return `${String(m).padStart(2, '0')}/${y}`;
+    // Default to current month for viewing history or next month for generation?
+    // User wants to see who paid/didn't pay for every month. Default to current makes sense.
+    return String(now.getMonth() + 1).padStart(2, '0');
   });
+  const [selectedYear, setSelectedYear] = useState<string>(() => {
+    return String(new Date().getFullYear());
+  });
+
+  const getTargetMonth = () => `${selectedMonth}/${selectedYear}`;
+
+  const months = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+  ];
+
+  // Generate a range of years (e.g., current year - 2 to + 5)
+  const years = Array.from({length: 8}, (_, i) => {
+      const y = new Date().getFullYear() - 2 + i;
+      return String(y);
+  });
+
 
   // Form State
   const [selectedClientId, setSelectedClientId] = useState<number | undefined>(undefined);
@@ -138,10 +163,11 @@ const TransactionsPage: React.FC = () => {
 
   useEffect(() => {
     loadTransactions();
-  }, [generationMonth]);
+  }, [selectedMonth, selectedYear]);
 
   const loadTransactions = async () => {
       try {
+        const generationMonth = getTargetMonth();
         const trns = await collectionService.getCollectionsByMonthDetailed(generationMonth);
         setTransactions(trns || []);
       } catch (e) {
@@ -151,18 +177,12 @@ const TransactionsPage: React.FC = () => {
 
   const handleGenerate = async () => {
       setLoading(true);
+      const generationMonth = getTargetMonth();
       try {
-          // validate format MM/YYYY
-          if(!/^\d{2}\/\d{4}$/.test(generationMonth)) {
-              showToastMessage("Invalid format. Use MM/YYYY");
-              setLoading(false);
-              return;
-          }
           const res = await collectionService.generateMonthlyTransactions(generationMonth);
-          // check result (depends on my service impl returning {success, count} or void)
-          // I implemented { success: true, count } in service.
+          // check result
           if(res && res.success) {
-              showToastMessage(`Generated ${res.count} transactions.`);
+              showToastMessage(`Checked/Generated ${res.count} transactions.`);
               await loadTransactions();
           } else {
               showToastMessage("Details: " + JSON.stringify(res));
@@ -218,25 +238,68 @@ const TransactionsPage: React.FC = () => {
                 <IonCard>
                     <IonCardContent>
                         <IonItem lines="none"><IonLabel color="primary"><h2>Monthly Transactions</h2></IonLabel></IonItem>
-                        <IonItem>
-                            <IonInput 
-                                label="Billing Month(MM/YYYY)"
-                                labelPlacement="stacked"
-                                value={generationMonth} 
-                                onIonChange={e => setGenerationMonth(e.detail.value!)}
-                                placeholder="e.g. 04/2026"
-                            />
-                            <IonButton slot="end" onClick={handleGenerate}>Generate</IonButton>
-                        </IonItem>
+                        <IonGrid>
+                            <IonRow>
+                                <IonCol size="5">
+                                    <IonSelect 
+                                        label="Month"
+                                        labelPlacement="stacked"
+                                        value={selectedMonth}
+                                        onIonChange={e => setSelectedMonth(e.detail.value)}
+                                    >
+                                        {months.map(m => (
+                                            <IonSelectOption key={m.value} value={m.value}>{m.label}</IonSelectOption>
+                                        ))}
+                                    </IonSelect>
+                                </IonCol>
+                                <IonCol size="4">
+                                    <IonSelect 
+                                        label="Year"
+                                        labelPlacement="stacked"
+                                        value={selectedYear}
+                                        onIonChange={e => setSelectedYear(e.detail.value)}
+                                    >
+                                        {years.map(y => (
+                                            <IonSelectOption key={y} value={y}>{y}</IonSelectOption>
+                                        ))}
+                                    </IonSelect>
+                                </IonCol>
+                                <IonCol size="3" className="ion-align-self-end">
+                                    <IonButton expand="block" onClick={handleGenerate} size="small">Gen</IonButton>
+                                </IonCol>
+                            </IonRow>
+                        </IonGrid>
                         
                         <IonList>
-                           {transactions.length === 0 && <IonItem><IonLabel>No transactions found for {generationMonth}</IonLabel></IonItem>}
-                           {transactions.map(trn => (
+                           {transactions.length === 0 && <IonItem><IonLabel>No transactions found for {getTargetMonth()}</IonLabel></IonItem>}
+                           {transactions.map(trn => {
+                               // Status Logic
+                               let statusBadge = <IonBadge color="medium">{trn.Status}</IonBadge>;
+                               if (trn.StatusId === 2) {
+                                   statusBadge = <IonBadge color="success">Paid</IonBadge>;
+                               } else {
+                                   // Check Overdue
+                                   const [m, y] = trn.BillingMonth.split('/');
+                                   const billDate = new Date(parseInt(y), parseInt(m) - 1, 1);
+                                   const now = new Date();
+                                   const curDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                                   
+                                   if (billDate < curDate && trn.StatusId === 1) {
+                                       statusBadge = <IonBadge color="danger">Overdue</IonBadge>;
+                                   } else if (trn.StatusId === 1) {
+                                       statusBadge = <IonBadge color="warning">Pending</IonBadge>;
+                                   }
+                               }
+
+                               return (
                                <IonItemSliding key={trn.Id}>
                                    <IonItem>
                                        <IonLabel>
                                            <h2>{trn.Client}</h2>
-                                           <p>Due: {trn.AmountDue} | Status: <IonBadge color={trn.StatusId === 2 ? "success" : "warning"}>{trn.Status || (trn.StatusId === 1 ? 'Pending' : 'Paid')}</IonBadge></p>
+                                           <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                                                <span>Due: {trn.AmountDue}</span>
+                                                {statusBadge}
+                                           </div>
                                        </IonLabel>
                                         { trn.StatusId !== 2 && (
                                             <IonButton fill="clear" slot="end" onClick={() => handleMarkPaid(trn)}>
@@ -248,7 +311,7 @@ const TransactionsPage: React.FC = () => {
                                         <IonItemOption color="success" onClick={() => handleMarkPaid(trn)}>Mark Paid</IonItemOption>
                                    </IonItemOptions>
                                </IonItemSliding>
-                           ))}
+                           )})}
                         </IonList>
                     </IonCardContent>
                 </IonCard>

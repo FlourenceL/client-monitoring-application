@@ -68,10 +68,24 @@ class CollectionService {
                 if (existing.length > 0) continue;
 
                  // Check Install Date
-                const installDate = new Date(client.DateInstalled);
+                // We parse manually to avoid timezone issues shifting the month back (e.g., UTC to Local)
+                let installMonthIndex = 0;
+                if (client.DateInstalled) {
+                    const datePart = String(client.DateInstalled).split('T')[0]; // "YYYY-MM-DD"
+                    const parts = datePart.split('-');
+                    if (parts.length >= 2) {
+                        const iYear = parseInt(parts[0]);
+                        const iMonth = parseInt(parts[1]) - 1; // 0-indexed
+                        installMonthIndex = iYear * 12 + iMonth;
+                    } else {
+                        const d = new Date(client.DateInstalled);
+                        installMonthIndex = d.getFullYear() * 12 + d.getMonth();
+                    }
+                }
+
                 // Compare months: (targetYear * 12 + targetMonth) > (installYear * 12 + installMonth)
+                // If it's the SAME month (==), we do NOT generate (it's paid on install).
                 const targetMonthIndex = targetDate.getFullYear() * 12 + targetDate.getMonth();
-                const installMonthIndex = installDate.getFullYear() * 12 + installDate.getMonth();
 
                 if (targetMonthIndex > installMonthIndex) {
                     const plan = plans.find((p: any) => p.Id === client.PlanId);
