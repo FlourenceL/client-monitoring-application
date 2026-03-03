@@ -3,8 +3,10 @@ import {
   IonContent, IonHeader, IonPage, IonTitle, IonToolbar, 
   IonCard, IonCardContent, IonItem, IonLabel, IonInput, 
   IonSelect, IonSelectOption, IonButton, 
-  IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons
+  IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
+  IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption
 } from '@ionic/react';
+import { checkmarkDoneCircle } from 'ionicons/icons';
 import collectionService from '../services/Collections.service';
 import clientService from '../services/Clients.service';
 import locationsService from '../services/Locations.service';
@@ -17,9 +19,21 @@ const TransactionsPage: React.FC = () => {
   const [locations, setLocations] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // Generation State
+  const [generationMonth, setGenerationMonth] = useState<string>(() => {
+    const now = new Date();
+    // Default to next month
+    let m = now.getMonth() + 2; 
+    let y = now.getFullYear();
+    if(m > 12) { m = 1; y++; }
+    return `${String(m).padStart(2, '0')}/${y}`;
+  });
 
   // Form State
   const [selectedClientId, setSelectedClientId] = useState<number | undefined>(undefined);
@@ -122,6 +136,59 @@ const TransactionsPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    loadTransactions();
+  }, [generationMonth]);
+
+  const loadTransactions = async () => {
+      try {
+        const trns = await collectionService.getCollectionsByMonthDetailed(generationMonth);
+        setTransactions(trns || []);
+      } catch (e) {
+          console.error(e);
+      }
+  };
+
+  const handleGenerate = async () => {
+      setLoading(true);
+      try {
+          // validate format MM/YYYY
+          if(!/^\d{2}\/\d{4}$/.test(generationMonth)) {
+              showToastMessage("Invalid format. Use MM/YYYY");
+              setLoading(false);
+              return;
+          }
+          const res = await collectionService.generateMonthlyTransactions(generationMonth);
+          // check result (depends on my service impl returning {success, count} or void)
+          // I implemented { success: true, count } in service.
+          if(res && res.success) {
+              showToastMessage(`Generated ${res.count} transactions.`);
+              await loadTransactions();
+          } else {
+              showToastMessage("Details: " + JSON.stringify(res));
+          }
+      } catch(e) {
+          console.error(e);
+          showToastMessage('Error generating transactions.');
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  const handleMarkPaid = async (item: any) => {
+      setLoading(true);
+      try {
+          await collectionService.markAsPaid(item.Id);
+          showToastMessage(`Marked ${item.Client}'s bill as Paid.`);
+          await loadTransactions();
+      } catch(e) {
+          console.error(e);
+          showToastMessage('Error marking paid.');
+      } finally {
+          setLoading(false);
+      }
+  };
+
   const showToastMessage = (msg: string) => {
     setToastMessage(msg);
     setShowToast(true);
@@ -146,10 +213,52 @@ const TransactionsPage: React.FC = () => {
 
         <IonGrid>
           <IonRow className="ion-justify-content-center">
+            {/* GENERATION / LIST SECTION */}
+            <IonCol size="12" sizeMd="8" sizeLg="6">
+                <IonCard>
+                    <IonCardContent>
+                        <IonItem lines="none"><IonLabel color="primary"><h2>Monthly Transactions</h2></IonLabel></IonItem>
+                        <IonItem>
+                            <IonInput 
+                                label="Billing Month(MM/YYYY)"
+                                labelPlacement="stacked"
+                                value={generationMonth} 
+                                onIonChange={e => setGenerationMonth(e.detail.value!)}
+                                placeholder="e.g. 04/2026"
+                            />
+                            <IonButton slot="end" onClick={handleGenerate}>Generate</IonButton>
+                        </IonItem>
+                        
+                        <IonList>
+                           {transactions.length === 0 && <IonItem><IonLabel>No transactions found for {generationMonth}</IonLabel></IonItem>}
+                           {transactions.map(trn => (
+                               <IonItemSliding key={trn.Id}>
+                                   <IonItem>
+                                       <IonLabel>
+                                           <h2>{trn.Client}</h2>
+                                           <p>Due: {trn.AmountDue} | Status: <IonBadge color={trn.StatusId === 2 ? "success" : "warning"}>{trn.Status || (trn.StatusId === 1 ? 'Pending' : 'Paid')}</IonBadge></p>
+                                       </IonLabel>
+                                        { trn.StatusId !== 2 && (
+                                            <IonButton fill="clear" slot="end" onClick={() => handleMarkPaid(trn)}>
+                                                <IonIcon icon={checkmarkDoneCircle} /> Paid
+                                            </IonButton>
+                                        )}
+                                   </IonItem>
+                                   <IonItemOptions side="end">
+                                        <IonItemOption color="success" onClick={() => handleMarkPaid(trn)}>Mark Paid</IonItemOption>
+                                   </IonItemOptions>
+                               </IonItemSliding>
+                           ))}
+                        </IonList>
+                    </IonCardContent>
+                </IonCard>
+            </IonCol>
+
+            {/* MANUAL ADD SECTION */}
             <IonCol size="12" sizeMd="8" sizeLg="6">
               <IonCard>
                 <IonCardContent>
-                    
+                  <IonItem lines="none"><IonLabel color="medium"><h2>Manually Add Transaction</h2></IonLabel></IonItem>
                   <IonItem>
                     <IonSelect 
                         label="Client"

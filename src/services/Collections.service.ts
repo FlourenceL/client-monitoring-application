@@ -1,6 +1,7 @@
 import { databaseService } from "../database/Database.service";
 import { TrnCollection, MstClient, MstPlan } from "../database/DatabaseConstants";
 import { CreateCollectionDTO } from "../models/createModels/CollectionsModel";
+import { MstStatus, MstPaymentMethod, MstLocation } from "../database/DatabaseConstants";
 
 class CollectionService {
     async getCollections() {
@@ -13,46 +14,88 @@ class CollectionService {
         return getCollections;
     }
 
-    async generateMonthlyTransactions() {
-        try {
-            const now = new Date();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const billingMonth = `${month}/${year}`;
+    async getCollectionsByMonthDetailed(month: string) {
+        const getCollections = await databaseService.query(
+            `SELECT t.Id, t.BillingMonth, t.AmountDue, t.AmountPaid, t.StatusId, 
+                    c.Client, s.Status, pm.PaymentMethod, l.Location
+             FROM ${TrnCollection} t
+             JOIN ${MstClient} c ON t.ClientId = c.Id
+             JOIN ${MstStatus} s ON t.StatusId = s.Id
+             LEFT JOIN ${MstPaymentMethod} pm ON t.PaymentMethodId = pm.Id
+             LEFT JOIN ${MstLocation} l ON t.LocationId = l.Id
+             WHERE t.BillingMonth = ?`,
+            [month]
+        );
+        return getCollections;
+    }
 
+    async markAsPaid(id: number) {
+        try {
+            const update = await databaseService.run(
+                `UPDATE ${TrnCollection} SET StatusId = 2, AmountPaid = AmountDue, PaymentDate = ? WHERE Id = ?`,
+                [new Date().toISOString(), id]
+            );
+            return { success: true };
+        } catch (error) {
+            console.error("Mark as paid error", error);
+            return { success: false, error };
+        }
+    }
+
+    async generateMonthlyTransactions(monthYear: string) {
+        try {
+            // monthYear expected format: "MM/YYYY"
+            const [m, y] = monthYear.split('/');
+            const targetDate = new Date(parseInt(y), parseInt(m) - 1, 1);
+            
             // Get active clients
             const clients = await databaseService.query(`SELECT * FROM ${MstClient} WHERE IsActive = 1`);
             // Get plans
             const plans = await databaseService.query(`SELECT * FROM ${MstPlan}`);
+             // Get default payment method (first one) to satisfy constraint
+            const pms = await databaseService.query(`SELECT * FROM ${MstPaymentMethod} LIMIT 1`);
+            const defaultPmId = pms.length > 0 ? pms[0].Id : 1;
+
+            let count = 0;
 
             for (const client of clients) {
                 // Check if transaction exists
                 const existing = await databaseService.query(
                     `SELECT * FROM ${TrnCollection} WHERE ClientId = ? AND BillingMonth = ?`,
-                    [client.Id || client.id, billingMonth]
+                    [client.Id || client.id, monthYear]
                 );
 
-                if (existing.length === 0) {
+                if (existing.length > 0) continue;
+
+                 // Check Install Date
+                const installDate = new Date(client.DateInstalled);
+                // Compare months: (targetYear * 12 + targetMonth) > (installYear * 12 + installMonth)
+                const targetMonthIndex = targetDate.getFullYear() * 12 + targetDate.getMonth();
+                const installMonthIndex = installDate.getFullYear() * 12 + installDate.getMonth();
+
+                if (targetMonthIndex > installMonthIndex) {
                     const plan = plans.find((p: any) => p.Id === client.PlanId);
                     const amountDue = plan ? plan.Amount : 0;
 
                     await this.addCollection({
                         UserId: 1, // Default admin
                         ClientId: client.Id || client.id,
-                        LocationId: 1, // Default location
+                        LocationId: client.LocationId || 1, // Default location fallback
                         StatusId: 1, // Pending
-                        PaymentMethodId: 1, // Default (e.g. Cash)
-                        BillingMonth: billingMonth,
+                        PaymentMethodId: defaultPmId, // Default (e.g. Cash)
+                        BillingMonth: monthYear,
                         AmountDue: amountDue,
                         AmountPaid: 0,
-                        PaymentDate: null as any, // Not paid yet
+                        PaymentDate: '', // Not paid yet
                         CreateDate: new Date().toISOString()
                     });
-                    console.log(`Generated transaction for client ${client.Client} for ${billingMonth}`);
+                    count++;
                 }
             }
+            return { success: true, count };
         } catch (error) {
             console.error("Error generating monthly transactions:", error);
+            return { success: false, error };
         }
     }
 
