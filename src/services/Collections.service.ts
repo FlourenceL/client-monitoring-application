@@ -42,6 +42,33 @@ class CollectionService {
         }
     }
 
+    async updateOverdueTransactions() {
+        try {
+           // Get all pending transactions
+            const pendings = await databaseService.query(`SELECT * FROM ${TrnCollection} WHERE StatusId = 1`);
+            
+            const now = new Date();
+            const currentMonthVal = now.getFullYear() * 12 + now.getMonth();
+            
+            let count = 0;
+            for(const trn of pendings) {
+                if(!trn.BillingMonth) continue;
+                const [m, y] = trn.BillingMonth.split('/');
+                const billMonthVal = parseInt(y) * 12 + (parseInt(m) - 1);
+                
+                // If bill month is strictly less than current month, it is overdue
+                if (billMonthVal < currentMonthVal) {
+                     await databaseService.run(`UPDATE ${TrnCollection} SET StatusId = 3 WHERE Id = ?`, [trn.Id]);
+                     count++;
+                }
+            }
+            return { success: true, count };
+        } catch (e) {
+            console.error("Error updating overdue transactions:", e);
+            return { success: false, error: e };
+        }
+   }
+
     async generateMonthlyTransactions(monthYear: string) {
         try {
             // monthYear expected format: "MM/YYYY"

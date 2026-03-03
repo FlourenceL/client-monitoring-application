@@ -167,6 +167,7 @@ const TransactionsPage: React.FC = () => {
 
   const loadTransactions = async () => {
       try {
+        await collectionService.updateOverdueTransactions();
         const generationMonth = getTargetMonth();
         const trns = await collectionService.getCollectionsByMonthDetailed(generationMonth);
         setTransactions(trns || []);
@@ -274,22 +275,17 @@ const TransactionsPage: React.FC = () => {
                            {transactions.length === 0 && <IonItem><IonLabel>No transactions found for {getTargetMonth()}</IonLabel></IonItem>}
                            {transactions.map(trn => {
                                // Status Logic
-                               let statusBadge = <IonBadge color="medium">{trn.Status}</IonBadge>;
-                               if (trn.StatusId === 2) {
-                                   statusBadge = <IonBadge color="success">Paid</IonBadge>;
-                               } else {
-                                   // Check Overdue
-                                   const [m, y] = trn.BillingMonth.split('/');
-                                   const billDate = new Date(parseInt(y), parseInt(m) - 1, 1);
-                                   const now = new Date();
-                                   const curDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                                   
-                                   if (billDate < curDate && trn.StatusId === 1) {
-                                       statusBadge = <IonBadge color="danger">Overdue</IonBadge>;
-                                   } else if (trn.StatusId === 1) {
-                                       statusBadge = <IonBadge color="warning">Pending</IonBadge>;
-                                   }
-                               }
+                               let statusBadgeStr = trn.Status || 'Pending';
+                               // Fallback logic if names missing in DB join
+                               if (trn.StatusId === 1) statusBadgeStr = 'Pending';
+                               if (trn.StatusId === 2) statusBadgeStr = 'Paid';
+                               if (trn.StatusId === 3) statusBadgeStr = 'Overdue';
+                               if (trn.StatusId === 4) statusBadgeStr = 'Cancelled';
+
+                               let statusColor = "medium";
+                               if (trn.StatusId === 1) statusColor = "warning";
+                               if (trn.StatusId === 2) statusColor = "success";
+                               if (trn.StatusId === 3) statusColor = "danger";
 
                                return (
                                <IonItemSliding key={trn.Id}>
@@ -298,7 +294,7 @@ const TransactionsPage: React.FC = () => {
                                            <h2>{trn.Client}</h2>
                                            <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
                                                 <span>Due: {trn.AmountDue}</span>
-                                                {statusBadge}
+                                                <IonBadge color={statusColor}>{statusBadgeStr}</IonBadge>
                                            </div>
                                        </IonLabel>
                                         { trn.StatusId !== 2 && (
