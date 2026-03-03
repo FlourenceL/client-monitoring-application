@@ -22,6 +22,7 @@ const ClientsPage: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<any>(null); // For details modal
   const [isDetailsOpen, setIsDetailsOpen] = useState<boolean>(false);
+  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   
   const [formData, setFormData] = useState({
     clientName: '',
@@ -101,11 +102,13 @@ const ClientsPage: React.FC = () => {
           name: c.Client,
           email: c.ContactInfo.split(' | ')[0],
           phone: c.ContactInfo.split(' | ')[1] || '',
+          rawDateInstalled: c.DateInstalled,
           dueDate: c.DateInstalled ? new Date(c.DateInstalled).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '',
           amount: clientPlan ? clientPlan.Amount : 0,
           status: billingStatus,
           subscriptionStatus: c.IsActive ? 'Active' : 'Inactive',
           planId: c.PlanId,
+          locationId: c.LocationId,
           location: clientLocation ? clientLocation.Location : ''
         };
       });
@@ -200,6 +203,76 @@ const ClientsPage: React.FC = () => {
       presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger' });  
     }
   }
+
+  const handleEditClick = () => {
+    if (!selectedClient) return;
+    
+    // Parse Date for input (YYYY-MM-DD from rawDateInstalled)
+    // If rawDateInstalled is ISO string, split by T and take first part.
+    const rawDate = selectedClient.rawDateInstalled ? new Date(selectedClient.rawDateInstalled).toISOString().split('T')[0] : '';
+
+    setFormData({
+      clientName: selectedClient.name,
+      email: selectedClient.email,
+      phone: selectedClient.phone,
+      amount: selectedClient.amount.toString(),
+      dueDate: rawDate,
+      status: selectedClient.subscriptionStatus.toLowerCase(), // active/inactive
+      planId: selectedClient.planId,
+      locationId: selectedClient.locationId
+    });
+    
+    setIsDetailsOpen(false);
+    setIsEditOpen(true);     
+  };
+
+  const handleUpdateClient = async () => {
+    if (!formData.clientName || formData.clientName.trim() === '') {
+      presentToast({ message: 'Client name is required', duration: 2000, color: 'warning' });
+      return;
+    }
+
+    if (!formData.planId) {
+      presentToast({ message: 'Please select an internet plan', duration: 2000, color: 'warning' });
+      return;
+    }
+
+    if (!formData.locationId) {
+      presentToast({ message: 'Please select a location', duration: 2000, color: 'warning' });
+      return;
+    }
+    
+    try {
+      const response = await clientService.updateClient(selectedClient.id, {
+        Client: formData.clientName,
+        ContactInfo: `${formData.email} | ${formData.phone}`,
+        DateInstalled: formData.dueDate ? new Date(formData.dueDate).toISOString() : new Date().toISOString(),
+        PlanId: formData.planId,
+        IsActive: formData.status === 'active', 
+        LocationId: formData.locationId
+      });
+
+      if (response.success) {
+        presentToast({ message: 'Client updated successfully', duration: 2000, color: 'success' });
+        setIsEditOpen(false);
+        loadClients();
+        setFormData({
+            clientName: '',
+            email: '',
+            phone: '',
+            amount: '',
+            dueDate: '',
+            status: 'pending',
+            planId: null,
+            locationId: null
+        });
+      } else {
+         presentToast({ message: response.message || 'Failed to update', duration: 2000, color: 'danger' });
+      }
+    } catch (error) {
+       presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger' });
+    }
+  };
 
   // Calculate total revenue and paid clients count
   const activeClientsCount = clientsList.filter(c => c.subscriptionStatus === 'Active').length;
@@ -512,7 +585,19 @@ const ClientsPage: React.FC = () => {
 
         {/* Floating Action Button */}
         <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ marginBottom: '20px', marginRight: '10px' }}>
-          <IonFabButton onClick={() => setIsOpen(true)}>
+          <IonFabButton onClick={() => {
+              setFormData({
+                clientName: '',
+                email: '',
+                phone: '',
+                amount: '',
+                dueDate: '',
+                status: 'pending',
+                planId: null,
+                locationId: null
+              });
+              setIsOpen(true);
+          }}>
             <IonIcon icon={add} />
           </IonFabButton>
         </IonFab>
@@ -675,19 +760,7 @@ const ClientsPage: React.FC = () => {
                 fill="outline" 
                 color="medium" 
                 style={{ flex: 1, '--border-radius': '12px', height: '50px' }} 
-                onClick={() => {
-                  setIsOpen(false);
-                  setFormData({
-                    clientName: '',
-                    email: '',
-                    phone: '',
-                    amount: '',
-                    dueDate: '',
-                    status: 'pending', 
-                    planId: null,
-                    locationId: null
-                  });
-                }}
+                onClick={() => setIsOpen(false)}
               >
                 Cancel
               </IonButton>
@@ -816,7 +889,7 @@ const ClientsPage: React.FC = () => {
                     </IonItem>
                 </IonList>
                 
-                <IonButton expand="block" color="primary" style={{ '--border-radius': '16px', height: '54px', fontWeight: '700', fontSize: '16px', '--box-shadow': '0 8px 20px -4px rgba(67, 97, 238, 0.4)' }}>
+                <IonButton expand="block" color="primary" onClick={handleEditClick} style={{ '--border-radius': '16px', height: '54px', fontWeight: '700', fontSize: '16px', '--box-shadow': '0 8px 20px -4px rgba(67, 97, 238, 0.4)' }}>
                     <IonIcon icon={createOutline} slot="start" />
                     Edit Client Details
                 </IonButton>
@@ -824,6 +897,204 @@ const ClientsPage: React.FC = () => {
               </div>
             )}
           </IonContent>
+        </IonModal>
+
+        {/* Edit Client Modal */}
+        <IonModal isOpen={isEditOpen} onDidDismiss={() => setIsEditOpen(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Edit Client Details</IonTitle>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingTop: '10px' }}>
+              
+              <div style={{ 
+                padding: '16px', 
+                background: 'rgba(var(--ion-color-primary-rgb), 0.05)', 
+                borderRadius: '12px',
+                fontSize: '14px',
+                color: 'var(--ion-color-medium)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                border: '1px solid rgba(var(--ion-color-primary-rgb), 0.1)'
+              }}>
+                <IonIcon icon={person} color="primary" />
+                <span>Update client information below</span>
+              </div>
+
+              {/* Client Details Section */}
+              <section>
+                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', color: 'var(--ion-color-medium)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <IonIcon icon={person} />
+                  Client Information
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <IonInput 
+                    label="Client Name *" 
+                    labelPlacement="floating" 
+                    fill="outline" 
+                    mode="md"
+                    placeholder="e.g. Acme Corp" 
+                    value={formData.clientName} 
+                    onIonInput={e => handleInputChange('clientName', e.detail.value!)}
+                    required
+                    style={{ '--border-radius': '12px' }}
+                  ></IonInput>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <IonInput 
+                      label="Email Address" 
+                      type="email" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      placeholder="contact@acme.com" 
+                      value={formData.email} 
+                      onIonInput={e => handleInputChange('email', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                    <IonInput 
+                      label="Phone Number" 
+                      type="tel" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      placeholder="+1 (555)..." 
+                      value={formData.phone} 
+                      onIonInput={e => handleInputChange('phone', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                  
+                  <IonSelect 
+                    label="Location *" 
+                    labelPlacement="floating" 
+                    fill="outline" 
+                    mode="md"
+                    value={formData.locationId} 
+                    style={{ '--border-radius': '12px' }}
+                    interface="action-sheet"
+                    onIonChange={e => handleInputChange('locationId', e.detail.value)}
+                  >
+                    {locations.map(loc => (
+                      <IonSelectOption key={loc.Id} value={loc.Id}>
+                        {loc.Location}
+                      </IonSelectOption>
+                    ))}
+                  </IonSelect>
+                  </div>
+                </div>
+              </section>
+
+              <div style={{ height: '1px', background: 'var(--ion-color-step-100, #f0f0f0)' }}></div>
+
+              {/* Billing Details Section */}
+              <section>
+                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '700', color: 'var(--ion-color-medium)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <IonIcon icon={card} />
+                  Subscription Plan & Status
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                   <IonSelect 
+                        label="Status" 
+                        labelPlacement="floating" 
+                        fill="outline" 
+                        mode="md"
+                        value={formData.status} 
+                        style={{ '--border-radius': '12px' }}
+                        interface="popover"
+                        onIonChange={e => handleInputChange('status', e.detail.value)}
+                      >
+                        <IonSelectOption value="active">Active</IonSelectOption>
+                        <IonSelectOption value="inactive">Inactive</IonSelectOption>
+                  </IonSelect>
+
+                  <IonSelect 
+                    label="Internet Plan *" 
+                    labelPlacement="floating" 
+                    fill="outline" 
+                    mode="md"
+                    value={formData.planId} 
+                    style={{ '--border-radius': '12px' }}
+                    interface="action-sheet"
+                    onIonChange={e => {
+                      const selectedPlanId = e.detail.value;
+                      const selectedPlan = plans.find(p => p.Id === selectedPlanId);
+                      handleInputChange('planId', selectedPlanId);
+                      if (selectedPlan) {
+                        handleInputChange('amount', selectedPlan.Amount);
+                      }
+                    }}
+                  >
+                    {plans.map(plan => (
+                      <IonSelectOption key={plan.Id} value={plan.Id}>
+                        {plan.PlanName} (${plan.Amount})
+                      </IonSelectOption>
+                    ))}
+                  </IonSelect>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <IonInput 
+                      label="Amount ($)" 
+                      type="number" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      placeholder="0.00" 
+                      value={formData.amount} 
+                      onIonInput={e => handleInputChange('amount', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                    <IonInput 
+                      label="Date Installed" 
+                      type="date" 
+                      labelPlacement="floating" 
+                      fill="outline" 
+                      mode="md"
+                      value={formData.dueDate} 
+                      onIonChange={e => handleInputChange('dueDate', e.detail.value!)}
+                      style={{ '--border-radius': '12px' }}
+                    ></IonInput>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+          </IonContent>
+          <IonFooter className="ion-no-border">
+            <div className="ion-padding" style={{ display: 'flex', gap: '12px', paddingTop: '0' }}>
+              <IonButton 
+                expand="block" 
+                fill="outline" 
+                color="medium" 
+                style={{ flex: 1, '--border-radius': '12px', height: '50px' }} 
+                onClick={() => {
+                  setIsEditOpen(false);
+                  setFormData({
+                    clientName: '',
+                    email: '',
+                    phone: '',
+                    amount: '',
+                    dueDate: '',
+                    status: 'pending', 
+                    planId: null,
+                    locationId: null
+                  });
+                }}
+              >
+                Cancel
+              </IonButton>
+              <IonButton 
+                expand="block" 
+                color="primary" 
+                style={{ flex: 1, '--border-radius': '12px', height: '50px', '--box-shadow': '0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3)' }} 
+                onClick={handleUpdateClient}
+              >
+                Update Client
+              </IonButton>
+            </div>
+          </IonFooter>
         </IonModal>
    
       </IonContent>

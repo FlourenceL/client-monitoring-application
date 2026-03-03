@@ -1,5 +1,5 @@
 import { databaseService } from "../database/Database.service";
-import { CreateClientDTO } from "../models/createModels/ClientsModel";
+import { CreateClientDTO, UpdateClientDTO } from "../models/createModels/ClientsModel";
 import { MstClient, TrnCollection } from "../database/DatabaseConstants";
 
 class ClientService {
@@ -35,6 +35,19 @@ class ClientService {
             return {success: false, message: `Failed to add client: ${error}`};
         }
         
+    }
+
+    async updateClient(id: number, updateClientDto: UpdateClientDTO): Promise<{success: boolean; message: string}> {
+        try {
+            const update = await databaseService.run(
+                `UPDATE ${MstClient} SET Client = ?, ContactInfo = ?, DateInstalled = ?, PlanId = ?, IsActive = ?, LocationId = ? WHERE Id = ?`,
+                [updateClientDto.Client, updateClientDto.ContactInfo, updateClientDto.DateInstalled, 
+                 updateClientDto.PlanId, updateClientDto.IsActive, updateClientDto.LocationId, id]
+            );
+            return {success: true, message: 'Client updated successfully'};
+        } catch (error) {
+            return {success: false, message: `Failed to update client: ${error}`};
+        }
     }
 
     async updateClientStatus(id: number, status: string) {

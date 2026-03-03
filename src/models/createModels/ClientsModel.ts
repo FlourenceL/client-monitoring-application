@@ -14,4 +14,5 @@ export interface UpdateClientDTO {
     DateInstalled: string;
     PlanId: number;
     IsActive: boolean;
+    LocationId: number;
 }
