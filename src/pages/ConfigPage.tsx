@@ -128,7 +128,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Location name cannot be empty",
                 duration: 2000,
                 color: "warning",
-                position: 'top',
                 icon: warningOutline
             });
             return;
@@ -141,7 +140,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                     message: "Location updated successfully",
                     duration: 2000,
                     color: "success",
-                    position: 'top',
                     icon: checkmarkCircleOutline
                 });
                 setEditingLocationId(null);
@@ -151,7 +149,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                     message: "Location added successfully",
                     duration: 2000,
                     color: "success",
-                    position: 'top',
                     icon: checkmarkCircleOutline
                 });
             }
@@ -163,7 +160,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: editingLocationId ? "Failed to update location" : "Failed to add location",
                 duration: 2000,
                 color: "danger",
-                position: 'top',
                 icon: closeCircleOutline
             });
         }
@@ -181,7 +177,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Location deleted successfully",
                 duration: 2000,
                 color: "success",
-                position: 'top',
                 icon: checkmarkCircleOutline
             });
             await loadLocations();
@@ -191,7 +186,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Failed to delete location",
                 duration: 2000,
                 color: "danger",
-                position: 'top',
                 icon: closeCircleOutline
             });
         }
@@ -203,7 +197,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Payment method name cannot be empty",
                 duration: 2000,
                 color: "warning",
-                position: 'top',
                 icon: warningOutline
             });
             return;
@@ -216,7 +209,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                     message: "Payment method updated successfully",
                     duration: 2000,
                     color: "success",
-                    position: 'top',
                     icon: checkmarkCircleOutline
                 });
                 setEditingPaymentMethodId(null);
@@ -226,7 +218,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                     message: "Payment method added successfully",
                     duration: 2000,
                     color: "success",
-                    position: 'top',
                     icon: checkmarkCircleOutline
                 });
             }
@@ -238,7 +229,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: editingPaymentMethodId ? "Failed to update payment method" : "Failed to add payment method",
                 duration: 2000,
                 color: "danger",
-                position: 'top',
                 icon: closeCircleOutline
             });
         }
@@ -256,7 +246,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Payment method deleted successfully",
                 duration: 2000,
                 color: "success",
-                position: 'top',
                 icon: checkmarkCircleOutline
             });
             await loadPaymentMethods();
@@ -266,7 +255,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Failed to delete payment method",
                 duration: 2000,
                 color: "danger",
-                position: 'top',
                 icon: closeCircleOutline
             });
         }
@@ -278,7 +266,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Plan name cannot be empty",
                 duration: 2000,
                 color: "warning",
-                position: 'top',
                 icon: warningOutline
             });
             return;
@@ -288,7 +275,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Please enter a valid amount",
                 duration: 2000,
                 color: "warning",
-                position: 'top',
                 icon: warningOutline
             });
             return;
@@ -301,7 +287,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                     message: "Plan updated successfully",
                     duration: 2000,
                     color: "success",
-                    position: 'top',
                     icon: checkmarkCircleOutline
                 });
                 setEditingPlanId(null);
@@ -311,7 +296,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                     message: "Plan added successfully",
                     duration: 2000,
                     color: "success",
-                    position: 'top',
                     icon: checkmarkCircleOutline
                 });
             }
@@ -325,7 +309,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: editingPlanId ? "Failed to update plan" : "Failed to add plan",
                 duration: 2000,
                 color: "danger",
-                position: 'top',
                 icon: closeCircleOutline
             });
         }
@@ -345,7 +328,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Plan deleted successfully",
                 duration: 2000,
                 color: "success",
-                position: 'top',
                 icon: checkmarkCircleOutline
             });
             await loadPlans();
@@ -355,7 +337,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 message: "Failed to delete plan",
                 duration: 2000,
                 color: "danger",
-                position: 'top',
                 icon: closeCircleOutline
             });
         }
