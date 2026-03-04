@@ -365,7 +365,7 @@ const TransactionsPage: React.FC = () => {
         doc.setTextColor(0, 0, 0);
 
         // Table
-        const tableColumn = ["Client", "Location", "Status", "Due", "Paid"];
+        const tableColumn = ["Due Date", "Client", "Location", "Status", "Due", "Paid"];
         const tableRows: any[] = [];
 
         transactionsData.forEach((t: any) => {
@@ -373,7 +373,33 @@ const TransactionsPage: React.FC = () => {
             if(t.StatusId === 2) statusText = "Paid";
             else if(t.StatusId === 3) statusText = "Overdue";
 
+            // Calculate Due Date
+            let dueDateStr = "N/A";
+            if(t.DateInstalled) {
+                try {
+                   // DateInstalled format usually ISO or YYYY-MM-DD
+                   const installedDate = new Date(t.DateInstalled);
+                   if(!isNaN(installedDate.getTime())) {
+                       const installDay = installedDate.getDate();
+                       if (t.BillingMonth) {
+                            const [m, y] = t.BillingMonth.split('/'); // e.g. '03' and '2026'
+                            const monthInt = parseInt(m);
+                            const yearInt = parseInt(y);
+                            
+                            // Check max days in month (0th day of next month gives last day of current)
+                            const lastDayOfMonth = new Date(yearInt, monthInt, 0).getDate();
+                            const finalDay = Math.min(installDay, lastDayOfMonth);
+                            
+                            dueDateStr = `${m}/${String(finalDay).padStart(2, '0')}/${y}`;
+                       }
+                   }
+                } catch(e) {
+                    console.error("Date error", e);
+                }
+            }
+
             const rowData = [
+                dueDateStr,
                 t.Client,
                 t.Location,
                 statusText,
@@ -396,8 +422,9 @@ const TransactionsPage: React.FC = () => {
             styles: { fontSize: 10, cellPadding: 3 },
             alternateRowStyles: { fillColor: [245, 247, 250] },
             columnStyles: {
-                0: { cellWidth: 50 }, // Client
-                1: { cellWidth: 40 }, // Location
+                0: { cellWidth: 25 }, // Due Date
+                1: { cellWidth: 50 }, // Client
+                2: { cellWidth: 35 }, // Location
                 // ...
             }
         });
