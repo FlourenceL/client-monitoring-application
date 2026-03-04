@@ -12,12 +12,30 @@ import {
   cashOutline, calendarOutline, refreshOutline, personCircleOutline,
   statsChartOutline, locationOutline, documentTextOutline 
 } from 'ionicons/icons';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import collectionService from '../services/Collections.service';
 import clientService from '../services/Clients.service';
 import locationsService from '../services/Locations.service';
 import paymentMethodsService from '../services/PaymentMethods.service';
 import planService from '../services/Plans.service';
 import { CreateCollectionDTO } from '../models/createModels/CollectionsModel';
+
+const getBase64ImageFromUrl = async (imageUrl: string): Promise<string | ArrayBuffer | null> => {
+  try {
+    const res = await fetch(imageUrl);
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error("Error converting image to base64:", error);
+    return null;
+  }
+};
 
 const TransactionsPage: React.FC = () => {
   const [clients, setClients] = useState<any[]>([]);
@@ -253,11 +271,146 @@ const TransactionsPage: React.FC = () => {
     setShowToast(true);
   };
 
-  const handleGeneratePdf = () => {
-    console.log("Generating PDF for:", pdfMonth, pdfYear, pdfLocation);
+  const handleGeneratePdf = async () => {
     setShowPdfModal(false);
     showToastMessage(`Generating PDF report for ${pdfMonth}/${pdfYear}...`);
-    // TODO: Implement PDF generation logic here
+    setLoading(true);
+
+    try {
+        const generationMonth = `${pdfMonth}/${pdfYear}`;
+        
+        // Fetch data
+        let transactionsData = (await collectionService.getCollectionsByMonthDetailed(generationMonth)) || [];
+        
+        // Filter by location
+        let locationName = "All Locations";
+        if(pdfLocation !== 'all') {
+            // Ensure comparison works regardless of type (string/number)
+            transactionsData = transactionsData.filter((t: any) => String(t.LocationId) === String(pdfLocation));
+            const foundLoc = locations.find(l => String(l.Id) === String(pdfLocation));
+            if(foundLoc) locationName = foundLoc.Location;
+        }
+
+        // Calculate Stats
+        let total = 0, collected = 0, overdue = 0, pending = 0;
+        transactionsData.forEach((t: any) => {
+             const amount = t.AmountDue || 0;
+             const paid = t.AmountPaid || 0;
+             total += amount;
+             if(t.StatusId === 2) collected += paid;
+             else if(t.StatusId === 3) overdue += amount;
+             else pending += amount;
+        });
+
+        // Generate PDF
+        const doc = new jsPDF();
+        
+        // Add Logo
+        try {
+            const logoData = await getBase64ImageFromUrl('/assets/happy-link-report-logo.png');
+            if (logoData) {
+                // Add logo at top right (A4 width is ~210mm)
+                doc.addImage(logoData as string, 'PNG', 160, 10, 35, 35);
+            }
+        } catch (e) {
+            console.warn("Logo not found or could not be loaded");
+        }
+        
+        // Title
+        doc.setFontSize(22);
+        doc.setTextColor(33, 33, 33);
+        doc.text("Monthly Collection Report", 14, 25);
+        
+        doc.setFontSize(11);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Period: ${generationMonth}`, 14, 33);
+        doc.text(`Location: ${locationName}`, 14, 39);
+        doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 45);
+        doc.setTextColor(0, 0, 0);
+
+        // Summary Box
+        doc.setDrawColor(220, 220, 220);
+        doc.setFillColor(250, 252, 255);
+        doc.roundedRect(14, 55, 180, 28, 3, 3, 'FD');
+        
+        doc.setFontSize(10);
+        doc.setTextColor(60, 60, 60);
+        
+        doc.text("Total Expected:", 22, 65);
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`$${total.toLocaleString()}`, 22, 72);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(60, 60, 60);
+        doc.text("Collected:", 65, 65);
+        doc.setFontSize(12);
+        doc.setTextColor(40, 167, 69); // Green
+        doc.text(`$${collected.toLocaleString()}`, 65, 72);
+
+        doc.setFontSize(10);
+        doc.setTextColor(60, 60, 60);
+        doc.text("Pending:", 108, 65);
+        doc.setFontSize(12);
+        doc.setTextColor(255, 152, 0); // Orange
+        doc.text(`$${pending.toLocaleString()}`, 108, 72);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(60, 60, 60);
+        doc.text("Overdue:", 151, 65);
+        doc.setFontSize(12);
+        doc.setTextColor(220, 53, 69); // Red
+        doc.text(`$${overdue.toLocaleString()}`, 151, 72);
+        
+        doc.setTextColor(0, 0, 0);
+
+        // Table
+        const tableColumn = ["Client", "Location", "Status", "Due", "Paid"];
+        const tableRows: any[] = [];
+
+        transactionsData.forEach((t: any) => {
+            let statusText = "Pending";
+            if(t.StatusId === 2) statusText = "Paid";
+            else if(t.StatusId === 3) statusText = "Overdue";
+
+            const rowData = [
+                t.Client,
+                t.Location,
+                statusText,
+                `$${(t.AmountDue || 0).toLocaleString()}`,
+                `$${(t.AmountPaid || 0).toLocaleString()}`,
+            ];
+            tableRows.push(rowData);
+        });
+
+        autoTable(doc, {
+            startY: 95,
+            head: [tableColumn],
+            body: tableRows,
+            theme: 'striped',
+            headStyles: { 
+                fillColor: [41, 128, 185],
+                textColor: 255,
+                fontStyle: 'bold'
+            },
+            styles: { fontSize: 10, cellPadding: 3 },
+            alternateRowStyles: { fillColor: [245, 247, 250] },
+            columnStyles: {
+                0: { cellWidth: 50 }, // Client
+                1: { cellWidth: 40 }, // Location
+                // ...
+            }
+        });
+
+        doc.save(`Report_${generationMonth.replace('/', '-')}_${pdfLocation}.pdf`);
+        showToastMessage("PDF Report downloaded successfully.");
+
+    } catch (e) {
+        console.error("Error generating PDF", e);
+        showToastMessage("Failed to generate PDF report.");
+    } finally {
+        setLoading(false);
+    }
   };
 
   return (
