@@ -9,14 +9,14 @@ import {
 	IonTabs,
 	setupIonicReact,
 	useIonToast,
+    IonLoading
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { databaseService } from "./database/Database.service";
 import { seedDatabase } from "./database/Seeder";
 import collectionService from "./services/Collections.service";
-import { useAppStore } from "./store/appStore";
-
+import { useAppStore } from "./store/appStore";																					
 import './theme/LoginPage.css'
 
 /* Core CSS required for Ionic components to work properly */
@@ -58,12 +58,14 @@ const App: React.FC = () => {
     const isAuthenticated = useAppStore((state) => state.isAuthenticated);
     const setIsAuthenticated = useAppStore((state) => state.setIsAuthenticated);
     const [presentToast] = useIonToast();
+    const [dbReady, setDbReady] = useState(false);
+
 	useEffect(() => {
 		const initDb = async () => {
 			try {
 				await databaseService.init();
 				await seedDatabase();
-                await collectionService.generateMonthlyTransactions();
+                setDbReady(true);
 			} catch (error) {
 				presentToast({
 					message: "Error initializing database: " + error,
@@ -77,6 +79,9 @@ const App: React.FC = () => {
 		initDb();
 	}, []);
 
+    if (!dbReady) {
+        return <IonApp><IonLoading isOpen={true} message="Initializing Database..." /></IonApp>;
+    }
 
 	return (
 		<IonApp>
