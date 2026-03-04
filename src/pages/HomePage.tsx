@@ -1,61 +1,66 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle, IonGrid, IonRow, IonCol,
-  IonBadge, IonButton, IonModal, IonButtons, IonFooter, IonIcon, IonText, IonAvatar, IonChip
+  IonBadge, IonButton, IonModal, IonButtons, IonFooter, IonIcon, IonText, IonAvatar, IonChip, useIonViewWillEnter
  } from '@ionic/react';
 import { wallet, time, alertCircle, trendingUp, arrowForward, sparkles, notifications, chevronForward } from 'ionicons/icons';
 import { useState } from 'react';
 import { useAppStore } from "../store/appStore";
-
-const clients = [
-  {
-    id: 1,
-    name: 'Tech Solutions Inc.',
-    email: 'contact@techsolutions.com',
-    dueDate: 'Oct 24, 2023',
-    amount: 12500,
-    status: 'Paid',
-  },
-  {
-    id: 2,
-    name: 'Global Logistics',
-    email: 'billing@globallogistics.com',
-    dueDate: 'Oct 28, 2023',
-    amount: 8400,
-    status: 'Pending',
-  },
-  {
-    id: 3,
-    name: 'Creative Studio',
-    email: 'hello@creativestudio.com',
-    dueDate: 'Nov 02, 2023',
-    amount: 4200,
-    status: 'Overdue',
-  },
-  {
-    id: 4,
-    name: 'NextGen Systems',
-    email: 'finance@nextgen.com',
-    dueDate: 'Nov 05, 2023',
-    amount: 15000,
-    status: 'Paid',
-  },
-];
-
-const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'paid':
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800';
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
-    case 'overdue':
-      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800';
-    default:
-      return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700';
-  }
-};
+import collectionService from '../services/Collections.service';
 
 const HomePage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [stats, setStats] = useState({ revenue: 0, pending: 0, pendingCount: 0, overdue: 0, overdueCount: 0 });
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+
+  useIonViewWillEnter(() => {
+      loadDashboardData();
+  });
+
+  const loadDashboardData = async () => {
+      try {
+          const now = new Date();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const year = now.getFullYear();
+          const currentMonth = `${month}/${year}`;
+
+          // Fetch transactions for the current month
+          const trns = await collectionService.getCollectionsByMonthDetailed(currentMonth);
+          
+          let revenue = 0;
+          let pending = 0;
+          let pendingCount = 0;
+          let overdue = 0;
+          let overdueCount = 0;
+
+          if (trns) {
+              trns.forEach((t: any) => {
+                  const paid = t.AmountPaid || 0;
+                  const due = t.AmountDue || 0;
+
+                  // StatusId: 1=Pending, 2=Paid, 3=Overdue
+                  if (t.StatusId === 2) {
+                      revenue += paid;
+                  } else if (t.StatusId === 1) {
+                      pending += due;
+                      pendingCount++;
+                  } else if (t.StatusId === 3) {
+                      overdue += due;
+                      overdueCount++;
+                  }
+              });
+
+              // Sort by ID descending (newest first)
+              const sorted = [...trns].sort((a: any, b: any) => b.Id - a.Id);
+              setRecentTransactions(sorted);
+          }
+
+          setStats({ revenue, pending, pendingCount, overdue, overdueCount });
+
+      } catch (e) {
+          console.error("Error loading dashboard data", e);
+      }
+  };
+
   return (
     <IonPage>
       <IonHeader translucent={true}>
@@ -101,13 +106,7 @@ const HomePage: React.FC = () => {
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
                  <div style={{ flex: 1 }}>
                    <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>TOTAL REVENUE</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>$40.1k</h1>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                      <span style={{ background: 'rgba(255, 255, 255, 0.25)', padding: '4px 10px', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <IonIcon icon={trendingUp} style={{ fontSize: '16px' }} /> +12%
-                      </span>
-                      <span style={{ opacity: 0.9, fontWeight: 500 }}>vs last month</span>
-                   </div>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.revenue.toLocaleString()}</h1>
                  </div>
                  <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
                     <IonIcon icon={wallet} style={{ fontSize: '28px' }} />
@@ -141,9 +140,9 @@ const HomePage: React.FC = () => {
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
                  <div style={{ flex: 1 }}>
                    <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>PENDING INVOICES</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>$33.9k</h1>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.pending.toLocaleString()}</h1>
                    <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
-                      <strong>5</strong> active items awaiting payment
+                      <strong>{stats.pendingCount}</strong> active items awaiting payment
                    </div>
                  </div>
                  <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
@@ -154,13 +153,7 @@ const HomePage: React.FC = () => {
             </section>
 
             {/* Action Required Section */}
-            {(() => {
-              const overdueClients = clients.filter(c => c.status === 'Overdue');
-              if (overdueClients.length === 0) return null;
-
-              const totalOverdue = overdueClients.reduce((sum, client) => sum + client.amount, 0);
-
-              return (
+            {stats.overdueCount > 0 && (
               <section style={{ marginBottom: '32px' }}>
                 <div style={{ 
                   background: 'linear-gradient(to right, #FEF3C7, #FDE68A)', 
@@ -191,7 +184,7 @@ const HomePage: React.FC = () => {
                         Action Required
                       </h3>
                       <p style={{ margin: 0, color: '#92400E', fontSize: '14px', lineHeight: '1.4' }}>
-                        <strong>{overdueClients.length} overdue invoice{overdueClients.length > 1 ? 's' : ''}</strong> totaling <strong>${totalOverdue.toLocaleString()}</strong>
+                        <strong>{stats.overdueCount} overdue invoice{stats.overdueCount > 1 ? 's' : ''}</strong> totaling <strong>${stats.overdue.toLocaleString()}</strong>
                       </p>
                     </div>
                   </div>
@@ -214,8 +207,7 @@ const HomePage: React.FC = () => {
                   </IonButton>
                 </div>
               </section>
-              );
-            })()}
+            )}
 
             {/* AI Insights */}
             <section style={{ marginBottom: '36px' }}>
@@ -296,16 +288,16 @@ const HomePage: React.FC = () => {
                 border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
               }}>
-                {clients.map((client, index) => (
+                {recentTransactions.slice(0, 5).map((t, index) => (
                   <div
-                    key={client.id}
+                    key={t.Id}
                     style={{
                       padding: '18px 20px',
                       display: 'grid',
                       gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 90px',
                       gap: '16px',
                       alignItems: 'center',
-                      borderBottom: index < clients.length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
+                      borderBottom: index < recentTransactions.length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
                       transition: 'background 0.2s ease',
                       cursor: 'pointer'
                     }}
@@ -315,36 +307,36 @@ const HomePage: React.FC = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                       <div style={{ 
                           width: '48px', height: '48px', borderRadius: '14px',
-                          background: `hsl(${client.id * 50}, 85%, 95%)`, 
-                          color: `hsl(${client.id * 50}, 70%, 40%)`,
+                          background: `hsl(${t.Id * 50}, 85%, 95%)`, 
+                          color: `hsl(${t.Id * 50}, 70%, 40%)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center', 
                           fontWeight: '700', fontSize: '19px',
-                          border: `2px solid hsl(${client.id * 50}, 85%, 90%)`
+                          border: `2px solid hsl(${t.Id * 50}, 85%, 90%)`
                         }}>
-                          {client.name.charAt(0)}
+                          {t.Client ? t.Client.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div style={{ overflow: 'hidden', minWidth: 0 }}>
-                        <div style={{ fontWeight: '600', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ion-text-color)' }}>{client.name}</div>
-                        <div style={{ fontSize: '13px', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{client.email || 'No email'}</div>
+                        <div style={{ fontWeight: '600', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ion-text-color)' }}>{t.Client}</div>
+                        <div style={{ fontSize: '13px', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{t.ContactInfo || 'No contact info'}</div>
                       </div>
                     </div>
 
                     <div style={{ fontSize: '14px', color: 'var(--ion-color-step-600, #666)', fontWeight: 500 }}>
-                      {client.dueDate}
+                      {t.BillingMonth}
                     </div>
 
                     <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '16px', color: 'var(--ion-text-color)' }}>
-                      ${client.amount.toLocaleString()}
+                      ${(t.StatusId === 2 ? t.AmountPaid : t.AmountDue).toLocaleString()}
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
                       <IonBadge color={
-                          client.status.toLowerCase() === 'paid' ? 'success' :
-                          client.status.toLowerCase() === 'pending' ? 'warning' : 'danger'
+                          t.Status === 'Paid' ? 'success' :
+                          t.Status === 'Pending' ? 'warning' : 'danger'
                         }
                         style={{ borderRadius: '8px', padding: '6px 12px', fontWeight: '600', fontSize: '12px' }}
                       >
-                        {client.status}
+                        {t.Status}
                       </IonBadge>
                     </div>
                   </div>
@@ -356,7 +348,7 @@ const HomePage: React.FC = () => {
       <IonModal isOpen={isOpen} onDidDismiss={() => setIsOpen(false)} className="custom-modal">
         <IonHeader>
           <IonToolbar>
-            <IonTitle>All Clients</IonTitle>
+            <IonTitle>Transactions</IonTitle>
             <IonButtons slot="end">
         
             </IonButtons>
@@ -364,27 +356,27 @@ const HomePage: React.FC = () => {
         </IonHeader>
         <IonContent className="ion-padding">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {clients.map((client) => (
-              <IonCard key={client.id} style={{ margin: 0, borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            {recentTransactions.map((t) => (
+              <IonCard key={t.Id} style={{ margin: 0, borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
           <IonCardContent style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ 
                 width: '42px', height: '42px', borderRadius: '10px',
-                background: `hsl(${client.id * 60}, 70%, 95%)`, color: `hsl(${client.id * 60}, 70%, 40%)`,
+                background: `hsl(${t.Id * 60}, 70%, 95%)`, color: `hsl(${t.Id * 60}, 70%, 40%)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center', 
                 fontWeight: '700', fontSize: '16px'
               }}>
-                {client.name.charAt(0)}
+                {t.Client ? t.Client.charAt(0).toUpperCase() : '?'}
               </div>
               <div>
-                <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--ion-text-color)' }}>{client.name}</div>
-                <div style={{ fontSize: '12px', color: '#6b7280' }}>{client.email}</div>
+                <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--ion-text-color)' }}>{t.Client}</div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>{t.ContactInfo}</div>
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>${client.amount.toLocaleString()}</div>
-              <IonBadge color={client.status === 'Paid' ? 'success' : client.status === 'Pending' ? 'warning' : 'danger'} style={{ fontSize: '10px', marginTop: '2px' }}>
-                {client.status}
+              <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>${(t.StatusId === 2 ? t.AmountPaid : t.AmountDue).toLocaleString()}</div>
+              <IonBadge color={t.Status === 'Paid' ? 'success' : t.Status === 'Pending' ? 'warning' : 'danger'} style={{ fontSize: '10px', marginTop: '2px' }}>
+                {t.Status}
               </IonBadge>
             </div>
           </IonCardContent>

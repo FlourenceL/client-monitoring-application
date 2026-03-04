@@ -17,7 +17,7 @@ class CollectionService {
     async getCollectionsByMonthDetailed(month: string) {
         const getCollections = await databaseService.query(
             `SELECT t.Id, t.BillingMonth, t.AmountDue, t.AmountPaid, t.StatusId, t.LocationId,
-                    c.Client, s.Status, pm.PaymentMethod, l.Location
+                    c.Client, c.ContactInfo, s.Status, pm.PaymentMethod, l.Location
              FROM ${TrnCollection} t
              JOIN ${MstClient} c ON t.ClientId = c.Id
              JOIN ${MstStatus} s ON t.StatusId = s.Id
