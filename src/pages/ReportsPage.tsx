@@ -10,7 +10,7 @@ import {
 import { 
   checkmarkDoneCircle, walletOutline, timeOutline, alertCircleOutline, 
   cashOutline, calendarOutline, refreshOutline, personCircleOutline,
-  statsChartOutline 
+  statsChartOutline, locationOutline 
 } from 'ionicons/icons';
 import collectionService from '../services/Collections.service';
 import clientService from '../services/Clients.service';
@@ -25,7 +25,7 @@ const TransactionsPage: React.FC = () => {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [stats, setStats] = useState({ collected: 0, pending: 0, overdue: 0, total: 0 });
+  const [filterLocation, setFilterLocation] = useState<string>('all');
   
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -178,26 +178,35 @@ const TransactionsPage: React.FC = () => {
         const trns = await collectionService.getCollectionsByMonthDetailed(generationMonth);
         setTransactions(trns || []);
         
-        // Calculate stats
-        let c = 0, p = 0, o = 0, t = 0;
-        trns.forEach((trn: any) => {
-            const amount = trn.AmountDue || 0;
-            const paid = trn.AmountPaid || 0;
-            t += amount;
-            if (trn.StatusId === 2) {
-                c += paid;
-            } else if (trn.StatusId === 3) {
-                o += amount;
-            } else {
-                p += amount;
-            }
-        });
-        setStats({ collected: c, pending: p, overdue: o, total: t });
-
       } catch (e) {
           console.error(e);
       }
   };
+
+  const filteredTransactions = React.useMemo(() => {
+    if (filterLocation === 'all') return transactions;
+    return transactions.filter((t: any) => {
+        // Handle various id types/names if needed. Assuming LocationId is present and matches.
+        return t.LocationId == filterLocation; 
+    });
+  }, [transactions, filterLocation]);
+
+  const stats = React.useMemo(() => {
+    let c = 0, p = 0, o = 0, t = 0;
+    filteredTransactions.forEach((trn: any) => {
+        const amount = trn.AmountDue || 0;
+        const paid = trn.AmountPaid || 0;
+        t += amount;
+        if (trn.StatusId === 2) {
+            c += paid;
+        } else if (trn.StatusId === 3) {
+            o += amount;
+        } else {
+            p += amount;
+        }
+    });
+    return { collected: c, pending: p, overdue: o, total: t };
+  }, [filteredTransactions]);
 
   const handleGenerate = async () => {
       setLoading(true);
@@ -416,7 +425,8 @@ const TransactionsPage: React.FC = () => {
                   <div style={{
                       display:'flex', gap:'15px', alignItems:'center', 
                       background: 'var(--ion-card-background)', padding: '6px 12px', borderRadius: '16px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)', border: '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))'
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)', border: '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))',
+                      flexWrap: 'wrap'
                     }}>
                       <div style={{background: 'var(--ion-color-light)', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                         <IonIcon icon={calendarOutline} color="medium" />
@@ -429,7 +439,7 @@ const TransactionsPage: React.FC = () => {
                           value={selectedMonth}
                           onIonChange={e => setSelectedMonth(e.detail.value)}
                          className="custom-select no-border-select"
-                         style={{flex: 1, '--border-width': '0', '--padding-start': '0'}}
+                         style={{flex: 1, minWidth: '80px', '--border-width': '0', '--padding-start': '0'}}
                       >
                           {months.map(m => (
                               <IonSelectOption key={m.value} value={m.value}>{m.label}</IonSelectOption>
@@ -446,12 +456,34 @@ const TransactionsPage: React.FC = () => {
                           value={selectedYear}
                           onIonChange={e => setSelectedYear(e.detail.value)}
                            className="custom-select no-border-select"
-                           style={{flex: 1, '--border-width': '0', '--padding-start': '0'}}
+                           style={{flex: 1, minWidth: '60px', '--border-width': '0', '--padding-start': '0'}}
                       >
                           {years.map(y => (
                               <IonSelectOption key={y} value={y}>{y}</IonSelectOption>
                           ))}
                       </IonSelect>
+
+                      <div style={{height: '24px', width: '1px', background: '#eee'}}></div>
+
+                      <div style={{display:'flex', alignItems:'center', flex: 1.5, minWidth: '120px'}}>
+                          <IonIcon icon={locationOutline} color="medium" style={{marginRight: '8px'}} />
+                          <IonSelect 
+                              interface="popover"
+                              label="Filter Location"
+                              placeholder="All Locations"
+                              fill="outline"
+                              mode="ios"
+                              value={filterLocation}
+                              onIonChange={e => setFilterLocation(e.detail.value)}
+                              className="custom-select no-border-select"
+                              style={{ width: '100%', '--border-width': '0', '--padding-start': '0' }}
+                          >
+                              <IonSelectOption value="all">All Locations</IonSelectOption>
+                              {locations.map(loc => (
+                                  <IonSelectOption key={loc.Id} value={loc.Id}>{loc.Location}</IonSelectOption>
+                              ))}
+                          </IonSelect>
+                      </div>
                   </div>
               </IonCol>
               
@@ -469,7 +501,7 @@ const TransactionsPage: React.FC = () => {
                 {/* Removed IonCard wrapper for a cleaner list look */}
                 <div className="ion-padding-horizontal">
                     <IonList style={{background: 'transparent', paddingBottom: '40px'}}>
-                        {transactions.length === 0 && (
+                        {filteredTransactions.length === 0 && (
                             <div className="ion-padding ion-text-center" style={{marginTop: '40px'}}>
                                 <div style={{
                                     background: 'rgba(var(--ion-color-primary-rgb), 0.05)', 
@@ -480,17 +512,19 @@ const TransactionsPage: React.FC = () => {
                                 }}>
                                     <IonIcon icon={calendarOutline} style={{fontSize: '48px'}} />
                                 </div>
-                                <h3 style={{color: 'var(--ion-color-dark)', fontWeight: 'bold', fontSize: '20px'}}>No Transactions</h3>
+                                <h3 style={{color: 'var(--ion-color-dark)', fontWeight: 'bold', fontSize: '20px'}}>No Transactions Found</h3>
                                 <p style={{color: 'var(--ion-color-medium)', maxWidth: '280px', margin: '10px auto'}}>
-                                    We couldn't find any collection records for {getTargetMonth()}. Try generating a new report.
+                                    {filterLocation !== 'all' ? 'Try changing the location filter or generate a new report.' : `We couldn't find any collection records for ${getTargetMonth()}.`}
                                 </p>
-                                <IonButton fill="outline" shape="round" className="ion-margin-top" onClick={handleGenerate}>
-                                    Generate Report
-                                </IonButton>
+                                {filterLocation === 'all' && (
+                                    <IonButton fill="outline" shape="round" className="ion-margin-top" onClick={handleGenerate}>
+                                        Generate Report
+                                    </IonButton>
+                                )}
                             </div>
                         )}
                         
-                        {transactions.map((trn, index) => {
+                        {filteredTransactions.map((trn, index) => {
                             // Status Logic
                             let statusBadgeStr = trn.Status || 'Pending';
                             if (trn.StatusId === 1) statusBadgeStr = 'Pending';
