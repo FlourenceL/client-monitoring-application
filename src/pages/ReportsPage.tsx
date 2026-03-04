@@ -314,7 +314,7 @@ const TransactionsPage: React.FC = () => {
             </IonCol>
 
             {/* MANUAL ADD SECTION */}
-            <IonCol size="12" sizeMd="8" sizeLg="6">
+            {/* <IonCol size="12" sizeMd="8" sizeLg="6">
               <IonCard>
                 <IonCardContent>
                   <IonItem lines="none"><IonLabel color="medium"><h2>Manually Add Transaction</h2></IonLabel></IonItem>
@@ -426,7 +426,7 @@ const TransactionsPage: React.FC = () => {
 
                 </IonCardContent>
               </IonCard>
-            </IonCol>
+            </IonCol> */}
           </IonRow>
         </IonGrid>
 
