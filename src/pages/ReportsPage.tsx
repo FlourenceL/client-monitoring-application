@@ -5,12 +5,12 @@ import {
   IonSelect, IonSelectOption, IonButton, 
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
   IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
-  IonText, IonAvatar, IonChip, IonProgressBar
+  IonText, IonAvatar, IonChip, IonProgressBar, IonModal
 } from '@ionic/react';
 import { 
   checkmarkDoneCircle, walletOutline, timeOutline, alertCircleOutline, 
   cashOutline, calendarOutline, refreshOutline, personCircleOutline,
-  statsChartOutline, locationOutline 
+  statsChartOutline, locationOutline, documentTextOutline 
 } from 'ionicons/icons';
 import collectionService from '../services/Collections.service';
 import clientService from '../services/Clients.service';
@@ -30,6 +30,12 @@ const TransactionsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // PDF Modal State
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfMonth, setPdfMonth] = useState<string>(() => String(new Date().getMonth() + 1).padStart(2, '0'));
+  const [pdfYear, setPdfYear] = useState<string>(() => String(new Date().getFullYear()));
+  const [pdfLocation, setPdfLocation] = useState<string>('all');
 
   // Generation State
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
@@ -247,6 +253,13 @@ const TransactionsPage: React.FC = () => {
     setShowToast(true);
   };
 
+  const handleGeneratePdf = () => {
+    console.log("Generating PDF for:", pdfMonth, pdfYear, pdfLocation);
+    setShowPdfModal(false);
+    showToastMessage(`Generating PDF report for ${pdfMonth}/${pdfYear}...`);
+    // TODO: Implement PDF generation logic here
+  };
+
   return (
     <IonPage>
       <style>{`
@@ -265,6 +278,11 @@ const TransactionsPage: React.FC = () => {
         <IonToolbar>
             <IonButtons slot="start">
                 <IonBackButton defaultHref="/" />
+            </IonButtons>
+            <IonButtons slot="end">
+                <IonButton onClick={() => setShowPdfModal(true)}>
+                    <IonIcon slot="icon-only" icon={documentTextOutline} />
+                </IonButton>
             </IonButtons>
           <IonTitle>Transactions</IonTitle>
         </IonToolbar>
@@ -620,6 +638,53 @@ const TransactionsPage: React.FC = () => {
           message={toastMessage}
           duration={2000}
         />
+
+        <IonModal isOpen={showPdfModal} onDidDismiss={() => setShowPdfModal(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Generate Report</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setShowPdfModal(false)}>Close</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonList lines="full">
+              <IonItem>
+                <IonLabel position="stacked">Month</IonLabel>
+                <IonSelect value={pdfMonth} onIonChange={e => setPdfMonth(e.detail.value)}>
+                  {months.map(m => (
+                    <IonSelectOption key={m.value} value={m.value}>{m.label}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonLabel position="stacked">Year</IonLabel>
+                <IonSelect value={pdfYear} onIonChange={e => setPdfYear(e.detail.value)}>
+                  {years.map(y => (
+                    <IonSelectOption key={y} value={y}>{y}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+              <IonItem>
+                <IonLabel position="stacked">Location</IonLabel>
+                <IonSelect value={pdfLocation} onIonChange={e => setPdfLocation(e.detail.value)}>
+                  <IonSelectOption value="all">All Locations</IonSelectOption>
+                  {locations.map(loc => (
+                    <IonSelectOption key={loc.Id} value={loc.Id}>{loc.Location}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+            </IonList>
+            
+            <div className="ion-padding-top ion-margin-top">
+              <IonButton expand="block" onClick={handleGeneratePdf} color="primary" shape="round">
+                <IonIcon slot="start" icon={documentTextOutline} />
+                Generate PDF Report
+              </IonButton>
+            </div>
+          </IonContent>
+        </IonModal>
       </IonContent>
     </IonPage>
   );
