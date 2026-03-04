@@ -4,9 +4,14 @@ import {
   IonCard, IonCardContent, IonItem, IonLabel, IonInput, 
   IonSelect, IonSelectOption, IonButton, 
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
-  IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption
+  IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
+  IonText, IonAvatar, IonChip
 } from '@ionic/react';
-import { checkmarkDoneCircle } from 'ionicons/icons';
+import { 
+  checkmarkDoneCircle, walletOutline, timeOutline, alertCircleOutline, 
+  cashOutline, calendarOutline, refreshOutline, personCircleOutline,
+  statsChartOutline 
+} from 'ionicons/icons';
 import collectionService from '../services/Collections.service';
 import clientService from '../services/Clients.service';
 import locationsService from '../services/Locations.service';
@@ -20,6 +25,7 @@ const TransactionsPage: React.FC = () => {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [stats, setStats] = useState({ collected: 0, pending: 0, overdue: 0, total: 0 });
   
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -171,6 +177,23 @@ const TransactionsPage: React.FC = () => {
         const generationMonth = getTargetMonth();
         const trns = await collectionService.getCollectionsByMonthDetailed(generationMonth);
         setTransactions(trns || []);
+        
+        // Calculate stats
+        let c = 0, p = 0, o = 0, t = 0;
+        trns.forEach((trn: any) => {
+            const amount = trn.AmountDue || 0;
+            const paid = trn.AmountPaid || 0;
+            t += amount;
+            if (trn.StatusId === 2) {
+                c += paid;
+            } else if (trn.StatusId === 3) {
+                o += amount;
+            } else {
+                p += amount;
+            }
+        });
+        setStats({ collected: c, pending: p, overdue: o, total: t });
+
       } catch (e) {
           console.error(e);
       }
@@ -228,59 +251,112 @@ const TransactionsPage: React.FC = () => {
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Add Transaction</IonTitle>
+            <IonTitle size="large">Transactions</IonTitle>
           </IonToolbar>
         </IonHeader>
 
         <IonGrid>
+          {/* STATS ROW */}
+          <IonRow>
+            <IonCol size="6" sizeMd="3">
+              <IonCard color="tertiary">
+                <IonCardContent className="ion-text-center">
+                  <IonIcon size="large" icon={walletOutline} />
+                  <h2>${stats.collected.toFixed(2)}</h2>
+                  <p>Collected</p>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+             <IonCol size="6" sizeMd="3">
+              <IonCard color="primary">
+                <IonCardContent className="ion-text-center">
+                  <IonIcon size="large" icon={statsChartOutline} />
+                  <h2>${stats.total.toFixed(2)}</h2>
+                  <p>Total Due</p>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol size="6" sizeMd="3">
+              <IonCard color="warning">
+                <IonCardContent className="ion-text-center">
+                  <IonIcon size="large" icon={timeOutline} />
+                  <h2>${stats.pending.toFixed(2)}</h2>
+                  <p>Pending</p>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol size="6" sizeMd="3">
+              <IonCard color="danger">
+                <IonCardContent className="ion-text-center">
+                  <IonIcon size="large" icon={alertCircleOutline} />
+                  <h2>${stats.overdue.toFixed(2)}</h2>
+                  <p>Overdue</p>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+
+          <IonRow className="ion-align-items-center ion-justify-content-between ion-padding-horizontal">
+              <IonCol size="12" sizeMd="6">
+                  <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+                      <IonSelect 
+                          interface="popover"
+                          label="Month"
+                          labelPlacement="stacked"
+                          fill="outline" 
+                          value={selectedMonth}
+                          onIonChange={e => setSelectedMonth(e.detail.value)}
+                         className="custom-select"
+                      >
+                          {months.map(m => (
+                              <IonSelectOption key={m.value} value={m.value}>{m.label}</IonSelectOption>
+                          ))}
+                      </IonSelect>
+                      
+                       <IonSelect 
+                          interface="popover"
+                          label="Year"
+                          labelPlacement="stacked"
+                          fill="outline"
+                          value={selectedYear}
+                          onIonChange={e => setSelectedYear(e.detail.value)}
+                           className="custom-select"
+                      >
+                          {years.map(y => (
+                              <IonSelectOption key={y} value={y}>{y}</IonSelectOption>
+                          ))}
+                      </IonSelect>
+                  </div>
+              </IonCol>
+              
+              <IonCol size="12" sizeMd="6" className="ion-text-end">
+                   <IonButton fill="solid" onClick={handleGenerate}>
+                       <IonIcon slot="start" icon={refreshOutline} />
+                       Generate / Refresh
+                   </IonButton>
+              </IonCol>
+          </IonRow>
+
           <IonRow className="ion-justify-content-center">
-            {/* GENERATION / LIST SECTION */}
-            <IonCol size="12" sizeMd="8" sizeLg="6">
+            {/* LIST SECTION */}
+            <IonCol size="12">
                 <IonCard>
-                    <IonCardContent>
-                        <IonItem lines="none"><IonLabel color="primary"><h2>Monthly Transactions</h2></IonLabel></IonItem>
-                        <IonGrid>
-                            <IonRow>
-                                <IonCol size="5">
-                                    <IonSelect 
-                                        label="Month"
-                                        labelPlacement="stacked"
-                                        value={selectedMonth}
-                                        onIonChange={e => setSelectedMonth(e.detail.value)}
-                                    >
-                                        {months.map(m => (
-                                            <IonSelectOption key={m.value} value={m.value}>{m.label}</IonSelectOption>
-                                        ))}
-                                    </IonSelect>
-                                </IonCol>
-                                <IonCol size="4">
-                                    <IonSelect 
-                                        label="Year"
-                                        labelPlacement="stacked"
-                                        value={selectedYear}
-                                        onIonChange={e => setSelectedYear(e.detail.value)}
-                                    >
-                                        {years.map(y => (
-                                            <IonSelectOption key={y} value={y}>{y}</IonSelectOption>
-                                        ))}
-                                    </IonSelect>
-                                </IonCol>
-                                <IonCol size="3" className="ion-align-self-end">
-                                    <IonButton expand="block" onClick={handleGenerate} size="small">Gen</IonButton>
-                                </IonCol>
-                            </IonRow>
-                        </IonGrid>
-                        
-                        <IonList>
-                           {transactions.length === 0 && <IonItem><IonLabel>No transactions found for {getTargetMonth()}</IonLabel></IonItem>}
+                    <IonCardContent className="ion-no-padding">
+                        <IonList lines="full">
+                           {transactions.length === 0 && (
+                               <div className="ion-padding ion-text-center">
+                                   <IonIcon icon={calendarOutline} size="large" color="medium" />
+                                   <p>No transactions found for {getTargetMonth()}</p>
+                                   <IonButton fill="outline" size="small" onClick={handleGenerate}>Generate Now</IonButton>
+                               </div>
+                           )}
+                           
                            {transactions.map(trn => {
                                // Status Logic
                                let statusBadgeStr = trn.Status || 'Pending';
-                               // Fallback logic if names missing in DB join
                                if (trn.StatusId === 1) statusBadgeStr = 'Pending';
                                if (trn.StatusId === 2) statusBadgeStr = 'Paid';
                                if (trn.StatusId === 3) statusBadgeStr = 'Overdue';
-                               if (trn.StatusId === 4) statusBadgeStr = 'Cancelled';
 
                                let statusColor = "medium";
                                if (trn.StatusId === 1) statusColor = "warning";
@@ -289,22 +365,38 @@ const TransactionsPage: React.FC = () => {
 
                                return (
                                <IonItemSliding key={trn.Id}>
-                                   <IonItem>
+                                   <IonItem detail={false}>
+                                       <IonAvatar slot="start">
+                                           <div style={{
+                                               width:'100%', height:'100%', background:'#eee', 
+                                               borderRadius:'50%', display:'flex', 
+                                               alignItems:'center', justifyContent:'center',
+                                               color: '#666', fontWeight:'bold'
+                                            }}>
+                                               {trn.Client ? trn.Client.charAt(0).toUpperCase() : '?'}
+                                           </div>
+                                       </IonAvatar>
                                        <IonLabel>
                                            <h2>{trn.Client}</h2>
-                                           <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
-                                                <span>Due: {trn.AmountDue}</span>
-                                                <IonBadge color={statusColor}>{statusBadgeStr}</IonBadge>
-                                           </div>
+                                           <p>{trn.Location || 'Unknown Location'} | Due: ${trn.AmountDue}</p>
                                        </IonLabel>
+                                       <IonChip color={statusColor} outline={true}>
+                                           <IonLabel>{statusBadgeStr}</IonLabel>
+                                       </IonChip>
+                                        
+                                        {/* Quick Action Button */}
                                         { trn.StatusId !== 2 && (
                                             <IonButton fill="clear" slot="end" onClick={() => handleMarkPaid(trn)}>
-                                                <IonIcon icon={checkmarkDoneCircle} /> Paid
+                                                <IonIcon slot="icon-only" icon={checkmarkDoneCircle} />
                                             </IonButton>
                                         )}
                                    </IonItem>
+
                                    <IonItemOptions side="end">
-                                        <IonItemOption color="success" onClick={() => handleMarkPaid(trn)}>Mark Paid</IonItemOption>
+                                        <IonItemOption color="success" onClick={() => handleMarkPaid(trn)}>
+                                            <IonIcon slot="start" icon={checkmarkDoneCircle} />
+                                            Mark Paid
+                                        </IonItemOption>
                                    </IonItemOptions>
                                </IonItemSliding>
                            )})}
@@ -312,121 +404,6 @@ const TransactionsPage: React.FC = () => {
                     </IonCardContent>
                 </IonCard>
             </IonCol>
-
-            {/* MANUAL ADD SECTION */}
-            {/* <IonCol size="12" sizeMd="8" sizeLg="6">
-              <IonCard>
-                <IonCardContent>
-                  <IonItem lines="none"><IonLabel color="medium"><h2>Manually Add Transaction</h2></IonLabel></IonItem>
-                  <IonItem>
-                    <IonSelect 
-                        label="Client"
-                        labelPlacement="stacked"
-                        value={selectedClientId} 
-                        placeholder="Select Client" 
-                        onIonChange={e => handleClientChange(e.detail.value)}
-                    >
-                      {clients.map(client => (
-                        <IonSelectOption key={client.Id} value={client.Id}>
-                          {client.Client}
-                        </IonSelectOption>
-                      ))}
-                    </IonSelect>
-                  </IonItem>
-
-                  <IonItem>
-                    <IonSelect 
-                        label="Location"
-                        labelPlacement="stacked"
-                        value={selectedLocationId} 
-                        placeholder="Select Location"
-                        onIonChange={e => setSelectedLocationId(e.detail.value)}
-                    >
-                      {locations.map(loc => (
-                        <IonSelectOption key={loc.Id} value={loc.Id}>
-                          {loc.Location}
-                        </IonSelectOption>
-                      ))}
-                    </IonSelect>
-                  </IonItem>
-
-                  <IonItem>
-                    <IonInput 
-                        label="Billing Month (MM/YYYY)"
-                        labelPlacement="stacked"
-                        value={billingMonth} 
-                        onIonChange={e => setBillingMonth(e.detail.value!)}
-                        placeholder="e.g. 03/2026"
-                    />
-                  </IonItem>
-
-                  <IonItem>
-                    <IonSelect 
-                        label="Status"
-                        labelPlacement="stacked"
-                        value={statusId} 
-                        onIonChange={e => setStatusId(e.detail.value)}
-                    >
-                        <IonSelectOption value={1}>Pending</IonSelectOption>
-                        <IonSelectOption value={2}>Paid</IonSelectOption>
-                        <IonSelectOption value={3}>Overdue</IonSelectOption>
-                        <IonSelectOption value={4}>Cancelled</IonSelectOption>
-                    </IonSelect>
-                  </IonItem>
-
-                   <IonItem>
-                    <IonSelect 
-                        label="Payment Method"
-                        labelPlacement="stacked"
-                        value={selectedPaymentMethodId} 
-                        placeholder="Select Payment Method"
-                        onIonChange={e => setSelectedPaymentMethodId(e.detail.value)}
-                    >
-                      {paymentMethods.map(method => (
-                        <IonSelectOption key={method.Id} value={method.Id}>
-                          {method.PaymentMethod}
-                        </IonSelectOption>
-                      ))}
-                    </IonSelect>
-                  </IonItem>
-
-                  <IonItem>
-                    <IonInput 
-                        label="Amount Due"
-                        labelPlacement="stacked"
-                        type="number" 
-                        value={amountDue} 
-                        onIonChange={e => setAmountDue(parseFloat(e.detail.value!) || 0)}
-                    />
-                  </IonItem>
-
-                  <IonItem>
-                    <IonInput 
-                        label="Amount Paid"
-                        labelPlacement="stacked"
-                        type="number" 
-                        value={amountPaid} 
-                        onIonChange={e => setAmountPaid(parseFloat(e.detail.value!) || 0)}
-                    />
-                  </IonItem>
-
-                  <IonItem>
-                     <IonInput
-                        label="Payment Date"
-                        labelPlacement="stacked"
-                        type="date"
-                        value={paymentDate}
-                        onIonChange={e => setPaymentDate(e.detail.value!)}
-                     />
-                  </IonItem>
-
-                  <IonButton expand="block" className="ion-margin-top" onClick={handleSubmit}>
-                    Add Transaction
-                  </IonButton>
-
-                </IonCardContent>
-              </IonCard>
-            </IonCol> */}
           </IonRow>
         </IonGrid>
 
