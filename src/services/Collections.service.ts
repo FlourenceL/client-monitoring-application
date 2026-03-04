@@ -44,7 +44,7 @@ class CollectionService {
 
     async updateOverdueTransactions() {
         try {
-           // Get all pending transactions
+           // 1. Time-based: Mark past pending transactions as overdue
             const pendings = await databaseService.query(`SELECT * FROM ${TrnCollection} WHERE StatusId = 1`);
             
             const now = new Date();
@@ -62,6 +62,21 @@ class CollectionService {
                      count++;
                 }
             }
+
+            // 2. Cascade: If a client has ANY overdue transaction, mark all their subsequent pending transactions as overdue too.
+            // (e.g. if Jan is overdue, Feb and March become overdue automatically)
+            const overdueClients = await databaseService.query(`SELECT DISTINCT ClientId FROM ${TrnCollection} WHERE StatusId = 3`);
+            
+            if (overdueClients && overdueClients.length > 0) {
+                const clientIds = overdueClients.map(c => c.ClientId).join(',');
+                // Mark all Pending (1) as Overdue (3) for these clients
+                if(clientIds.length > 0) {
+                     await databaseService.run(
+                        `UPDATE ${TrnCollection} SET StatusId = 3 WHERE StatusId = 1 AND ClientId IN (${clientIds})`
+                    );
+                }
+            }
+
             return { success: true, count };
         } catch (e) {
             console.error("Error updating overdue transactions:", e);
