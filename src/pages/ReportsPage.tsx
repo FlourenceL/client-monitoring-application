@@ -5,7 +5,7 @@ import {
   IonSelect, IonSelectOption, IonButton, 
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
   IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
-  IonText, IonAvatar, IonChip
+  IonText, IonAvatar, IonChip, IonProgressBar
 } from '@ionic/react';
 import { 
   checkmarkDoneCircle, walletOutline, timeOutline, alertCircleOutline, 
@@ -240,6 +240,18 @@ const TransactionsPage: React.FC = () => {
 
   return (
     <IonPage>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .stat-card {
+            transition: transform 0.2s ease;
+        }
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+      `}</style>
       <IonHeader>
         <IonToolbar>
             <IonButtons slot="start">
@@ -248,79 +260,193 @@ const TransactionsPage: React.FC = () => {
           <IonTitle>Transactions</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen>
+      <IonContent fullscreen className="ion-padding-vertical">
         <IonHeader collapse="condense">
           <IonToolbar>
             <IonTitle size="large">Transactions</IonTitle>
           </IonToolbar>
         </IonHeader>
 
+        <div className="ion-padding-horizontal ion-margin-bottom">
+            <IonText color="medium">
+                <p style={{marginBottom: '5px', fontSize: '14px', fontWeight: '500'}}>COLLECTION PROGRESS</p>
+            </IonText>
+            <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '8px'}}>
+                <h1 style={{margin: 0, fontWeight: '800', fontSize: '32px', color: 'var(--ion-color-dark)'}}>
+                    ${stats.collected.toLocaleString()} 
+                    <span style={{fontSize: '16px', color: 'var(--ion-color-medium)', fontWeight: 'normal'}}> / ${stats.total.toLocaleString()}</span>
+                </h1>
+                <IonChip color="success" style={{margin: 0}}>
+                    {stats.total > 0 ? Math.round((stats.collected / stats.total) * 100) : 0}% Done
+                </IonChip>
+            </div>
+            <IonProgressBar 
+                value={stats.total > 0 ? stats.collected / stats.total : 0} 
+                color="success" 
+                style={{height: '10px', borderRadius: '5px', background: 'rgba(var(--ion-color-success-rgb), 0.2)'}} 
+            />
+        </div>
+
         <IonGrid>
           {/* STATS ROW */}
-          <IonRow>
+          <IonRow className="ion-padding-bottom">
             <IonCol size="6" sizeMd="3">
-              <IonCard color="tertiary">
-                <IonCardContent className="ion-text-center">
-                  <IonIcon size="large" icon={walletOutline} />
-                  <h2>${stats.collected.toFixed(2)}</h2>
-                  <p>Collected</p>
-                </IonCardContent>
-              </IonCard>
+              <div style={{
+                  background: 'linear-gradient(135deg, #4361ee, #3a0ca3)',
+                  borderRadius: '24px',
+                  padding: '24px 20px',
+                  color: 'white',
+                  boxShadow: '0 8px 25px -5px rgba(67, 97, 238, 0.5)',
+                  height: '100%',
+                  display: 'flex', flexDirection: 'column',
+                  justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+                  position: 'relative', overflow: 'hidden'
+              }}>
+                   <div style={{
+                    position: 'absolute', top: -20, right: -20, width: 90, height: 90,
+                    background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
+                  }}></div>
+
+                  <div style={{ position: 'relative', zIndex: 2 }}>
+                       <div style={{
+                        background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '48px', height: '48px',
+                        margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                       }}>
+                        <IonIcon icon={walletOutline} style={{ fontSize: '24px' }} />
+                      </div>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.collected.toLocaleString()}</h2>
+                      <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Collected</p>
+                  </div>
+              </div>
             </IonCol>
+            
+            <IonCol size="6" sizeMd="3">
+              <div style={{
+                  background: 'linear-gradient(135deg, #4cc9f0, #4361ee)',
+                  borderRadius: '24px',
+                  padding: '24px 20px',
+                  color: 'white',
+                  boxShadow: '0 8px 25px -5px rgba(76, 201, 240, 0.5)',
+                   height: '100%',
+                  display: 'flex', flexDirection: 'column',
+                  justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+                  position: 'relative', overflow: 'hidden'
+              }}>
+                   <div style={{
+                    position: 'absolute', top: -20, right: -20, width: 90, height: 90,
+                    background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
+                  }}></div>
+
+                  <div style={{ position: 'relative', zIndex: 2 }}>
+                       <div style={{
+                        background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '48px', height: '48px',
+                        margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                       }}>
+                        <IonIcon icon={statsChartOutline} style={{ fontSize: '24px' }} />
+                      </div>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.total.toLocaleString()}</h2>
+                      <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Total Due</p>
+                  </div>
+              </div>
+            </IonCol>
+
+            <IonCol size="6" sizeMd="3">
+              <div style={{
+                  background: 'linear-gradient(135deg, #f72585, #7209b7)',
+                  borderRadius: '24px',
+                  padding: '24px 20px',
+                  color: 'white',
+                  boxShadow: '0 8px 25px -5px rgba(247, 37, 133, 0.5)',
+                   height: '100%',
+                  display: 'flex', flexDirection: 'column',
+                  justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+                  position: 'relative', overflow: 'hidden'
+              }}>
+                   <div style={{
+                    position: 'absolute', top: -20, right: -20, width: 90, height: 90,
+                    background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
+                  }}></div>
+
+                  <div style={{ position: 'relative', zIndex: 2 }}>
+                       <div style={{
+                        background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '48px', height: '48px',
+                        margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                       }}>
+                        <IonIcon icon={timeOutline} style={{ fontSize: '24px' }} />
+                      </div>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.pending.toLocaleString()}</h2>
+                      <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Pending</p>
+                  </div>
+              </div>
+            </IonCol>
+
              <IonCol size="6" sizeMd="3">
-              <IonCard color="primary">
-                <IonCardContent className="ion-text-center">
-                  <IonIcon size="large" icon={statsChartOutline} />
-                  <h2>${stats.total.toFixed(2)}</h2>
-                  <p>Total Due</p>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-            <IonCol size="6" sizeMd="3">
-              <IonCard color="warning">
-                <IonCardContent className="ion-text-center">
-                  <IonIcon size="large" icon={timeOutline} />
-                  <h2>${stats.pending.toFixed(2)}</h2>
-                  <p>Pending</p>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-            <IonCol size="6" sizeMd="3">
-              <IonCard color="danger">
-                <IonCardContent className="ion-text-center">
-                  <IonIcon size="large" icon={alertCircleOutline} />
-                  <h2>${stats.overdue.toFixed(2)}</h2>
-                  <p>Overdue</p>
-                </IonCardContent>
-              </IonCard>
+              <div style={{
+                  background: 'linear-gradient(135deg, #FF9966, #FF5E62)',
+                  borderRadius: '24px',
+                  padding: '24px 20px',
+                  color: 'white',
+                  boxShadow: '0 8px 25px -5px rgba(255, 94, 98, 0.5)',
+                   height: '100%',
+                  display: 'flex', flexDirection: 'column',
+                  justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+                  position: 'relative', overflow: 'hidden'
+              }}>
+                   <div style={{
+                    position: 'absolute', top: -20, right: -20, width: 90, height: 90,
+                    background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
+                  }}></div>
+
+                  <div style={{ position: 'relative', zIndex: 2 }}>
+                       <div style={{
+                        background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '48px', height: '48px',
+                        margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                       }}>
+                        <IonIcon icon={alertCircleOutline} style={{ fontSize: '24px' }} />
+                      </div>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.overdue.toLocaleString()}</h2>
+                      <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Overdue</p>
+                  </div>
+              </div>
             </IonCol>
           </IonRow>
 
-          <IonRow className="ion-align-items-center ion-justify-content-between ion-padding-horizontal">
-              <IonCol size="12" sizeMd="6">
-                  <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+          <IonRow className="ion-align-items-center ion-justify-content-between ion-padding-horizontal ion-margin-bottom">
+              <IonCol size="12" sizeMd="8">
+                  <div style={{
+                      display:'flex', gap:'15px', alignItems:'center', 
+                      background: 'var(--ion-card-background)', padding: '6px 12px', borderRadius: '16px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)', border: '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))'
+                    }}>
+                      <div style={{background: 'var(--ion-color-light)', borderRadius: '10px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                        <IonIcon icon={calendarOutline} color="medium" />
+                      </div>
                       <IonSelect 
                           interface="popover"
                           label="Month"
-                          labelPlacement="stacked"
                           fill="outline" 
+                          mode="ios"
                           value={selectedMonth}
                           onIonChange={e => setSelectedMonth(e.detail.value)}
-                         className="custom-select"
+                         className="custom-select no-border-select"
+                         style={{flex: 1, '--border-width': '0', '--padding-start': '0'}}
                       >
                           {months.map(m => (
                               <IonSelectOption key={m.value} value={m.value}>{m.label}</IonSelectOption>
                           ))}
                       </IonSelect>
                       
+                       <div style={{height: '24px', width: '1px', background: '#eee'}}></div>
+
                        <IonSelect 
                           interface="popover"
                           label="Year"
-                          labelPlacement="stacked"
                           fill="outline"
+                          mode="ios"
                           value={selectedYear}
                           onIonChange={e => setSelectedYear(e.detail.value)}
-                           className="custom-select"
+                           className="custom-select no-border-select"
+                           style={{flex: 1, '--border-width': '0', '--padding-start': '0'}}
                       >
                           {years.map(y => (
                               <IonSelectOption key={y} value={y}>{y}</IonSelectOption>
@@ -329,10 +455,10 @@ const TransactionsPage: React.FC = () => {
                   </div>
               </IonCol>
               
-              <IonCol size="12" sizeMd="6" className="ion-text-end">
-                   <IonButton fill="solid" onClick={handleGenerate}>
+              <IonCol size="12" sizeMd="4" className="ion-text-end">
+                   <IonButton fill="solid" shape="round" color="dark" onClick={handleGenerate} style={{height: '48px', margin: '0', fontWeight: '600', '--box-shadow': '0 4px 12px rgba(0,0,0,0.1)'}}>
                        <IonIcon slot="start" icon={refreshOutline} />
-                       Generate / Refresh
+                       Refresh Data
                    </IonButton>
               </IonCol>
           </IonRow>
@@ -340,69 +466,115 @@ const TransactionsPage: React.FC = () => {
           <IonRow className="ion-justify-content-center">
             {/* LIST SECTION */}
             <IonCol size="12">
-                <IonCard>
-                    <IonCardContent className="ion-no-padding">
-                        <IonList lines="full">
-                           {transactions.length === 0 && (
-                               <div className="ion-padding ion-text-center">
-                                   <IonIcon icon={calendarOutline} size="large" color="medium" />
-                                   <p>No transactions found for {getTargetMonth()}</p>
-                                   <IonButton fill="outline" size="small" onClick={handleGenerate}>Generate Now</IonButton>
-                               </div>
-                           )}
-                           
-                           {transactions.map(trn => {
-                               // Status Logic
-                               let statusBadgeStr = trn.Status || 'Pending';
-                               if (trn.StatusId === 1) statusBadgeStr = 'Pending';
-                               if (trn.StatusId === 2) statusBadgeStr = 'Paid';
-                               if (trn.StatusId === 3) statusBadgeStr = 'Overdue';
+                {/* Removed IonCard wrapper for a cleaner list look */}
+                <div className="ion-padding-horizontal">
+                    <IonList style={{background: 'transparent', paddingBottom: '40px'}}>
+                        {transactions.length === 0 && (
+                            <div className="ion-padding ion-text-center" style={{marginTop: '40px'}}>
+                                <div style={{
+                                    background: 'rgba(var(--ion-color-primary-rgb), 0.05)', 
+                                    width: '120px', height: '120px', borderRadius: '50%', 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                    margin: '0 auto 20px',
+                                    color: 'var(--ion-color-primary)'
+                                }}>
+                                    <IonIcon icon={calendarOutline} style={{fontSize: '48px'}} />
+                                </div>
+                                <h3 style={{color: 'var(--ion-color-dark)', fontWeight: 'bold', fontSize: '20px'}}>No Transactions</h3>
+                                <p style={{color: 'var(--ion-color-medium)', maxWidth: '280px', margin: '10px auto'}}>
+                                    We couldn't find any collection records for {getTargetMonth()}. Try generating a new report.
+                                </p>
+                                <IonButton fill="outline" shape="round" className="ion-margin-top" onClick={handleGenerate}>
+                                    Generate Report
+                                </IonButton>
+                            </div>
+                        )}
+                        
+                        {transactions.map((trn, index) => {
+                            // Status Logic
+                            let statusBadgeStr = trn.Status || 'Pending';
+                            if (trn.StatusId === 1) statusBadgeStr = 'Pending';
+                            if (trn.StatusId === 2) statusBadgeStr = 'Paid';
+                            if (trn.StatusId === 3) statusBadgeStr = 'Overdue';
 
-                               let statusColor = "medium";
-                               if (trn.StatusId === 1) statusColor = "warning";
-                               if (trn.StatusId === 2) statusColor = "success";
-                               if (trn.StatusId === 3) statusColor = "danger";
+                            let statusColor = "medium";
+                            if (trn.StatusId === 1) statusColor = "warning";
+                            if (trn.StatusId === 2) statusColor = "success";
+                            if (trn.StatusId === 3) statusColor = "danger";
 
-                               return (
-                               <IonItemSliding key={trn.Id}>
-                                   <IonItem detail={false}>
-                                       <IonAvatar slot="start">
-                                           <div style={{
-                                               width:'100%', height:'100%', background:'#eee', 
-                                               borderRadius:'50%', display:'flex', 
-                                               alignItems:'center', justifyContent:'center',
-                                               color: '#666', fontWeight:'bold'
-                                            }}>
-                                               {trn.Client ? trn.Client.charAt(0).toUpperCase() : '?'}
-                                           </div>
-                                       </IonAvatar>
-                                       <IonLabel>
-                                           <h2>{trn.Client}</h2>
-                                           <p>{trn.Location || 'Unknown Location'} | Due: ${trn.AmountDue}</p>
-                                       </IonLabel>
-                                       <IonChip color={statusColor} outline={true}>
-                                           <IonLabel>{statusBadgeStr}</IonLabel>
-                                       </IonChip>
-                                        
-                                        {/* Quick Action Button */}
-                                        { trn.StatusId !== 2 && (
-                                            <IonButton fill="clear" slot="end" onClick={() => handleMarkPaid(trn)}>
-                                                <IonIcon slot="icon-only" icon={checkmarkDoneCircle} />
-                                            </IonButton>
-                                        )}
-                                   </IonItem>
+                            const isPaid = trn.StatusId === 2;
+                            const isOverdue = trn.StatusId === 3;
 
-                                   <IonItemOptions side="end">
-                                        <IonItemOption color="success" onClick={() => handleMarkPaid(trn)}>
-                                            <IonIcon slot="start" icon={checkmarkDoneCircle} />
-                                            Mark Paid
-                                        </IonItemOption>
-                                   </IonItemOptions>
-                               </IonItemSliding>
-                           )})}
-                        </IonList>
-                    </IonCardContent>
-                </IonCard>
+                            return (
+                            <IonCard key={trn.Id} style={{
+                                borderRadius: '20px', 
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.03)', 
+                                border: isPaid ? '1px solid rgba(var(--ion-color-success-rgb), 0.1)' : (isOverdue ? '1px solid rgba(var(--ion-color-danger-rgb), 0.1)' : '1px solid var(--ion-color-step-50, rgba(0,0,0,0.05))'),
+                                margin: '0 0 16px 0',
+                                background: 'var(--ion-card-background)',
+                                transition: 'transform 0.2s',
+                                animation: `fadeIn 0.5s ease-out ${index * 0.05}s both`
+                            }}>
+                                <IonItemSliding>
+                                <IonItem lines="none" detail={false} style={{'--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0', paddingTop: '12px', paddingBottom: '12px'}}>
+                                    <IonAvatar slot="start" style={{width: '56px', height: '56px', marginRight: '20px'}}>
+                                        <div style={{
+                                            width:'100%', height:'100%', 
+                                            background: isPaid ? 'rgba(var(--ion-color-success-rgb), 0.1)' : (isOverdue ? 'rgba(var(--ion-color-danger-rgb), 0.1)' : 'rgba(var(--ion-color-tertiary-rgb), 0.1)'),
+                                            borderRadius:'18px', display:'flex', 
+                                            alignItems:'center', justifyContent:'center',
+                                            color: isPaid ? 'var(--ion-color-success)' : (isOverdue ? 'var(--ion-color-danger)' : 'var(--ion-color-tertiary)'), 
+                                            fontWeight:'800', fontSize: '20px'
+                                        }}>
+                                            {trn.Client ? trn.Client.charAt(0).toUpperCase() : '?'}
+                                        </div>
+                                    </IonAvatar>
+                                    <IonLabel style={{margin: '0'}}>
+                                        <h2 style={{fontWeight: '700', fontSize: '17px', marginBottom: '6px', letterSpacing: '-0.3px', color: 'var(--ion-color-dark)'}}>{trn.Client}</h2>
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ion-color-medium)', fontSize: '13px', fontWeight: '500'}}>
+                                            <IonIcon icon={walletOutline} size="small" style={{marginBottom: '2px'}} />
+                                            <span>{trn.Location || 'Unknown'}</span>
+                                            { isOverdue && <span style={{color: 'var(--ion-color-danger)', background: 'rgba(var(--ion-color-danger-rgb), 0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', textTransform:'uppercase', fontWeight:'bold'}}>Late</span> }
+                                        </div>
+                                    </IonLabel>
+                                    
+                                    <div slot="end" className="ion-text-end" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px'}}>
+                                        <h3 style={{fontWeight: '800', fontSize: '18px', color: isPaid ? 'var(--ion-color-success)' : 'var(--ion-color-dark)', margin: 0}}>
+                                            ${trn.AmountDue?.toLocaleString()}
+                                        </h3>
+                                        <div style={{fontSize: '12px', color: isPaid ? 'var(--ion-color-success)' : (isOverdue ? 'var(--ion-color-danger)' : 'var(--ion-color-warning)'), fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px'}}>
+                                            <div style={{width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor'}}></div>
+                                            {statusBadgeStr}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Action Button for non-paid items */}
+                                    { !isPaid && (
+                                        <IonButton 
+                                            fill="clear" 
+                                            slot="end" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMarkPaid(trn);
+                                            }}
+                                            style={{marginLeft: '4px', height: '44px', width: '44px', '--padding-start': '0', '--padding-end': '0', color: 'var(--ion-color-medium)'}}
+                                        >
+                                            <IonIcon slot="icon-only" icon={checkmarkDoneCircle} />
+                                        </IonButton>
+                                    )}
+                                </IonItem>
+
+                                <IonItemOptions side="end">
+                                    <IonItemOption color="success" onClick={() => handleMarkPaid(trn)}>
+                                        <IonIcon slot="top" icon={checkmarkDoneCircle} />
+                                        Mark Paid
+                                    </IonItemOption>
+                                </IonItemOptions>
+                                </IonItemSliding>
+                            </IonCard>
+                        )})}
+                    </IonList>
+                </div>
             </IonCol>
           </IonRow>
         </IonGrid>
