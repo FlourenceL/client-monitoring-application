@@ -208,10 +208,33 @@ const TransactionsPage: React.FC = () => {
   };
 
   const filteredTransactions = React.useMemo(() => {
-    if (filterLocation === 'all') return transactions;
-    return transactions.filter((t: any) => {
-        // Handle various id types/names if needed. Assuming LocationId is present and matches.
-        return t.LocationId == filterLocation; 
+    let data = transactions;
+    if (filterLocation !== 'all') {
+        data = transactions.filter((t: any) => {
+            // Handle various id types/names if needed. Assuming LocationId is present and matches.
+            return t.LocationId == filterLocation; 
+        });
+    }
+
+    // Sort: Overdue (3) -> Pending (1) -> Paid (2)
+    return [...data].sort((a: any, b: any) => {
+      const getPriority = (statusId: number) => {
+        if (statusId === 3) return 0; // Overdue First
+        if (statusId === 1) return 1; // Pending Second
+        if (statusId === 2) return 2; // Paid Last
+        return 3;
+      };
+      
+      const priorityDiff = getPriority(a.StatusId) - getPriority(b.StatusId);
+      if (priorityDiff !== 0) return priorityDiff;
+
+      // Secondary Sort: Date (Earliest first) based on Day of DateInstalled
+      const getDay = (dateStr: string) => {
+          if (!dateStr) return 99;
+          const d = new Date(dateStr);
+          return isNaN(d.getTime()) ? 99 : d.getDate();
+      };
+      return getDay(a.DateInstalled) - getDay(b.DateInstalled);
     });
   }, [transactions, filterLocation]);
 
