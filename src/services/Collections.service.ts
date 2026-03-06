@@ -44,38 +44,56 @@ class CollectionService {
 
     async updateOverdueTransactions() {
         try {
-           // 1. Time-based: Mark past pending transactions as overdue
-            const pendings = await databaseService.query(`SELECT * FROM ${TrnCollection} WHERE StatusId = 1`);
+           // 1. Time-based: Mark past pending transactions as overdue based on exact installation day
+            const pendings = await databaseService.query(`
+                SELECT t.Id, t.BillingMonth, t.ClientId, c.DateInstalled 
+                FROM ${TrnCollection} t 
+                LEFT JOIN ${MstClient} c ON t.ClientId = c.Id 
+                WHERE t.StatusId = 1
+            `);
             
             const now = new Date();
-            const currentMonthVal = now.getFullYear() * 12 + now.getMonth();
+            now.setHours(0, 0, 0, 0); // Compare dates only
             
             let count = 0;
             for(const trn of pendings) {
                 if(!trn.BillingMonth) continue;
                 const [m, y] = trn.BillingMonth.split('/');
-                const billMonthVal = parseInt(y) * 12 + (parseInt(m) - 1);
+                const billYear = parseInt(y);
+                const billMonthIndex = parseInt(m) - 1; // 0-based
                 
-                // If bill month is strictly less than current month, it is overdue
-                if (billMonthVal < currentMonthVal) {
+                let dueDay = 1;
+                
+                // Determine Due Day from Installation Date
+                if (trn.DateInstalled) {
+                     const d = new Date(trn.DateInstalled);
+                     if(!isNaN(d.getTime())) {
+                         dueDay = d.getDate();
+                     } else {
+                         // Fallback if DateInstalled is invalid
+                         dueDay = new Date(billYear, billMonthIndex + 1, 0).getDate(); // End of month
+                     }
+                } else {
+                    // Fallback if no DateInstalled
+                     dueDay = new Date(billYear, billMonthIndex + 1, 0).getDate(); // End of month
+                }
+
+                // Handle valid days for the billing month (e.g. 31st in Feb -> 28th)
+                const lastDayOfBillMonth = new Date(billYear, billMonthIndex + 1, 0).getDate();
+                const finalDueDay = Math.min(dueDay, lastDayOfBillMonth);
+                
+                const dueDate = new Date(billYear, billMonthIndex, finalDueDay);
+                dueDate.setHours(0, 0, 0, 0);
+                
+                // If today is strictly after the due date, it is overdue
+                if (now > dueDate) {
                      await databaseService.run(`UPDATE ${TrnCollection} SET StatusId = 3 WHERE Id = ?`, [trn.Id]);
                      count++;
                 }
             }
 
-            // 2. Cascade: If a client has ANY overdue transaction, mark all their subsequent pending transactions as overdue too.
-            // (e.g. if Jan is overdue, Feb and March become overdue automatically)
-            const overdueClients = await databaseService.query(`SELECT DISTINCT ClientId FROM ${TrnCollection} WHERE StatusId = 3`);
-            
-            if (overdueClients && overdueClients.length > 0) {
-                const clientIds = overdueClients.map(c => c.ClientId).join(',');
-                // Mark all Pending (1) as Overdue (3) for these clients
-                if(clientIds.length > 0) {
-                     await databaseService.run(
-                        `UPDATE ${TrnCollection} SET StatusId = 3 WHERE StatusId = 1 AND ClientId IN (${clientIds})`
-                    );
-                }
-            }
+            // Note: Cascade logic removed to respect exact due date rule.
+            // Future bills should not be marked overdue until their specific date has passed.
 
             return { success: true, count };
         } catch (e) {

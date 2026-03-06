@@ -737,6 +737,23 @@ const TransactionsPage: React.FC = () => {
                             const isPaid = trn.StatusId === 2;
                             const isOverdue = trn.StatusId === 3;
 
+                            // Calculate Due Date Display
+                            let dueDateStr = "";
+                            if(trn.DateInstalled && trn.BillingMonth) {
+                                try {
+                                   const installedDate = new Date(trn.DateInstalled);
+                                   if(!isNaN(installedDate.getTime())) {
+                                       const installDay = installedDate.getDate();
+                                       const [m, y] = trn.BillingMonth.split('/');
+                                       const mInt = parseInt(m);
+                                       const yInt = parseInt(y);
+                                       const lastDay = new Date(yInt, mInt, 0).getDate();
+                                       const day = Math.min(installDay, lastDay);
+                                       dueDateStr = `${m}/${day}`;
+                                   }
+                                } catch {}
+                            }
+
                             return (
                             <IonCard key={trn.Id} style={{
                                 borderRadius: '20px', 
@@ -764,9 +781,17 @@ const TransactionsPage: React.FC = () => {
                                     <IonLabel style={{margin: '0'}}>
                                         <h2 style={{fontWeight: '700', fontSize: '17px', marginBottom: '6px', letterSpacing: '-0.3px', color: 'var(--ion-color-dark)'}}>{trn.Client}</h2>
                                         <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ion-color-medium)', fontSize: '13px', fontWeight: '500'}}>
-                                            <IonIcon icon={walletOutline} size="small" style={{marginBottom: '2px'}} />
-                                            <span>{trn.Location || 'Unknown'}</span>
-                                            { isOverdue && <span style={{color: 'var(--ion-color-danger)', background: 'rgba(var(--ion-color-danger-rgb), 0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', textTransform:'uppercase', fontWeight:'bold'}}>Late</span> }
+                                            <div style={{display:'flex', alignItems:'center', gap:'4px'}}>
+                                                <IonIcon icon={locationOutline} size="small" />
+                                                <span>{trn.Location || 'Unknown'}</span>
+                                            </div>
+                                            { dueDateStr && (
+                                                <div style={{display:'flex', alignItems:'center', gap:'4px', marginLeft: '8px'}}>
+                                                    <IonIcon icon={calendarOutline} size="small" />
+                                                    <span>Due: {dueDateStr}</span>
+                                                </div>
+                                            )}
+                                            { isOverdue && <span style={{color: 'var(--ion-color-danger)', background: 'rgba(var(--ion-color-danger-rgb), 0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', textTransform:'uppercase', fontWeight:'bold', marginLeft: '6px'}}>Late</span> }
                                         </div>
                                     </IonLabel>
                                     
