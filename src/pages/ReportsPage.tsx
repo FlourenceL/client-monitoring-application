@@ -520,36 +520,7 @@ const TransactionsPage: React.FC = () => {
         <IonGrid>
           {/* STATS ROW */}
           <IonRow className="ion-padding-bottom">
-            <IonCol size="6" sizeMd="3">
-              <div style={{
-                  background: 'linear-gradient(135deg, #4361ee, #3a0ca3)',
-                  borderRadius: '24px',
-                  padding: '24px 20px',
-                  color: 'white',
-                  boxShadow: '0 8px 25px -5px rgba(67, 97, 238, 0.5)',
-                  height: '100%',
-                  display: 'flex', flexDirection: 'column',
-                  justifyContent: 'center', alignItems: 'center', textAlign: 'center',
-                  position: 'relative', overflow: 'hidden'
-              }}>
-                   <div style={{
-                    position: 'absolute', top: -20, right: -20, width: 90, height: 90,
-                    background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
-                  }}></div>
 
-                  <div style={{ position: 'relative', zIndex: 2 }}>
-                       <div style={{
-                        background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '48px', height: '48px',
-                        margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
-                       }}>
-                        <IonIcon icon={walletOutline} style={{ fontSize: '24px' }} />
-                      </div>
-                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.collected.toLocaleString()}</h2>
-                      <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Collected</p>
-                  </div>
-              </div>
-            </IonCol>
-            
             <IonCol size="6" sizeMd="3">
               <div style={{
                   background: 'linear-gradient(135deg, #4cc9f0, #4361ee)',
@@ -580,6 +551,36 @@ const TransactionsPage: React.FC = () => {
               </div>
             </IonCol>
 
+            <IonCol size="6" sizeMd="3">
+              <div style={{
+                  background: 'linear-gradient(135deg, #4361ee, #3a0ca3)',
+                  borderRadius: '24px',
+                  padding: '24px 20px',
+                  color: 'white',
+                  boxShadow: '0 8px 25px -5px rgba(67, 97, 238, 0.5)',
+                  height: '100%',
+                  display: 'flex', flexDirection: 'column',
+                  justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+                  position: 'relative', overflow: 'hidden'
+              }}>
+                   <div style={{
+                    position: 'absolute', top: -20, right: -20, width: 90, height: 90,
+                    background: 'rgba(255,255,255,0.1)', borderRadius: '50%', zIndex: 1
+                  }}></div>
+
+                  <div style={{ position: 'relative', zIndex: 2 }}>
+                       <div style={{
+                        background: 'rgba(255,255,255,0.2)', borderRadius: '50%', width: '48px', height: '48px',
+                        margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                       }}>
+                        <IonIcon icon={walletOutline} style={{ fontSize: '24px' }} />
+                      </div>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.collected.toLocaleString()}</h2>
+                      <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Collected</p>
+                  </div>
+              </div>
+            </IonCol>
+            
             <IonCol size="6" sizeMd="3">
               <div style={{
                   background: 'linear-gradient(135deg, #f72585, #7209b7)',
