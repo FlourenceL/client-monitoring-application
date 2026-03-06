@@ -754,7 +754,7 @@ const TransactionsPage: React.FC = () => {
               <IonCol size="12" sizeMd="4" className="ion-text-end">
                    <IonButton fill="solid" shape="round" color="dark" onClick={handleGenerate} style={{height: '48px', margin: '0', fontWeight: '600', '--box-shadow': '0 4px 12px rgba(0,0,0,0.1)'}}>
                        <IonIcon slot="start" icon={refreshOutline} />
-                       Refresh Data
+                       Generate/Refresh
                    </IonButton>
               </IonCol>
           </IonRow>

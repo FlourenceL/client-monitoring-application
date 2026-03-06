@@ -25,13 +25,13 @@ const HomePage: React.FC = () => {
           const year = now.getFullYear();
           const currentMonth = `${month}/${year}`;
 
-          // Generate monthly transactions automatically
-          try {
-              await collectionService.generateMonthlyTransactions(currentMonth);
-              await collectionService.updateOverdueTransactions();
-          } catch (genError) {
-              console.error("Auto-generation failed", genError);
-          }
+          // // Generate monthly transactions automatically
+          // try {
+          //     await collectionService.generateMonthlyTransactions(currentMonth);
+          //     await collectionService.updateOverdueTransactions();
+          // } catch (genError) {
+          //     console.error("Auto-generation failed", genError);
+          // }
 
           // Fetch transactions for the current month
           const trns = await collectionService.getCollectionsByMonthDetailed(currentMonth);
