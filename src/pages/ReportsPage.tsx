@@ -5,7 +5,7 @@ import {
   IonSelect, IonSelectOption, IonButton, 
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
   IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
-  IonText, IonAvatar, IonChip, IonProgressBar, IonModal
+  IonText, IonAvatar, IonChip, IonProgressBar, IonModal, useIonViewWillEnter
 } from '@ionic/react';
 import { 
   checkmarkDoneCircle, walletOutline, timeOutline, alertCircleOutline, 
@@ -106,9 +106,9 @@ const TransactionsPage: React.FC = () => {
   const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
 
-  useEffect(() => {
+  useIonViewWillEnter(() => {
     loadData();
-  }, []);
+  });
 
   const loadData = async () => {
     setLoading(true);

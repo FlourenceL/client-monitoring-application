@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonCard, IonCardHeader
   , IonCardTitle, IonCardContent, IonButton, IonIcon, IonSearchbar, IonGrid, IonRow, IonCol, IonBadge, IonSegment, IonSegmentButton, IonLabel,
   IonModal, IonButtons, IonInput, IonFooter, useIonToast, IonSelect, IonSelectOption,
-  IonFab, IonFabButton, IonText, IonAvatar, IonList, IonItem, IonNote
+  IonFab, IonFabButton, IonText, IonAvatar, IonList, IonItem, IonNote, useIonViewWillEnter
  } from '@ionic/react';
 import { add, wallet, searchOutline, filter, person, calendar, card, mail, call, location, createOutline, documentText, wifi } from 'ionicons/icons';
 import clientService from '../services/Clients.service';
@@ -151,6 +151,13 @@ const ClientsPage: React.FC = () => {
     loadLocations();
     getPaidClients();
   }, [selectedMonth]);
+
+  useIonViewWillEnter(() => {
+    loadClients();
+    loadPlans();
+    loadLocations();
+    getPaidClients();
+  });
 
   const handleSaveClient = async () => {
     // Validate required fields
