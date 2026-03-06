@@ -158,6 +158,51 @@ const HomePage: React.FC = () => {
                  </div>
                </div>
             </div>
+
+            {/* Overdue Invoices Card */}
+            <div style={{ 
+              background: stats.overdueCount > 0 
+                ? 'linear-gradient(135deg, var(--ion-color-danger, #eb445a), #c5000f)' 
+                : 'linear-gradient(135deg, var(--ion-color-success, #2dd36f), #1ea354)', 
+              borderRadius: '20px', 
+              padding: '28px', 
+              color: 'white',
+              boxShadow: stats.overdueCount > 0 
+                ? '0 8px 24px -4px rgba(235, 68, 90, 0.3)' 
+                : '0 8px 24px -4px rgba(45, 211, 111, 0.3)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = stats.overdueCount > 0 
+                ? '0 12px 32px -4px rgba(235, 68, 90, 0.4)' 
+                : '0 12px 32px -4px rgba(45, 211, 111, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = stats.overdueCount > 0 
+                 ? '0 8px 24px -4px rgba(235, 68, 90, 0.3)' 
+                 : '0 8px 24px -4px rgba(45, 211, 111, 0.3)';
+            }}>
+               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%' }}></div>
+               <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
+
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+                 <div style={{ flex: 1 }}>
+                   <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>OVERDUE</IonText>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.overdue.toLocaleString()}</h1>
+                   <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
+                      <strong>{stats.overdueCount}</strong> overdue client{stats.overdueCount !== 1 ? 's' : ''}
+                   </div>
+                 </div>
+                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
+                    <IonIcon icon={alertCircle} style={{ fontSize: '28px' }} />
+                 </div>
+               </div>
+            </div>
             </section>
 
             {/* Action Required Section */}
