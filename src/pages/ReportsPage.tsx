@@ -5,8 +5,10 @@ import {
   IonSelect, IonSelectOption, IonButton, 
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
   IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
-  IonText, IonAvatar, IonChip, IonProgressBar, IonModal, useIonViewWillEnter
+  IonText, IonAvatar, IonChip, IonProgressBar, IonModal, useIonViewWillEnter, isPlatform
 } from '@ionic/react';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { FileOpener } from '@capacitor-community/file-opener';
 import { 
   checkmarkDoneCircle, walletOutline, timeOutline, alertCircleOutline, 
   cashOutline, calendarOutline, refreshOutline, personCircleOutline,
@@ -452,8 +454,51 @@ const TransactionsPage: React.FC = () => {
             }
         });
 
-        doc.save(`Report_${generationMonth.replace('/', '-')}_${pdfLocation}.pdf`);
-        showToastMessage("PDF Report downloaded successfully.");
+        const fileName = `Report_${generationMonth.replace('/', '-')}_${pdfLocation}.pdf`;
+
+        if (isPlatform('hybrid')) {
+            try {
+                const pdfBase64 = doc.output('datauristring').split(',')[1];
+                
+                const savedFile = await Filesystem.writeFile({
+                    path: fileName,
+                    data: pdfBase64,
+                    directory: Directory.Documents,
+                });
+                
+                await FileOpener.open({
+                    filePath: savedFile.uri,
+                    contentType: 'application/pdf',
+                    openWithDefault: true,
+                });
+
+                showToastMessage("PDF Report saved to Documents and opened.");
+            } catch (err) {
+                console.error('Error saving file', err);
+                try {
+                     // Fallback to cache if documents fails
+                     const pdfBase64 = doc.output('datauristring').split(',')[1];
+                     const savedFile = await Filesystem.writeFile({
+                        path: fileName,
+                        data: pdfBase64,
+                        directory: Directory.Cache,
+                    });
+                    
+                    await FileOpener.open({
+                        filePath: savedFile.uri,
+                        contentType: 'application/pdf',
+                        openWithDefault: true,
+                    });
+                    showToastMessage("PDF saved to temp storage and opened.");
+                } catch (storeErr) {
+                    console.error('Error saving to cache', storeErr);
+                    showToastMessage("Unable to save or open PDF on this device.");
+                }
+            }
+        } else {
+            doc.save(fileName);
+            showToastMessage("PDF Report downloaded successfully.");
+        }
 
     } catch (e) {
         console.error("Error generating PDF", e);
@@ -479,9 +524,6 @@ const TransactionsPage: React.FC = () => {
       `}</style>
       <IonHeader>
         <IonToolbar>
-            <IonButtons slot="start">
-                <IonBackButton defaultHref="/" />
-            </IonButtons>
             <IonButtons slot="end">
                 <IonButton onClick={() => setShowPdfModal(true)}>
                     <IonIcon slot="icon-only" icon={documentTextOutline} />

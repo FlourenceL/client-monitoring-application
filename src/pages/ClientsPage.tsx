@@ -289,7 +289,7 @@ const ClientsPage: React.FC = () => {
     <IonPage>
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonTitle style={{ fontWeight: 800, fontSize: '24px', paddingLeft: '8px' }}>Client Manager</IonTitle>
+          <IonTitle>Client Manager</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen className="ion-padding-bottom">

@@ -11,6 +11,7 @@ const HomePage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [stats, setStats] = useState({ revenue: 0, pending: 0, pendingCount: 0, overdue: 0, overdueCount: 0 });
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useIonViewWillEnter(() => {
       loadDashboardData();
@@ -18,6 +19,7 @@ const HomePage: React.FC = () => {
 
   const loadDashboardData = async () => {
       try {
+          setLoading(true);
           const now = new Date();
           const month = String(now.getMonth() + 1).padStart(2, '0');
           const year = now.getFullYear();
@@ -66,6 +68,8 @@ const HomePage: React.FC = () => {
 
       } catch (e) {
           console.error("Error loading dashboard data", e);
+      } finally {
+          setLoading(false);
       }
   };
 

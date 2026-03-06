@@ -27,7 +27,7 @@ export const useAppStore = create<AppState>()(
             setIsConnected: (connected: boolean) => set({ isConnected: connected }),
             isAdmin: false,
             setIsAdmin: (admin: boolean) => set({ isAdmin: admin }),
-            isAuthenticated: true,
+            isAuthenticated: false,
             setIsAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),
         }),
         {
