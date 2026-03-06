@@ -481,6 +481,16 @@ const TransactionsPage: React.FC = () => {
             }
         });
 
+        // Add Page Numbers
+        const pageCount = doc.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        for(let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            // A4 size is roughly 210mm x 297mm
+            doc.text(`Page ${i} of ${pageCount}`, 195, 290, { align: 'right' });
+        }
+
         const fileName = `Report_${generationMonth.replace('/', '-')}_${pdfLocation}.pdf`;
 
         if (isPlatform('hybrid')) {
