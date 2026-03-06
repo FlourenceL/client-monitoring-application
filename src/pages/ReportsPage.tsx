@@ -553,11 +553,11 @@ const TransactionsPage: React.FC = () => {
 
             <IonCol size="6" sizeMd="3">
               <div style={{
-                  background: 'linear-gradient(135deg, #4361ee, #3a0ca3)',
+                  background: 'linear-gradient(135deg, #2dd36f, #1ea354)',
                   borderRadius: '24px',
                   padding: '24px 20px',
                   color: 'white',
-                  boxShadow: '0 8px 25px -5px rgba(67, 97, 238, 0.5)',
+                  boxShadow: '0 8px 25px -5px rgba(45, 211, 111, 0.5)',
                   height: '100%',
                   display: 'flex', flexDirection: 'column',
                   justifyContent: 'center', alignItems: 'center', textAlign: 'center',
@@ -583,11 +583,11 @@ const TransactionsPage: React.FC = () => {
             
             <IonCol size="6" sizeMd="3">
               <div style={{
-                  background: 'linear-gradient(135deg, #f72585, #7209b7)',
+                  background: 'linear-gradient(135deg, #ffc409, #e0ac08)',
                   borderRadius: '24px',
                   padding: '24px 20px',
                   color: 'white',
-                  boxShadow: '0 8px 25px -5px rgba(247, 37, 133, 0.5)',
+                  boxShadow: '0 8px 25px -5px rgba(255, 196, 9, 0.5)',
                    height: '100%',
                   display: 'flex', flexDirection: 'column',
                   justifyContent: 'center', alignItems: 'center', textAlign: 'center',
@@ -613,11 +613,11 @@ const TransactionsPage: React.FC = () => {
 
              <IonCol size="6" sizeMd="3">
               <div style={{
-                  background: 'linear-gradient(135deg, #FF9966, #FF5E62)',
+                  background: 'linear-gradient(135deg, #eb445a, #c5000f)',
                   borderRadius: '24px',
                   padding: '24px 20px',
                   color: 'white',
-                  boxShadow: '0 8px 25px -5px rgba(255, 94, 98, 0.5)',
+                  boxShadow: '0 8px 25px -5px rgba(235, 68, 90, 0.5)',
                    height: '100%',
                   display: 'flex', flexDirection: 'column',
                   justifyContent: 'center', alignItems: 'center', textAlign: 'center',
