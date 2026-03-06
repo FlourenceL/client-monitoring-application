@@ -23,15 +23,41 @@ import paymentMethodsService from '../services/PaymentMethods.service';
 import planService from '../services/Plans.service';
 import { CreateCollectionDTO } from '../models/createModels/CollectionsModel';
 
-const getBase64ImageFromUrl = async (imageUrl: string): Promise<string | ArrayBuffer | null> => {
+const getBase64ImageFromUrl = async (imageUrl: string): Promise<string | null> => {
   try {
     const res = await fetch(imageUrl);
     const blob = await res.blob();
+
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+      const img = new Image();
+      img.src = URL.createObjectURL(blob);
+      img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if(!ctx) { reject("Canvas error"); return; }
+          
+          // Resize to reasonable width (e.g., 500px is sufficient for a logo)
+          const MAX_WIDTH = 500; 
+          let width = img.width;
+          let height = img.height;
+          
+          if(width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Use PNG to preserve transparency, but resized
+          resolve(canvas.toDataURL('image/png')); 
+          URL.revokeObjectURL(img.src);
+      };
+      img.onerror = (err) => {
+          URL.revokeObjectURL(img.src);
+          reject(err);
+      };
     });
   } catch (error) {
     console.error("Error converting image to base64:", error);
@@ -328,14 +354,15 @@ const TransactionsPage: React.FC = () => {
         });
 
         // Generate PDF
-        const doc = new jsPDF();
+        const doc = new jsPDF({ compress: true });
         
         // Add Logo
         try {
             const logoData = await getBase64ImageFromUrl('/assets/happy-link-report-logo.png');
             if (logoData) {
                 // Add logo at top right (A4 width is ~210mm)
-                doc.addImage(logoData as string, 'PNG', 160, 10, 35, 35);
+                // Use default compression 'FAST' or similar if resizing wasn't enough, but resizing is key.
+                doc.addImage(logoData, 'PNG', 160, 10, 35, 35, undefined, 'FAST');
             }
         } catch (e) {
             console.warn("Logo not found or could not be loaded");
