@@ -2,14 +2,14 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle, IonGrid, IonRow, IonCol,
   IonBadge, IonButton, IonModal, IonButtons, IonFooter, IonIcon, IonText, IonAvatar, IonChip, useIonViewWillEnter
  } from '@ionic/react';
-import { wallet, time, alertCircle, trendingUp, arrowForward, sparkles, notifications, chevronForward } from 'ionicons/icons';
+import { wallet, time, alertCircle, trendingUp, arrowForward, sparkles, notifications, chevronForward, calendar } from 'ionicons/icons';
 import { useState } from 'react';
 import { useAppStore } from "../store/appStore";
 import collectionService from '../services/Collections.service';
 
 const HomePage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [stats, setStats] = useState({ revenue: 0, pending: 0, pendingCount: 0, overdue: 0, overdueCount: 0 });
+  const [stats, setStats] = useState({ revenue: 0, pending: 0, pendingCount: 0, overdue: 0, overdueCount: 0, dueToday: 0, dueTodayCount: 0 });
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -25,14 +25,6 @@ const HomePage: React.FC = () => {
           const year = now.getFullYear();
           const currentMonth = `${month}/${year}`;
 
-          // // Generate monthly transactions automatically
-          // try {
-          //     await collectionService.generateMonthlyTransactions(currentMonth);
-          //     await collectionService.updateOverdueTransactions();
-          // } catch (genError) {
-          //     console.error("Auto-generation failed", genError);
-          // }
-
           // Fetch transactions for the current month
           const trns = await collectionService.getCollectionsByMonthDetailed(currentMonth);
           
@@ -41,11 +33,34 @@ const HomePage: React.FC = () => {
           let pendingCount = 0;
           let overdue = 0;
           let overdueCount = 0;
+          let dueToday = 0;
+          let dueTodayCount = 0;
 
           if (trns) {
               trns.forEach((t: any) => {
                   const paid = t.AmountPaid || 0;
                   const due = t.AmountDue || 0;
+
+                  // due today check
+                  let isDueToday = false;
+                   if(t.DateInstalled && t.BillingMonth) {
+                        try {
+                           const installedDate = new Date(t.DateInstalled);
+                           if(!isNaN(installedDate.getTime())) {
+                               const installDay = installedDate.getDate();
+                               const [m, y] = t.BillingMonth.split('/');
+                               const mInt = parseInt(m);
+                               const yInt = parseInt(y);
+                               const lastDay = new Date(yInt, mInt, 0).getDate();
+                               const day = Math.min(installDay, lastDay);
+                               
+                               const nowCheck = new Date();
+                               if(nowCheck.getDate() === day && (nowCheck.getMonth() + 1) === mInt && nowCheck.getFullYear() === yInt) {
+                                   isDueToday = true;
+                               }
+                           }
+                        } catch {}
+                    }
 
                   // StatusId: 1=Pending, 2=Paid, 3=Overdue
                   if (t.StatusId === 2) {
@@ -53,6 +68,10 @@ const HomePage: React.FC = () => {
                   } else if (t.StatusId === 1) {
                       pending += due;
                       pendingCount++;
+                      if (isDueToday) {
+                          dueToday += due;
+                          dueTodayCount++;
+                      }
                   } else if (t.StatusId === 3) {
                       overdue += due;
                       overdueCount++;
@@ -64,7 +83,7 @@ const HomePage: React.FC = () => {
               setRecentTransactions(sorted);
           }
 
-          setStats({ revenue, pending, pendingCount, overdue, overdueCount });
+          setStats({ revenue, pending, pendingCount, overdue, overdueCount, dueToday, dueTodayCount });
 
       } catch (e) {
           console.error("Error loading dashboard data", e);
@@ -122,6 +141,43 @@ const HomePage: React.FC = () => {
                  </div>
                  <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
                     <IonIcon icon={wallet} style={{ fontSize: '28px' }} />
+                 </div>
+               </div>
+            </div>
+
+            {/* Due Today Card */}
+            <div style={{ 
+              background: 'linear-gradient(135deg, #8e44ad, #9b59b6)', 
+              borderRadius: '20px', 
+              padding: '28px', 
+              color: 'white',
+              boxShadow: '0 8px 24px -4px rgba(155, 89, 182, 0.3)',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(155, 89, 182, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(155, 89, 182, 0.3)';
+            }}>
+               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%' }}></div>
+               <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
+
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+                 <div style={{ flex: 1 }}>
+                   <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>DUE TODAY</IonText>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.dueToday.toLocaleString()}</h1>
+                   <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
+                      <strong>{stats.dueTodayCount}</strong> items due today
+                   </div>
+                 </div>
+                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
+                    <IonIcon icon={calendar} style={{ fontSize: '28px' }} />
                  </div>
                </div>
             </div>
