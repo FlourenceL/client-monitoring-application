@@ -826,22 +826,10 @@ const TransactionsPage: React.FC = () => {
                         )}
                         
                         {filteredTransactions.map((trn, index) => {
-                            // Status Logic
-                            let statusBadgeStr = trn.Status || 'Pending';
-                            if (trn.StatusId === 1) statusBadgeStr = 'Pending';
-                            if (trn.StatusId === 2) statusBadgeStr = 'Paid';
-                            if (trn.StatusId === 3) statusBadgeStr = 'Overdue';
-
-                            let statusColor = "medium";
-                            if (trn.StatusId === 1) statusColor = "warning";
-                            if (trn.StatusId === 2) statusColor = "success";
-                            if (trn.StatusId === 3) statusColor = "danger";
-
-                            const isPaid = trn.StatusId === 2;
-                            const isOverdue = trn.StatusId === 3;
-
                             // Calculate Due Date Display
                             let dueDateStr = "";
+                            let isDueToday = false;
+
                             if(trn.DateInstalled && trn.BillingMonth) {
                                 try {
                                    const installedDate = new Date(trn.DateInstalled);
@@ -853,9 +841,28 @@ const TransactionsPage: React.FC = () => {
                                        const lastDay = new Date(yInt, mInt, 0).getDate();
                                        const day = Math.min(installDay, lastDay);
                                        dueDateStr = `${m}/${day}`;
+
+                                       const now = new Date();
+                                       if(now.getDate() === day && (now.getMonth() + 1) === mInt && now.getFullYear() === yInt) {
+                                           isDueToday = true;
+                                       }
                                    }
                                 } catch {}
                             }
+
+                            // Status Logic
+                            let statusBadgeStr = trn.Status || 'Pending';
+                            if (trn.StatusId === 1) statusBadgeStr = isDueToday ? 'Due Today' : 'Pending';
+                            if (trn.StatusId === 2) statusBadgeStr = 'Paid';
+                            if (trn.StatusId === 3) statusBadgeStr = 'Overdue';
+
+                            let statusColor = "medium";
+                            if (trn.StatusId === 1) statusColor = "warning";
+                            if (trn.StatusId === 2) statusColor = "success";
+                            if (trn.StatusId === 3) statusColor = "danger";
+
+                            const isPaid = trn.StatusId === 2;
+                            const isOverdue = trn.StatusId === 3;
 
                             return (
                             <IonCard key={trn.Id} style={{

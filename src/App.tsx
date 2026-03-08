@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { databaseService } from "./database/Database.service";
 import { seedDatabase } from "./database/Seeder";
 import collectionService from "./services/Collections.service";
+import { notificationService } from "./services/Notifications.service";
 import { useAppStore } from "./store/appStore";																					
 import './theme/LoginPage.css'
 
@@ -66,6 +67,7 @@ const App: React.FC = () => {
 				await databaseService.init();
 				await seedDatabase();
                 setDbReady(true);
+                notificationService.initialize();
 			} catch (error) {
 				presentToast({
 					message: "Error initializing database: " + error,
