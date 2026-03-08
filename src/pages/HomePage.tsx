@@ -177,7 +177,7 @@ const HomePage: React.FC = () => {
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
                  <div style={{ flex: 1 }}>
                    <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>TOTAL REVENUE</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.revenue.toLocaleString()}</h1>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.revenue.toLocaleString()}</h1>
                  </div>
                  <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
                     <IonIcon icon={wallet} style={{ fontSize: '28px' }} />
@@ -211,7 +211,7 @@ const HomePage: React.FC = () => {
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
                  <div style={{ flex: 1 }}>
                    <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>DUE TODAY</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.dueToday.toLocaleString()}</h1>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.dueToday.toLocaleString()}</h1>
                    <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
                       <strong>{stats.dueTodayCount}</strong> items due today
                    </div>
@@ -248,7 +248,7 @@ const HomePage: React.FC = () => {
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
                  <div style={{ flex: 1 }}>
                    <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>PENDING INVOICES</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.pending.toLocaleString()}</h1>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.pending.toLocaleString()}</h1>
                    <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
                       <strong>{stats.pendingCount}</strong> active items awaiting payment
                    </div>
@@ -293,7 +293,7 @@ const HomePage: React.FC = () => {
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
                  <div style={{ flex: 1 }}>
                    <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>OVERDUE</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>${stats.overdue.toLocaleString()}</h1>
+                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.overdue.toLocaleString()}</h1>
                    <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
                       <strong>{stats.overdueCount}</strong> overdue client{stats.overdueCount !== 1 ? 's' : ''}
                    </div>
@@ -337,7 +337,7 @@ const HomePage: React.FC = () => {
                         Action Required
                       </h3>
                       <p style={{ margin: 0, color: '#92400E', fontSize: '14px', lineHeight: '1.4' }}>
-                        <strong>{stats.overdueCount} overdue invoice{stats.overdueCount > 1 ? 's' : ''}</strong> totaling <strong>${stats.overdue.toLocaleString()}</strong>
+                        <strong>{stats.overdueCount} overdue invoice{stats.overdueCount > 1 ? 's' : ''}</strong> totaling <strong>₱{stats.overdue.toLocaleString()}</strong>
                       </p>
                     </div>
                   </div>
@@ -399,7 +399,7 @@ const HomePage: React.FC = () => {
                       axisLine={false} 
                       tickLine={false} 
                       tick={{ fill: 'var(--ion-color-medium)', fontSize: 12 }} 
-                      tickFormatter={(value) => value >= 1000 ? `$${(value/1000).toFixed(0)}k` : `$${value}`}
+                      tickFormatter={(value) => value >= 1000 ? `₱${(value/1000).toFixed(0)}k` : `₱${value}`}
                     />
                     <Tooltip 
                       contentStyle={{ 
@@ -408,7 +408,7 @@ const HomePage: React.FC = () => {
                         border: 'none', 
                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
                       }}
-                      formatter={(value: any) => [`$${value?.toLocaleString()}`, 'Revenue']}
+                      formatter={(value: any) => [`₱${value?.toLocaleString()}`, 'Revenue']}
                     />
                     <Area 
                       type="monotone" 
@@ -540,7 +540,7 @@ const HomePage: React.FC = () => {
                     </div>
 
                     <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '16px', color: 'var(--ion-text-color)' }}>
-                      ${(t.StatusId === 2 ? t.AmountPaid : t.AmountDue).toLocaleString()}
+                      ₱{(t.StatusId === 2 ? t.AmountPaid : t.AmountDue).toLocaleString()}
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
@@ -588,7 +588,7 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>${(t.StatusId === 2 ? t.AmountPaid : t.AmountDue).toLocaleString()}</div>
+              <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>₱{(t.StatusId === 2 ? t.AmountPaid : t.AmountDue).toLocaleString()}</div>
               <IonBadge color={t.Status === 'Paid' ? 'success' : t.Status === 'Pending' ? 'warning' : 'danger'} style={{ fontSize: '10px', marginTop: '2px' }}>
                 {t.Status}
               </IonBadge>

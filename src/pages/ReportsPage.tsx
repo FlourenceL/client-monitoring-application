@@ -391,28 +391,28 @@ const TransactionsPage: React.FC = () => {
         doc.text("Total Expected:", 22, 65);
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
-        doc.text(`$${total.toLocaleString()}`, 22, 72);
+        doc.text(`₱${total.toLocaleString()}`, 22, 72);
         
         doc.setFontSize(10);
         doc.setTextColor(60, 60, 60);
         doc.text("Collected:", 65, 65);
         doc.setFontSize(12);
         doc.setTextColor(40, 167, 69); // Green
-        doc.text(`$${collected.toLocaleString()}`, 65, 72);
+        doc.text(`₱${collected.toLocaleString()}`, 65, 72);
 
         doc.setFontSize(10);
         doc.setTextColor(60, 60, 60);
         doc.text("Pending:", 108, 65);
         doc.setFontSize(12);
         doc.setTextColor(255, 152, 0); // Orange
-        doc.text(`$${pending.toLocaleString()}`, 108, 72);
+        doc.text(`₱${pending.toLocaleString()}`, 108, 72);
         
         doc.setFontSize(10);
         doc.setTextColor(60, 60, 60);
         doc.text("Overdue:", 151, 65);
         doc.setFontSize(12);
         doc.setTextColor(220, 53, 69); // Red
-        doc.text(`$${overdue.toLocaleString()}`, 151, 72);
+        doc.text(`₱${overdue.toLocaleString()}`, 151, 72);
         
         doc.setTextColor(0, 0, 0);
 
@@ -455,8 +455,8 @@ const TransactionsPage: React.FC = () => {
                 t.Client,
                 t.Location,
                 statusText,
-                `$${(t.AmountDue || 0).toLocaleString()}`,
-                `$${(t.AmountPaid || 0).toLocaleString()}`,
+                `₱${(t.AmountDue || 0).toLocaleString()}`,
+                `₱${(t.AmountPaid || 0).toLocaleString()}`,
             ];
             tableRows.push(rowData);
         });
@@ -624,7 +624,7 @@ const TransactionsPage: React.FC = () => {
                        }}>
                         <IonIcon icon={statsChartOutline} style={{ fontSize: '24px' }} />
                       </div>
-                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.total.toLocaleString()}</h2>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>₱{stats.total.toLocaleString()}</h2>
                       <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Total Due</p>
                   </div>
               </div>
@@ -654,7 +654,7 @@ const TransactionsPage: React.FC = () => {
                        }}>
                         <IonIcon icon={walletOutline} style={{ fontSize: '24px' }} />
                       </div>
-                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.collected.toLocaleString()}</h2>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>₱{stats.collected.toLocaleString()}</h2>
                       <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Collected</p>
                   </div>
               </div>
@@ -684,7 +684,7 @@ const TransactionsPage: React.FC = () => {
                        }}>
                         <IonIcon icon={timeOutline} style={{ fontSize: '24px' }} />
                       </div>
-                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.pending.toLocaleString()}</h2>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>₱{stats.pending.toLocaleString()}</h2>
                       <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Pending</p>
                   </div>
               </div>
@@ -714,7 +714,7 @@ const TransactionsPage: React.FC = () => {
                        }}>
                         <IonIcon icon={alertCircleOutline} style={{ fontSize: '24px' }} />
                       </div>
-                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>${stats.overdue.toLocaleString()}</h2>
+                      <h2 style={{ fontSize: '26px', fontWeight: '800', margin: '0', letterSpacing: '-0.5px' }}>₱{stats.overdue.toLocaleString()}</h2>
                       <p style={{ fontSize: '13px', opacity: 0.9, margin: '4px 0 0', fontWeight: '500' }}>Overdue</p>
                   </div>
               </div>
@@ -907,7 +907,7 @@ const TransactionsPage: React.FC = () => {
                                     
                                     <div slot="end" className="ion-text-end" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px'}}>
                                         <h3 style={{fontWeight: '800', fontSize: '18px', color: isPaid ? 'var(--ion-color-success)' : 'var(--ion-color-dark)', margin: 0}}>
-                                            ${trn.AmountDue?.toLocaleString()}
+                                            ₱{trn.AmountDue?.toLocaleString()}
                                         </h3>
                                         <div style={{fontSize: '12px', color: isPaid ? 'var(--ion-color-success)' : (isOverdue ? 'var(--ion-color-danger)' : 'var(--ion-color-warning)'), fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px'}}>
                                             <div style={{width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor'}}></div>

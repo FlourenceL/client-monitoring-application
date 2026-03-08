@@ -727,14 +727,14 @@ const ClientsPage: React.FC = () => {
                   >
                     {plans.map(plan => (
                       <IonSelectOption key={plan.Id} value={plan.Id}>
-                        {plan.PlanName} (${plan.Amount})
+                        {plan.PlanName} (₱{plan.Amount})
                       </IonSelectOption>
                     ))}
                   </IonSelect>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <IonInput 
-                      label="Amount ($)" 
+                      label="Amount (₱)" 
                       type="number" 
                       labelPlacement="floating" 
                       fill="outline" 
@@ -854,7 +854,7 @@ const ClientsPage: React.FC = () => {
                             </p>
                         </IonLabel>
                          <IonNote slot="end" style={{ fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>
-                            ${selectedClient.amount}
+                            ₱{selectedClient.amount}
                         </IonNote>
                     </IonItem>
 
@@ -1036,14 +1036,14 @@ const ClientsPage: React.FC = () => {
                   >
                     {plans.map(plan => (
                       <IonSelectOption key={plan.Id} value={plan.Id}>
-                        {plan.PlanName} (${plan.Amount})
+                        {plan.PlanName} (₱{plan.Amount})
                       </IonSelectOption>
                     ))}
                   </IonSelect>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <IonInput 
-                      label="Amount ($)" 
+                      label="Amount (₱)" 
                       type="number" 
                       labelPlacement="floating" 
                       fill="outline" 
