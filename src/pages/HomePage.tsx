@@ -2,16 +2,26 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle, IonGrid, IonRow, IonCol,
   IonBadge, IonButton, IonModal, IonButtons, IonFooter, IonIcon, IonText, IonAvatar, IonChip, useIonViewWillEnter
  } from '@ionic/react';
-import { wallet, time, alertCircle, trendingUp, arrowForward, sparkles, notifications, chevronForward, calendar } from 'ionicons/icons';
+import { wallet, time, alertCircle, trendingUp, arrowForward, sparkles, notifications, chevronForward, calendar, statsChart } from 'ionicons/icons';
 import { useState } from 'react';
 import { useAppStore } from "../store/appStore";
 import collectionService from '../services/Collections.service';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 
 const HomePage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [stats, setStats] = useState({ revenue: 0, pending: 0, pendingCount: 0, overdue: 0, overdueCount: 0, dueToday: 0, dueTodayCount: 0 });
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [chartData, setChartData] = useState<any[]>([]);
 
   useIonViewWillEnter(() => {
       loadDashboardData();
@@ -24,6 +34,36 @@ const HomePage: React.FC = () => {
           const month = String(now.getMonth() + 1).padStart(2, '0');
           const year = now.getFullYear();
           const currentMonth = `${month}/${year}`;
+
+          // Calculate Last 6 Months for Chart
+          const monthsParams: string[] = [];
+          const labels: string[] = [];
+          for(let i=5; i>=0; i--) {
+              const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+              const mStr = String(d.getMonth() + 1).padStart(2, '0');
+              const yStr = d.getFullYear();
+              monthsParams.push(`${mStr}/${yStr}`);
+              labels.push(d.toLocaleString('default', { month: 'short' }));
+          }
+
+          // Fetch chart data
+          const newChartData = [];
+          for(let i=0; i<6; i++) {
+              const monthStr = monthsParams[i];
+              try {
+                  const mTrns = await collectionService.getCollectionsByMonthDetailed(monthStr);
+                  let mRev = 0;
+                  if(mTrns) {
+                      mTrns.forEach((t:any) => {
+                          if(t.StatusId === 2) mRev += (t.AmountPaid || 0);
+                      });
+                  }
+                  newChartData.push({ name: labels[i], revenue: mRev });
+              } catch(e) {
+                  newChartData.push({ name: labels[i], revenue: 0 });
+              }
+          }
+          setChartData(newChartData);
 
           // Fetch transactions for the current month
           const trns = await collectionService.getCollectionsByMonthDetailed(currentMonth);
@@ -266,7 +306,7 @@ const HomePage: React.FC = () => {
             </section>
 
             {/* Action Required Section */}
-            {stats.overdueCount > 0 && (
+            {/* {stats.overdueCount > 0 && (
               <section style={{ marginBottom: '32px' }}>
                 <div style={{ 
                   background: 'linear-gradient(to right, #FEF3C7, #FDE68A)', 
@@ -320,10 +360,71 @@ const HomePage: React.FC = () => {
                   </IonButton>
                 </div>
               </section>
-            )}
+            )} */}
+
+            {/* Revenue Trend Chart */}
+            <section style={{ marginBottom: '36px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+                <h2 style={{ margin: 0, fontWeight: '700', color: 'var(--ion-text-color)', fontSize: '18px' }}>Revenue Trend</h2>
+                <IonButton fill="clear" size="small" style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>
+                  Last 6 Months
+                </IonButton>
+              </div>
+              
+              <div style={{ 
+                background: 'var(--ion-card-background)',
+                borderRadius: '16px',
+                padding: '24px',
+                border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                height: '300px'
+              }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--ion-color-primary)" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="var(--ion-color-primary)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--ion-color-step-200, #e0e0e0)" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: 'var(--ion-color-medium)', fontSize: 12 }} 
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: 'var(--ion-color-medium)', fontSize: 12 }} 
+                      tickFormatter={(value) => value >= 1000 ? `$${(value/1000).toFixed(0)}k` : `$${value}`}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'var(--ion-card-background)', 
+                        borderRadius: '8px', 
+                        border: 'none', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
+                      }}
+                      formatter={(value: any) => [`$${value?.toLocaleString()}`, 'Revenue']}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="var(--ion-color-primary)" 
+                      strokeWidth={3} 
+                      fillOpacity={1} 
+                      fill="url(#colorRevenue)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </section>
 
             {/* AI Insights */}
-            <section style={{ marginBottom: '36px' }}>
+            {/* <section style={{ marginBottom: '36px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
                 <div style={{ 
                   background: 'linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary))',
@@ -383,7 +484,7 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </section>
+            </section> */}
 
             {/* Recent Transactions Table */}
             <section>
