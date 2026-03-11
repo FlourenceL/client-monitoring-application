@@ -42,6 +42,20 @@ class CollectionService {
         }
     }
 
+    async markAsUnpaid(id: number) {
+        try {
+            // Revert to Pending (1), Reset Paid amount
+            const update = await databaseService.run(
+                `UPDATE ${TrnCollection} SET StatusId = 1, AmountPaid = 0, PaymentDate = NULL WHERE Id = ?`,
+                [id]
+            );
+            return { success: true };
+        } catch (error) {
+            console.error("Mark as unpaid error", error);
+            return { success: false, error };
+        }
+    }
+
     async updateOverdueTransactions() {
         try {
            // 1. Time-based: Mark past pending transactions as overdue based on exact installation day

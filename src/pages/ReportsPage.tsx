@@ -85,7 +85,9 @@ const TransactionsPage: React.FC = () => {
 
   // Confirmation Alert State
   const [showConfirmAlert, setShowConfirmAlert] = useState(false);
+  const [showRevertAlert, setShowRevertAlert] = useState(false);
   const [transactionToPay, setTransactionToPay] = useState<any>(null);
+  const [transactionToRevert, setTransactionToRevert] = useState<any>(null);
 
 
   // Generation State
@@ -325,6 +327,25 @@ const TransactionsPage: React.FC = () => {
   const confirmPayment = (item: any) => {
       setTransactionToPay(item);
       setShowConfirmAlert(true);
+  };
+
+  const handleMarkUnpaid = async (item: any) => {
+      setLoading(true);
+      try {
+          await collectionService.markAsUnpaid(item.Id);
+          showToastMessage(`Reverted ${item.Client}'s bill to Pending.`);
+          await loadTransactions();
+      } catch(e) {
+          console.error(e);
+          showToastMessage('Error reverting to pending.');
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  const confirmRevert = (item: any) => {
+      setTransactionToRevert(item);
+      setShowRevertAlert(true);
   };
 
   const showToastMessage = (msg: string) => {
@@ -885,7 +906,15 @@ const TransactionsPage: React.FC = () => {
                                 animation: `fadeIn 0.5s ease-out ${index * 0.05}s both`
                             }}>
                                 <IonItemSliding>
-                                <IonItem lines="none" detail={false} style={{'--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0', paddingTop: '12px', paddingBottom: '12px'}}>
+                                <IonItem 
+                                    lines="none" 
+                                    detail={false} 
+                                    button={isPaid}
+                                    onClick={() => {
+                                        if (isPaid) confirmRevert(trn);
+                                    }}
+                                    style={{'--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0', paddingTop: '12px', paddingBottom: '12px'}}
+                                >
                                     <IonAvatar slot="start" style={{width: '56px', height: '56px', marginRight: '20px'}}>
                                         <div style={{
                                             width:'100%', height:'100%', 
@@ -942,10 +971,17 @@ const TransactionsPage: React.FC = () => {
                                 </IonItem>
 
                                 <IonItemOptions side="end">
-                                    <IonItemOption color="success" onClick={() => confirmPayment(trn)}>
-                                        <IonIcon slot="top" icon={checkmarkDoneCircle} />
-                                        Mark Paid
-                                    </IonItemOption>
+                                    { !isPaid ? (
+                                        <IonItemOption color="success" onClick={() => confirmPayment(trn)}>
+                                            <IonIcon slot="top" icon={checkmarkDoneCircle} />
+                                            Mark Paid
+                                        </IonItemOption>
+                                    ) : (
+                                        <IonItemOption color="warning" onClick={() => confirmRevert(trn)}>
+                                            <IonIcon slot="top" icon={refreshOutline} />
+                                            Revert
+                                        </IonItemOption>
+                                    )}
                                 </IonItemOptions>
                                 </IonItemSliding>
                             </IonCard>
@@ -976,6 +1012,34 @@ const TransactionsPage: React.FC = () => {
                         if (transactionToPay) {
                             handleMarkPaid(transactionToPay);
                             setTransactionToPay(null);
+                        }
+                    }
+                }
+            ]}
+        />
+        
+        <IonAlert
+            isOpen={showRevertAlert}
+            onDidDismiss={() => setShowRevertAlert(false)}
+            header={'Revert to Pending?'}
+            subHeader="This transaction is marked as Paid."
+            message={`Do you want to revert ${transactionToRevert?.Client || 'this client'}'s payment status to Pending (Unpaid)?`}
+            buttons={[
+                {
+                    text: 'Cancel',
+                    role: 'cancel',
+                    cssClass: 'secondary',
+                    handler: () => {
+                        setTransactionToRevert(null);
+                    }
+                },
+                {
+                    text: 'Yes, Revert to Pending',
+                    cssClass: 'danger',
+                    handler: () => {
+                        if (transactionToRevert) {
+                            handleMarkUnpaid(transactionToRevert);
+                            setTransactionToRevert(null);
                         }
                     }
                 }
