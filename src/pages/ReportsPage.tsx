@@ -5,7 +5,7 @@ import {
   IonSelect, IonSelectOption, IonButton, 
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
   IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
-  IonText, IonAvatar, IonChip, IonProgressBar, IonModal, useIonViewWillEnter, isPlatform
+  IonText, IonAvatar, IonChip, IonProgressBar, IonModal, IonAlert, useIonViewWillEnter, isPlatform
 } from '@ionic/react';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
@@ -82,6 +82,11 @@ const TransactionsPage: React.FC = () => {
   const [pdfMonth, setPdfMonth] = useState<string>(() => String(new Date().getMonth() + 1).padStart(2, '0'));
   const [pdfYear, setPdfYear] = useState<string>(() => String(new Date().getFullYear()));
   const [pdfLocation, setPdfLocation] = useState<string>('all');
+
+  // Confirmation Alert State
+  const [showConfirmAlert, setShowConfirmAlert] = useState(false);
+  const [transactionToPay, setTransactionToPay] = useState<any>(null);
+
 
   // Generation State
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
@@ -315,6 +320,11 @@ const TransactionsPage: React.FC = () => {
       } finally {
           setLoading(false);
       }
+  };
+
+  const confirmPayment = (item: any) => {
+      setTransactionToPay(item);
+      setShowConfirmAlert(true);
   };
 
   const showToastMessage = (msg: string) => {
@@ -922,7 +932,7 @@ const TransactionsPage: React.FC = () => {
                                             slot="end" 
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleMarkPaid(trn);
+                                                confirmPayment(trn);
                                             }}
                                             style={{marginLeft: '4px', height: '44px', width: '44px', '--padding-start': '0', '--padding-end': '0', color: 'var(--ion-color-medium)'}}
                                         >
@@ -932,7 +942,7 @@ const TransactionsPage: React.FC = () => {
                                 </IonItem>
 
                                 <IonItemOptions side="end">
-                                    <IonItemOption color="success" onClick={() => handleMarkPaid(trn)}>
+                                    <IonItemOption color="success" onClick={() => confirmPayment(trn)}>
                                         <IonIcon slot="top" icon={checkmarkDoneCircle} />
                                         Mark Paid
                                     </IonItemOption>
@@ -945,6 +955,32 @@ const TransactionsPage: React.FC = () => {
             </IonCol>
           </IonRow>
         </IonGrid>
+
+        <IonAlert
+            isOpen={showConfirmAlert}
+            onDidDismiss={() => setShowConfirmAlert(false)}
+            header={'Confirm Payment'}
+            message={`Are you sure you want to mark ${transactionToPay?.Client || 'this client'}'s bill as Paid?`}
+            buttons={[
+                {
+                    text: 'Cancel',
+                    role: 'cancel',
+                    cssClass: 'secondary',
+                    handler: () => {
+                        setTransactionToPay(null);
+                    }
+                },
+                {
+                    text: 'Yes, Mark as Paid',
+                    handler: () => {
+                        if (transactionToPay) {
+                            handleMarkPaid(transactionToPay);
+                            setTransactionToPay(null);
+                        }
+                    }
+                }
+            ]}
+        />
 
         <IonLoading isOpen={loading} message={'Processing...'} duration={0} />
         <IonToast
