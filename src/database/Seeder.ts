@@ -79,48 +79,48 @@ export const seedDatabase = async () => {
 			console.log("Seeded Statuses");
 		}
 
-		// Seed Clients
-		const clients = await databaseService.query(`SELECT * FROM ${MstClient}`);
-		if (clients.length === 0) {
-			// We need Plan IDs. Assuming 1 and 2 from above.
-			const clientData = [
-				{
-					client: "John Doe",
-					contactInfo: "09123456789",
-					dateInstalled: new Date().toISOString(),
-					planId: 1,
-					userId: 1,
-					isActive: 1,
-					locationId: 1,
+		// // Seed Clients
+		// const clients = await databaseService.query(`SELECT * FROM ${MstClient}`);
+		// if (clients.length === 0) {
+		// 	// We need Plan IDs. Assuming 1 and 2 from above.
+		// 	const clientData = [
+		// 		{
+		// 			client: "John Doe",
+		// 			contactInfo: "09123456789",
+		// 			dateInstalled: new Date().toISOString(),
+		// 			planId: 1,
+		// 			userId: 1,
+		// 			isActive: 1,
+		// 			locationId: 1,
 					
-				},
-				{
-					client: "Jane Smith",
-					contactInfo: "09987654321",
-					dateInstalled: new Date().toISOString(),
-					planId: 2,
-					userId: 1,
-					isActive: 1,
-					locationId: 1,
-				},
-			];
+		// 		},
+		// 		{
+		// 			client: "Jane Smith",
+		// 			contactInfo: "09987654321",
+		// 			dateInstalled: new Date().toISOString(),
+		// 			planId: 2,
+		// 			userId: 1,
+		// 			isActive: 1,
+		// 			locationId: 1,
+		// 		},
+		// 	];
 
-			for (const client of clientData) {
-				await databaseService.run(
-					`INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, UserId, IsActive, LocationId) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-					[
-						client.client,
-						client.contactInfo,
-						client.dateInstalled,
-						client.planId,
-						client.userId,
-						client.isActive,
-						client.locationId
-					]
-				);
-			}
-			console.log("Seeded Clients");
-		}
+		// 	for (const client of clientData) {
+		// 		await databaseService.run(
+		// 			`INSERT INTO ${MstClient} (Client, ContactInfo, DateInstalled, PlanId, UserId, IsActive, LocationId) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		// 			[
+		// 				client.client,
+		// 				client.contactInfo,
+		// 				client.dateInstalled,
+		// 				client.planId,
+		// 				client.userId,
+		// 				client.isActive,
+		// 				client.locationId
+		// 			]
+		// 		);
+		// 	}
+		// 	console.log("Seeded Clients");
+		// }
 	} catch (error) {
     console.error("Error seeding database:", error);
   }
