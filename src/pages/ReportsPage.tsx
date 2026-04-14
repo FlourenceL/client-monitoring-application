@@ -592,8 +592,8 @@ const TransactionsPage: React.FC = () => {
             </IonText>
             <div style={{display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '8px'}}>
                 <h1 style={{margin: 0, fontWeight: '800', fontSize: '32px', color: 'var(--ion-color-dark)'}}>
-                    ${stats.collected.toLocaleString()} 
-                    <span style={{fontSize: '16px', color: 'var(--ion-color-medium)', fontWeight: 'normal'}}> / ${stats.total.toLocaleString()}</span>
+                    ₱{stats.collected.toLocaleString()} 
+                    <span style={{fontSize: '16px', color: 'var(--ion-color-medium)', fontWeight: 'normal'}}> / ₱{stats.total.toLocaleString()}</span>
                 </h1>
                 <IonChip color="success" style={{margin: 0}}>
                     {stats.total > 0 ? Math.round((stats.collected / stats.total) * 100) : 0}% Done
