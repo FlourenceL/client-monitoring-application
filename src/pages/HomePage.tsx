@@ -149,159 +149,98 @@ const HomePage: React.FC = () => {
             </section>
 
             {/* Dashboard Stats */}
-            <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '32px' }}>              
+            <section style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)', 
+              gap: '12px', 
+              marginBottom: '32px' 
+            }}>              
             
             {/* Revenue Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary))', 
+              background: 'var(--ion-card-background)', 
               borderRadius: '20px', 
-              padding: '28px', 
-              color: 'white',
-              boxShadow: '0 8px 24px -4px rgba(0, 180, 216, 0.3)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(0, 180, 216, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(0, 180, 216, 0.3)';
+              padding: '16px', 
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'all 0.3s ease'
             }}>
-               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%' }}></div>
-               <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
-               
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-                 <div style={{ flex: 1 }}>
-                   <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>TOTAL REVENUE</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.revenue.toLocaleString()}</h1>
-                 </div>
-                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
-                    <IonIcon icon={wallet} style={{ fontSize: '28px' }} />
-                 </div>
+               <div>
+                  <div style={{ background: 'rgba(var(--ion-color-primary-rgb), 0.1)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                      <IonIcon icon={wallet} style={{ fontSize: '18px', color: 'var(--ion-color-primary)' }} />
+                  </div>
+                  <IonText style={{ color: 'var(--ion-color-medium)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>REVENUE</IonText>
+                  <h2 style={{ margin: '4px 0 0 0', fontSize: '1.4rem', fontWeight: '800', color: 'var(--ion-text-color)' }}>₱{stats.revenue.toLocaleString()}</h2>
                </div>
             </div>
 
             {/* Due Today Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, #8e44ad, #9b59b6)', 
+              background: 'var(--ion-card-background)', 
               borderRadius: '20px', 
-              padding: '28px', 
-              color: 'white',
-              boxShadow: '0 8px 24px -4px rgba(155, 89, 182, 0.3)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(155, 89, 182, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(155, 89, 182, 0.3)';
+              padding: '16px', 
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'all 0.3s ease'
             }}>
-               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%' }}></div>
-               <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
-
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-                 <div style={{ flex: 1 }}>
-                   <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>DUE TODAY</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.dueToday.toLocaleString()}</h1>
-                   <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
-                      <strong>{stats.dueTodayCount}</strong> items due today
-                   </div>
-                 </div>
-                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
-                    <IonIcon icon={calendar} style={{ fontSize: '28px' }} />
-                 </div>
+               <div>
+                  <div style={{ background: 'rgba(142, 68, 173, 0.1)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                      <IonIcon icon={calendar} style={{ fontSize: '18px', color: '#8e44ad' }} />
+                  </div>
+                  <IonText style={{ color: 'var(--ion-color-medium)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>DUE TODAY</IonText>
+                  <h2 style={{ margin: '4px 0 0 0', fontSize: '1.4rem', fontWeight: '800', color: 'var(--ion-text-color)' }}>₱{stats.dueToday.toLocaleString()}</h2>
                </div>
+               <div style={{ fontSize: '11px', color: '#8e44ad', fontWeight: 700, marginTop: '8px' }}>{stats.dueTodayCount} items</div>
             </div>
 
             {/* Pending Invoices Card */}
             <div style={{ 
-              background: 'linear-gradient(135deg, var(--ion-color-secondary), #fb8500)', 
+              background: 'var(--ion-card-background)', 
               borderRadius: '20px', 
-              padding: '28px', 
-              color: 'white',
-              boxShadow: '0 8px 24px -4px rgba(255, 183, 3, 0.3)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 12px 32px -4px rgba(255, 183, 3, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(255, 183, 3, 0.3)';
+              padding: '16px', 
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'all 0.3s ease'
             }}>
-               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%' }}></div>
-               <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
-
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-                 <div style={{ flex: 1 }}>
-                   <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>PENDING INVOICES</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.pending.toLocaleString()}</h1>
-                   <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
-                      <strong>{stats.pendingCount}</strong> active items awaiting payment
-                   </div>
-                 </div>
-                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
-                    <IonIcon icon={time} style={{ fontSize: '28px' }} />
-                 </div>
+               <div>
+                  <div style={{ background: 'rgba(var(--ion-color-warning-rgb), 0.1)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                      <IonIcon icon={time} style={{ fontSize: '18px', color: 'var(--ion-color-warning)' }} />
+                  </div>
+                  <IonText style={{ color: 'var(--ion-color-medium)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>PENDING</IonText>
+                  <h2 style={{ margin: '4px 0 0 0', fontSize: '1.4rem', fontWeight: '800', color: 'var(--ion-text-color)' }}>₱{stats.pending.toLocaleString()}</h2>
                </div>
+               <div style={{ fontSize: '11px', color: 'var(--ion-color-warning-shade)', fontWeight: 700, marginTop: '8px' }}>{stats.pendingCount} active</div>
             </div>
 
             {/* Overdue Invoices Card */}
             <div style={{ 
-              background: stats.overdueCount > 0 
-                ? 'linear-gradient(135deg, var(--ion-color-danger, #eb445a), #c5000f)' 
-                : 'linear-gradient(135deg, var(--ion-color-success, #2dd36f), #1ea354)', 
+              background: 'var(--ion-card-background)', 
               borderRadius: '20px', 
-              padding: '28px', 
-              color: 'white',
-              boxShadow: stats.overdueCount > 0 
-                ? '0 8px 24px -4px rgba(235, 68, 90, 0.3)' 
-                : '0 8px 24px -4px rgba(45, 211, 111, 0.3)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = stats.overdueCount > 0 
-                ? '0 12px 32px -4px rgba(235, 68, 90, 0.4)' 
-                : '0 12px 32px -4px rgba(45, 211, 111, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = stats.overdueCount > 0 
-                 ? '0 8px 24px -4px rgba(235, 68, 90, 0.3)' 
-                 : '0 8px 24px -4px rgba(45, 211, 111, 0.3)';
+              padding: '16px', 
+              border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'all 0.3s ease'
             }}>
-               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'rgba(255,255,255,0.08)', borderRadius: '50%' }}></div>
-               <div style={{ position: 'absolute', bottom: '-30px', left: '-30px', width: '120px', height: '120px', background: 'rgba(255,255,255,0.05)', borderRadius: '50%' }}></div>
-
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
-                 <div style={{ flex: 1 }}>
-                   <IonText color="light" style={{ opacity: 0.95, fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px' }}>OVERDUE</IonText>
-                   <h1 style={{ margin: '12px 0 16px 0', fontSize: '2.5rem', fontWeight: '800', lineHeight: 1 }}>₱{stats.overdue.toLocaleString()}</h1>
-                   <div style={{ fontSize: '14px', opacity: 0.95, fontWeight: 500 }}>
-                      <strong>{stats.overdueCount}</strong> overdue client{stats.overdueCount !== 1 ? 's' : ''}
-                   </div>
-                 </div>
-                 <div style={{ background: 'rgba(255,255,255,0.2)', padding: '14px', borderRadius: '18px', backdropFilter: 'blur(10px)' }}>
-                    <IonIcon icon={alertCircle} style={{ fontSize: '28px' }} />
-                 </div>
+               <div>
+                  <div style={{ background: stats.overdueCount > 0 ? 'rgba(var(--ion-color-danger-rgb), 0.1)' : 'rgba(var(--ion-color-success-rgb), 0.1)', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+                      <IonIcon icon={alertCircle} style={{ fontSize: '18px', color: stats.overdueCount > 0 ? 'var(--ion-color-danger)' : 'var(--ion-color-success)' }} />
+                  </div>
+                  <IonText style={{ color: 'var(--ion-color-medium)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>OVERDUE</IonText>
+                  <h2 style={{ margin: '4px 0 0 0', fontSize: '1.4rem', fontWeight: '800', color: stats.overdueCount > 0 ? 'var(--ion-color-danger)' : 'var(--ion-text-color)' }}>₱{stats.overdue.toLocaleString()}</h2>
                </div>
+               <div style={{ fontSize: '11px', color: stats.overdueCount > 0 ? 'var(--ion-color-danger)' : 'var(--ion-color-success)', fontWeight: 700, marginTop: '8px' }}>{stats.overdueCount} clients</div>
             </div>
             </section>
 
@@ -497,61 +436,86 @@ const HomePage: React.FC = () => {
 
               <div style={{ 
                 background: 'var(--ion-card-background)',
-                borderRadius: '16px',
+                borderRadius: '24px',
                 overflow: 'hidden',
                 border: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
               }}>
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 100px', 
+                  gap: '16px', 
+                  padding: '12px 20px', 
+                  background: 'var(--ion-color-step-50, rgba(0,0,0,0.02))',
+                  borderBottom: '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  color: 'var(--ion-color-medium)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  <div>Client</div>
+                  <div>Billing Period</div>
+                  <div style={{ textAlign: 'right' }}>Amount</div>
+                  <div style={{ textAlign: 'center' }}>Status</div>
+                </div>
                 {recentTransactions.slice(0, 5).map((t, index) => (
                   <div
                     key={t.Id}
                     style={{
-                      padding: '18px 20px',
+                      padding: '16px 20px',
                       display: 'grid',
-                      gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 90px',
+                      gridTemplateColumns: 'minmax(200px, 2.5fr) 120px 110px 100px',
                       gap: '16px',
                       alignItems: 'center',
-                      borderBottom: index < recentTransactions.length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
+                      borderBottom: index < 4 && index < recentTransactions.length - 1 ? '1px solid var(--ion-color-step-100, rgba(0,0,0,0.05))' : 'none',
                       transition: 'background 0.2s ease',
                       cursor: 'pointer'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--ion-color-step-50, rgba(0,0,0,0.02))'}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--ion-color-step-50, rgba(0,0,0,0.01))'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ 
-                          width: '48px', height: '48px', borderRadius: '14px',
-                          background: `hsl(${t.Id * 50}, 85%, 95%)`, 
-                          color: `hsl(${t.Id * 50}, 70%, 40%)`,
+                          width: '40px', height: '40px', borderRadius: '12px',
+                          background: `rgba(var(--ion-color-primary-rgb), 0.08)`, 
+                          color: `var(--ion-color-primary)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                          fontWeight: '700', fontSize: '19px',
-                          border: `2px solid hsl(${t.Id * 50}, 85%, 90%)`
+                          fontWeight: '700', fontSize: '16px'
                         }}>
                           {t.Client ? t.Client.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div style={{ overflow: 'hidden', minWidth: 0 }}>
-                        <div style={{ fontWeight: '600', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ion-text-color)' }}>{t.Client}</div>
-                        <div style={{ fontSize: '13px', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{t.ContactInfo || 'No contact info'}</div>
+                        <div style={{ fontWeight: '600', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--ion-text-color)' }}>{t.Client}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{t.ContactInfo || 'No contact info'}</div>
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '14px', color: 'var(--ion-color-step-600, #666)', fontWeight: 500 }}>
+                    <div style={{ fontSize: '13px', color: 'var(--ion-color-step-600, #666)', fontWeight: 500 }}>
                       {t.BillingMonth}
                     </div>
 
-                    <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '16px', color: 'var(--ion-text-color)' }}>
+                    <div style={{ textAlign: 'right', fontWeight: '700', fontSize: '15px', color: 'var(--ion-text-color)' }}>
                       ₱{(t.StatusId === 2 ? t.AmountPaid : t.AmountDue).toLocaleString()}
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
-                      <IonBadge color={
-                          t.Status === 'Paid' ? 'success' :
-                          t.Status === 'Pending' ? 'warning' : 'danger'
-                        }
-                        style={{ borderRadius: '8px', padding: '6px 12px', fontWeight: '600', fontSize: '12px' }}
-                      >
+                      <span style={{ 
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        backgroundColor: 
+                          t.Status === 'Paid' ? 'rgba(var(--ion-color-success-rgb), 0.12)' :
+                          t.Status === 'Pending' ? 'rgba(var(--ion-color-warning-rgb), 0.12)' : 'rgba(var(--ion-color-danger-rgb), 0.12)',
+                        color: 
+                          t.Status === 'Paid' ? 'var(--ion-color-success)' :
+                          t.Status === 'Pending' ? 'var(--ion-color-warning-shade)' : 'var(--ion-color-danger)'
+                      }}>
                         {t.Status}
-                      </IonBadge>
+                      </span>
                     </div>
                   </div>
                 ))}
