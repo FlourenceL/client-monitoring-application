@@ -401,28 +401,28 @@ const TransactionsPage: React.FC = () => {
         doc.text("Total Expected:", 22, 65);
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
-        doc.text(`₱${total.toLocaleString()}`, 22, 72);
+        doc.text(`P ${total.toLocaleString()}`, 22, 72);
         
         doc.setFontSize(10);
         doc.setTextColor(60, 60, 60);
         doc.text("Collected:", 65, 65);
         doc.setFontSize(12);
         doc.setTextColor(40, 167, 69); // Green
-        doc.text(`₱${collected.toLocaleString()}`, 65, 72);
+        doc.text(`P ${collected.toLocaleString()}`, 65, 72);
 
         doc.setFontSize(10);
         doc.setTextColor(60, 60, 60);
         doc.text("Pending:", 108, 65);
         doc.setFontSize(12);
         doc.setTextColor(255, 152, 0); // Orange
-        doc.text(`₱${pending.toLocaleString()}`, 108, 72);
+        doc.text(`P ${pending.toLocaleString()}`, 108, 72);
         
         doc.setFontSize(10);
         doc.setTextColor(60, 60, 60);
         doc.text("Overdue:", 151, 65);
         doc.setFontSize(12);
         doc.setTextColor(220, 53, 69); // Red
-        doc.text(`₱${overdue.toLocaleString()}`, 151, 72);
+        doc.text(`P ${overdue.toLocaleString()}`, 151, 72);
         
         doc.setTextColor(0, 0, 0);
 
@@ -465,8 +465,8 @@ const TransactionsPage: React.FC = () => {
                 t.Client,
                 t.Location,
                 statusText,
-                `₱${(t.AmountDue || 0).toLocaleString()}`,
-                `₱${(t.AmountPaid || 0).toLocaleString()}`,
+                `P ${(t.AmountDue || 0).toLocaleString()}`,
+                `P ${(t.AmountPaid || 0).toLocaleString()}`,
             ];
             tableRows.push(rowData);
         });
