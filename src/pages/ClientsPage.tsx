@@ -282,8 +282,23 @@ const ClientsPage: React.FC = () => {
   };
 
   // Calculate total revenue and paid clients count
-  const activeClientsCount = clientsList.filter(c => c.subscriptionStatus === 'Active').length;
-  const inactiveClientsCount = clientsList.filter(c => c.subscriptionStatus === 'Inactive').length;
+  const filteredClients = clientsList.filter(client => {
+    const matchesTab = selectedTab === 'all' || (client.status && client.status.toLowerCase() === selectedTab);
+    const matchesSub = subscriptionFilter === 'all' || (client.subscriptionStatus && client.subscriptionStatus.toLowerCase() === subscriptionFilter);
+    const matchesLocation = selectedLocation === 'all' || (client.location === selectedLocation);
+    const matchesSearch = searchText === '' || client.name.toLowerCase().includes(searchText.toLowerCase()) || client.email.toLowerCase().includes(searchText.toLowerCase());
+    return matchesTab && matchesSub && matchesLocation && matchesSearch;
+  });
+
+  const activeClientsCount = clientsList.filter(c => 
+    c.subscriptionStatus === 'Active' && 
+    (selectedLocation === 'all' || c.location === selectedLocation)
+  ).length;
+  
+  const inactiveClientsCount = clientsList.filter(c => 
+    c.subscriptionStatus === 'Inactive' && 
+    (selectedLocation === 'all' || c.location === selectedLocation)
+  ).length;
 
   return (
     <IonPage>
