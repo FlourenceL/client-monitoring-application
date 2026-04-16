@@ -5,7 +5,8 @@ import {
   IonSelect, IonSelectOption, IonButton, 
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
   IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
-  IonText, IonAvatar, IonChip, IonProgressBar, IonModal, IonAlert, useIonViewWillEnter, isPlatform
+  IonText, IonAvatar, IonChip, IonProgressBar, IonModal, IonAlert, useIonViewWillEnter, isPlatform,
+  IonSearchbar
 } from '@ionic/react';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
@@ -72,6 +73,8 @@ const TransactionsPage: React.FC = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [filterLocation, setFilterLocation] = useState<string>('all');
+  const [filterDay, setFilterDay] = useState<string>(String(new Date().getDate()));
+  const [searchText, setSearchText] = useState<string>('');
   
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -123,6 +126,8 @@ const TransactionsPage: React.FC = () => {
       const y = new Date().getFullYear() - 2 + i;
       return String(y);
   });
+  
+  const days = Array.from({length: 31}, (_, i) => String(i + 1));
 
 
   // Form State
@@ -244,10 +249,44 @@ const TransactionsPage: React.FC = () => {
 
   const filteredTransactions = React.useMemo(() => {
     let data = transactions;
+
+    // Filter by Location
     if (filterLocation !== 'all') {
-        data = transactions.filter((t: any) => {
+        data = data.filter((t: any) => {
             // Handle various id types/names if needed. Assuming LocationId is present and matches.
-            return t.LocationId == filterLocation; 
+            return String(t.LocationId) === String(filterLocation); 
+        });
+    }
+
+    // Filter by Search
+    if (searchText && searchText.trim() !== '') {
+        const lower = searchText.toLowerCase();
+        data = data.filter((t: any) => 
+            (t.Client || '').toLowerCase().includes(lower) || 
+            (t.Location || '').toLowerCase().includes(lower)
+        );
+    }
+
+    // Filter by Day
+    if (filterDay !== 'all') {
+        const targetDay = parseInt(filterDay);
+        data = data.filter((t: any) => {
+             if(t.DateInstalled && t.BillingMonth) {
+                 try {
+                     const installedDate = new Date(t.DateInstalled);
+                     if(isNaN(installedDate.getTime())) return false;
+                     
+                     const installDay = installedDate.getDate();
+                     const [m, y] = t.BillingMonth.split('/');
+                     const mInt = parseInt(m);
+                     const yInt = parseInt(y);
+                     const lastDay = new Date(yInt, mInt, 0).getDate();
+                     
+                     const dueDay = Math.min(installDay, lastDay);
+                     return dueDay === targetDay;
+                 } catch { return false; }
+             }
+             return false;
         });
     }
 
@@ -271,11 +310,20 @@ const TransactionsPage: React.FC = () => {
       };
       return getDay(a.DateInstalled) - getDay(b.DateInstalled);
     });
-  }, [transactions, filterLocation]);
+  }, [transactions, filterLocation, searchText, filterDay]);
 
   const stats = React.useMemo(() => {
     let c = 0, p = 0, o = 0, t = 0;
-    filteredTransactions.forEach((trn: any) => {
+    
+    // Stats based on Location Filter only (ignoring Day/Search)
+    const statsData = transactions.filter((t: any) => {
+        if (filterLocation !== 'all') {
+            return String(t.LocationId) === String(filterLocation);
+        }
+        return true;
+    });
+
+    statsData.forEach((trn: any) => {
         const amount = trn.AmountDue || 0;
         const paid = trn.AmountPaid || 0;
         t += amount;
@@ -288,7 +336,7 @@ const TransactionsPage: React.FC = () => {
         }
     });
     return { collected: c, pending: p, overdue: o, total: t };
-  }, [filteredTransactions]);
+  }, [transactions, filterLocation]);
 
   const handleGenerate = async () => {
       setLoading(true);
@@ -753,6 +801,17 @@ const TransactionsPage: React.FC = () => {
           </IonRow>
 
           <IonRow className="ion-align-items-center ion-justify-content-between ion-padding-horizontal ion-margin-bottom">
+              <IonCol size="12" style={{marginBottom: '5px'}}>
+                   <IonSearchbar 
+                        value={searchText} 
+                        onIonInput={e => setSearchText(e.detail.value!)} 
+                        placeholder="Search Client or Location..." 
+                        searchIcon="search-outline"
+                        animated
+                        style={{'--box-shadow': 'none', '--background': 'var(--ion-card-background)', 'padding': '0', 'borderRadius': '10px'}}
+                    />
+              </IonCol>
+              
               <IonCol size="12" sizeMd="8">
                   <div style={{
                       display:'flex', gap:'15px', alignItems:'center', 
@@ -792,6 +851,25 @@ const TransactionsPage: React.FC = () => {
                       >
                           {years.map(y => (
                               <IonSelectOption key={y} value={y}>{y}</IonSelectOption>
+                          ))}
+                      </IonSelect>
+                      
+                      <div style={{height: '24px', width: '1px', background: '#eee'}}></div>
+
+                       <IonSelect 
+                          interface="popover"
+                          label="Day"
+                          placeholder="All"
+                          fill="outline"
+                          mode="ios"
+                          value={filterDay}
+                          onIonChange={e => setFilterDay(e.detail.value)}
+                           className="custom-select no-border-select"
+                           style={{flex: 0.8, minWidth: '50px', '--border-width': '0', '--padding-start': '0'}}
+                      >
+                          <IonSelectOption value="all">All</IonSelectOption>
+                          {days.map(d => (
+                              <IonSelectOption key={d} value={d}>{d}</IonSelectOption>
                           ))}
                       </IonSelect>
 
