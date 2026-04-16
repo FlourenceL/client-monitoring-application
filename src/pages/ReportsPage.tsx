@@ -6,7 +6,7 @@ import {
   IonGrid, IonRow, IonCol, IonToast, IonLoading, IonBackButton, IonButtons,
   IonList, IonListHeader, IonIcon, IonBadge, IonItemSliding, IonItemOptions, IonItemOption,
   IonText, IonAvatar, IonChip, IonProgressBar, IonModal, IonAlert, useIonViewWillEnter, isPlatform,
-  IonSearchbar
+  IonSearchbar, useIonToast
 } from '@ionic/react';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { FileOpener } from '@capacitor-community/file-opener';
@@ -67,6 +67,7 @@ const getBase64ImageFromUrl = async (imageUrl: string): Promise<string | null> =
 };
 
 const TransactionsPage: React.FC = () => {
+  const [present] = useIonToast();
   const [clients, setClients] = useState<any[]>([]);
   const [locations, setLocations] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -77,8 +78,6 @@ const TransactionsPage: React.FC = () => {
   const [searchText, setSearchText] = useState<string>('');
   
   const [loading, setLoading] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
 
   // PDF Modal State
   const [showPdfModal, setShowPdfModal] = useState(false);
@@ -397,8 +396,12 @@ const TransactionsPage: React.FC = () => {
   };
 
   const showToastMessage = (msg: string) => {
-    setToastMessage(msg);
-    setShowToast(true);
+    present({
+      message: msg,
+      duration: 2000,
+      position: 'top',
+      color: "success"
+    });
   };
 
   const handleGeneratePdf = async () => {
@@ -1125,12 +1128,6 @@ const TransactionsPage: React.FC = () => {
         />
 
         <IonLoading isOpen={loading} message={'Processing...'} duration={0} />
-        <IonToast
-          isOpen={showToast}
-          onDidDismiss={() => setShowToast(false)}
-          message={toastMessage}
-          duration={2000}
-        />
 
         <IonModal isOpen={showPdfModal} onDidDismiss={() => setShowPdfModal(false)}>
           <IonHeader>

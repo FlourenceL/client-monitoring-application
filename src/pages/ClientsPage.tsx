@@ -162,17 +162,17 @@ const ClientsPage: React.FC = () => {
   const handleSaveClient = async () => {
     // Validate required fields
     if (!formData.clientName || formData.clientName.trim() === '') {
-      presentToast({ message: 'Client name is required', duration: 2000, color: 'warning' });
+      presentToast({ message: 'Client name is required', duration: 2000, color: 'warning', position: 'top' });
       return;
     }
 
     if (!formData.planId) {
-      presentToast({ message: 'Please select an internet plan', duration: 2000, color: 'warning' });
+      presentToast({ message: 'Please select an internet plan', duration: 2000, color: 'warning', position: 'top' });
       return;
     }
 
     if (!formData.locationId) {
-      presentToast({ message: 'Please select a location', duration: 2000, color: 'warning' });
+      presentToast({ message: 'Please select a location', duration: 2000, color: 'warning', position: 'top' });
       return;
     }
 
@@ -188,7 +188,7 @@ const ClientsPage: React.FC = () => {
       });
 
       if (response.success) {
-        presentToast({ message: 'Client added successfully', duration: 2000, color: 'success' });  
+        presentToast({ message: 'Client added successfully', duration: 2000, color: 'success', position: 'top' });  
         setIsOpen(false);
         loadClients();
         
@@ -204,10 +204,10 @@ const ClientsPage: React.FC = () => {
           locationId: null
         });
       } else {
-        presentToast({ message: response.message || 'Failed to add client', duration: 2000, color: 'danger' });
+        presentToast({ message: response.message || 'Failed to add client', duration: 2000, color: 'danger', position: 'top' });
       }
     } catch (error) {
-      presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger' });  
+      presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger', position: 'top' });  
     }
   }
 
@@ -235,17 +235,17 @@ const ClientsPage: React.FC = () => {
 
   const handleUpdateClient = async () => {
     if (!formData.clientName || formData.clientName.trim() === '') {
-      presentToast({ message: 'Client name is required', duration: 2000, color: 'warning' });
+      presentToast({ message: 'Client name is required', duration: 2000, color: 'warning', position: 'top' });
       return;
     }
 
     if (!formData.planId) {
-      presentToast({ message: 'Please select an internet plan', duration: 2000, color: 'warning' });
+      presentToast({ message: 'Please select an internet plan', duration: 2000, color: 'warning', position: 'top' });
       return;
     }
 
     if (!formData.locationId) {
-      presentToast({ message: 'Please select a location', duration: 2000, color: 'warning' });
+      presentToast({ message: 'Please select a location', duration: 2000, color: 'warning', position: 'top' });
       return;
     }
     
@@ -260,7 +260,7 @@ const ClientsPage: React.FC = () => {
       });
 
       if (response.success) {
-        presentToast({ message: 'Client updated successfully', duration: 2000, color: 'success' });
+        presentToast({ message: 'Client updated successfully', duration: 2000, color: 'success', position: 'top' });
         setIsEditOpen(false);
         loadClients();
         setFormData({
@@ -274,10 +274,10 @@ const ClientsPage: React.FC = () => {
             locationId: null
         });
       } else {
-         presentToast({ message: response.message || 'Failed to update', duration: 2000, color: 'danger' });
+         presentToast({ message: response.message || 'Failed to update', duration: 2000, color: 'danger', position: 'top' });
       }
     } catch (error) {
-       presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger' });
+       presentToast({ message: `An error occurred: ${error}`, duration: 2000, color: 'danger', position: 'top' });
     }
   };
 
