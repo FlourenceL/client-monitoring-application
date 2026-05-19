@@ -1010,18 +1010,18 @@ const TransactionsPage: React.FC = () => {
                                     </IonAvatar>
                                     <IonLabel style={{margin: '0'}}>
                                         <h2 style={{fontWeight: '700', fontSize: '17px', marginBottom: '6px', letterSpacing: '-0.3px', color: 'var(--ion-color-dark)'}}>{trn.Client}</h2>
-                                        <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ion-color-medium)', fontSize: '13px', fontWeight: '500'}}>
+                                        <div style={{display: 'flex', flexDirection: 'column', gap: '4px', color: 'var(--ion-color-medium)', fontSize: '13px', fontWeight: '500'}}>
                                             <div style={{display:'flex', alignItems:'center', gap:'4px'}}>
-                                                <IonIcon icon={locationOutline} size="small" />
                                                 <span>{trn.Location || 'Unknown'}</span>
                                             </div>
-                                            { dueDateStr && (
-                                                <div style={{display:'flex', alignItems:'center', gap:'4px', marginLeft: '8px'}}>
-                                                    <IonIcon icon={calendarOutline} size="small" />
-                                                    <span>Due: {dueDateStr}</span>
-                                                </div>
-                                            )}
-                                            { isOverdue && <span style={{color: 'var(--ion-color-danger)', background: 'rgba(var(--ion-color-danger-rgb), 0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', textTransform:'uppercase', fontWeight:'bold', marginLeft: '6px'}}>Late</span> }
+                                            <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                                                { dueDateStr && (
+                                                    <div style={{display:'flex', alignItems:'center', gap:'4px'}}>
+                                                        <span>{dueDateStr}</span>
+                                                    </div>
+                                                )}
+                                                { isOverdue && <span style={{color: 'var(--ion-color-danger)', background: 'rgba(var(--ion-color-danger-rgb), 0.1)', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', textTransform:'uppercase', fontWeight:'bold'}}>Late</span> }
+                                            </div>
                                         </div>
                                     </IonLabel>
                                     
