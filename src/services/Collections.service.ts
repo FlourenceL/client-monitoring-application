@@ -58,51 +58,51 @@ class CollectionService {
 
     async updateOverdueTransactions() {
         try {
-           // 1. Time-based: Mark past pending transactions as overdue based on exact installation day
+            // 1. Time-based: Mark past pending transactions as overdue based on exact installation day
             const pendings = await databaseService.query(`
                 SELECT t.Id, t.BillingMonth, t.ClientId, c.DateInstalled 
                 FROM ${TrnCollection} t 
                 LEFT JOIN ${MstClient} c ON t.ClientId = c.Id 
                 WHERE t.StatusId = 1
             `);
-            
+
             const now = new Date();
             now.setHours(0, 0, 0, 0); // Compare dates only
-            
+
             let count = 0;
-            for(const trn of pendings) {
-                if(!trn.BillingMonth) continue;
+            for (const trn of pendings) {
+                if (!trn.BillingMonth) continue;
                 const [m, y] = trn.BillingMonth.split('/');
                 const billYear = parseInt(y);
                 const billMonthIndex = parseInt(m) - 1; // 0-based
-                
+
                 let dueDay = 1;
-                
+
                 // Determine Due Day from Installation Date
                 if (trn.DateInstalled) {
-                     const d = new Date(trn.DateInstalled);
-                     if(!isNaN(d.getTime())) {
-                         dueDay = d.getDate();
-                     } else {
-                         // Fallback if DateInstalled is invalid
-                         dueDay = new Date(billYear, billMonthIndex + 1, 0).getDate(); // End of month
-                     }
+                    const d = new Date(trn.DateInstalled);
+                    if (!isNaN(d.getTime())) {
+                        dueDay = d.getDate();
+                    } else {
+                        // Fallback if DateInstalled is invalid
+                        dueDay = new Date(billYear, billMonthIndex + 1, 0).getDate(); // End of month
+                    }
                 } else {
                     // Fallback if no DateInstalled
-                     dueDay = new Date(billYear, billMonthIndex + 1, 0).getDate(); // End of month
+                    dueDay = new Date(billYear, billMonthIndex + 1, 0).getDate(); // End of month
                 }
 
                 // Handle valid days for the billing month (e.g. 31st in Feb -> 28th)
                 const lastDayOfBillMonth = new Date(billYear, billMonthIndex + 1, 0).getDate();
                 const finalDueDay = Math.min(dueDay, lastDayOfBillMonth);
-                
+
                 const dueDate = new Date(billYear, billMonthIndex, finalDueDay);
                 dueDate.setHours(0, 0, 0, 0);
-                
+
                 // If today is strictly after the due date, it is overdue
                 if (now > dueDate) {
-                     await databaseService.run(`UPDATE ${TrnCollection} SET StatusId = 3 WHERE Id = ?`, [trn.Id]);
-                     count++;
+                    await databaseService.run(`UPDATE ${TrnCollection} SET StatusId = 3 WHERE Id = ?`, [trn.Id]);
+                    count++;
                 }
             }
 
@@ -114,19 +114,19 @@ class CollectionService {
             console.error("Error updating overdue transactions:", e);
             return { success: false, error: e };
         }
-   }
+    }
 
     async generateMonthlyTransactions(monthYear: string) {
         try {
             // monthYear expected format: "MM/YYYY"
             const [m, y] = monthYear.split('/');
             const targetDate = new Date(parseInt(y), parseInt(m) - 1, 1);
-            
+
             // Get active clients
             const clients = await databaseService.query(`SELECT * FROM ${MstClient} WHERE IsActive = 1`);
             // Get plans
             const plans = await databaseService.query(`SELECT * FROM ${MstPlan}`);
-             // Get default payment method (first one) to satisfy constraint
+            // Get default payment method (first one) to satisfy constraint
             const pms = await databaseService.query(`SELECT * FROM ${MstPaymentMethod} LIMIT 1`);
             const defaultPmId = pms.length > 0 ? pms[0].Id : 1;
 
@@ -141,7 +141,7 @@ class CollectionService {
 
                 if (existing.length > 0) continue;
 
-                 // Check Install Date
+                // Check Install Date
                 // We parse manually to avoid timezone issues shifting the month back (e.g., UTC to Local)
                 let installMonthIndex = 0;
                 if (client.DateInstalled) {
@@ -196,8 +196,8 @@ class CollectionService {
     }
 
     async updateCollection(id: number, collection: Partial<CreateCollectionDTO>) {
-         // Placeholder for update
-        return null; 
+        // Placeholder for update
+        return null;
     }
 
     async deleteCollection(id: number) {
